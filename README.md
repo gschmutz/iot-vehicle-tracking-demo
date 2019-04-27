@@ -339,6 +339,7 @@ Navigate to the [Kafka Connect UI](http://streamingplatform:28001) to see the co
 
 ## MQTT to Kafa using Confluent MQTT Proxy (3)
 
+Instead of using a MQTT broker and bridge to Kafka using Kafka Connect, you can also provsion the [MQTT Proxy](https://docs.confluent.io/current/kafka-mqtt/index.html), which allows a MQTT client to produce messages directly to Kafka. 	
 Make sure that the MQTT proxy has been started as a service in the `docker-compose.yml`.
 
 ```
@@ -356,7 +357,7 @@ Make sure that the MQTT proxy has been started as a service in the `docker-compo
     restart: always
 ```
 
-Change the truck simulator to produce on port 1884, which is the one the MQTT proxy listens on.
+Now change the truck simulator to produce on port 1884
 
 ```
 mvn exec:java -Dexec.args="-s MQTT -f CSV -p 1884 -m SPLIT -t millisec"
@@ -364,13 +365,14 @@ mvn exec:java -Dexec.args="-s MQTT -f CSV -p 1884 -m SPLIT -t millisec"
 
 ## Using KSQL for Stream Analytics (4)
 
-### Connect to KSQL CLI
+Now with the data in the Kafka topic, let's do some anlaytics on the truck position events. In this section we are using KSQL for that. 
 
+### Connecting to KSQL CLI
 
-First let's connect to the KSQL CLI
+KSQL statements can be executed from KSQL CLI. Start it using the follwoing docker command:
 
 ```
-docker run -it --network analyticsplatform_default confluentinc/cp-ksql-cli http://ksql-server-1:8088
+docker run -it --network docker_default confluentinc/cp-ksql-cli http://ksql-server-1:8088
 ```
 
 Show the available Kafka topics
@@ -378,7 +380,6 @@ Show the available Kafka topics
 ```
 show topics;
 ```
-
 
 ```
 print 'truck_position';
@@ -400,7 +401,9 @@ Create a KSQL STREAM object on the `truck_position`
 
 ```
 DROP STREAM IF EXISTS truck_position_s;
+```
 
+```
 CREATE STREAM truck_position_s \
   (ts VARCHAR, \
    truckId VARCHAR, \
