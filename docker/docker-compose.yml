@@ -278,7 +278,7 @@ services:
     depends_on:
       - zookeeper-1
     ports:
-      - "9000:9000"
+      - "29000:9000"
     environment:
       ZK_HOSTS: 'zookeeper-1:2181'
       APPLICATION_SECRET: 'letmein' 
@@ -314,7 +314,7 @@ services:
     hostname: kafka-connect-ui
     container_name: kafka-connect-ui
     ports:
-      - "8003:8000"
+      - "28001:8000"
     environment:
       CONNECT_URL: "http://${PUBLIC_IP}:8083/"
       PROXY: "true"
