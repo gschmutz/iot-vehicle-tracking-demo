@@ -44,7 +44,7 @@ Last but not least add `streamingplatform` as an alias to the `/etc/hosts` file 
 192.168.25.136	streamingplatform
 ```
 
-### Installing Kafkacat
+### Installing Kafkacat (optional)
 
 To simplify peeking into a Kafka topic, the kafkacat tool becomes handy. You can optinally install it using the follwing command:
 
@@ -252,6 +252,18 @@ Alternatively you can also use the [MQTT.fx](https://mqttfx.jensd.de/) or the [M
 
 In order to get the messages from MQTT into Kafka, we will be using Kafka Connect. Luckily, there are multiple Kafka Connectors available for MQTT. We can either use the one provided by [Confluent Inc.](https://www.confluent.io/connector/kafka-connect-mqtt/) (in preview and available as evaluation license on Confluent Hub) or the one provided as part of the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) available on GitHub. We will show both of them in action in the section below. Choose the one you like best.
 
+First let's listen on the topic, eitehr with using `kafka-console-consumer` 
+
+```
+docker exec -ti broker-1 kafka-console-consumer --bootstrap-server broker-1:9092 --topic truck_position
+```
+
+or `kafkacat`
+
+```
+kafkacat -b streamingplatform:9092 -t truck_position -q
+```
+
 ### Using the Conluent MQTT Connector
 Navigate into the `kafka-connect` folder and download the `confluentinc-kafka-connect-mqtt-1.2.1-preview.zip` file from [the Confluent Hub](https://www.confluent.io/connector/kafka-connect-mqtt/).
 
@@ -279,6 +291,13 @@ cd ../../scripts
 ./start-connect-mqtt-confluent.sh
 ```
 
+The truck position messages are sent to the `truck_position` topic and show up on the consumer. 
+
+You can stop the connector using
+```
+./stop-connect-mqtt-confluent.sh
+```
+
 ### Using Landoop MQTT Connector
 
 Navigate into the `kafka-connect` folder and download the `kafka-connect-mqtt-1.1.1-2.1.0-all.tar.gz` file from the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) project.
@@ -300,27 +319,23 @@ Now let's restart Kafka connect in order to pick up the new connector.
 docker-compose restart connect-1 connect-2
 ```
 
-
-First let's listen on the topic 
-
-```
-kafkacat -b streamingplatform:9092 -t truck_position -q
-```
-
 Add and start the MQTT connector (make sure that consumer is still running):
 
 ```
 cd $SAMPLE_HOME/scripts
-./start-connect-mqtt.sh
+./start-connect-mqtt-datamountaineer.sh
 ```
 
-Navigate to the [Kafka Connect UI](http://streamingplatform:8003) to see the connector configured and running.
+The truck position messages are sent to the `truck_position` topic and show up on the consumer. 
 
-You can remove the connector using the following command
+You can stop the connector using
+```
+./stop-connect-mqtt-datamountaineer.sh
+```
 
-```
-curl -X "DELETE" "$DOCKER_HOST_IP:8083/connectors/mqtt-source"
-```
+### Monitor connector in Kafka Connect UI
+
+Navigate to the [Kafka Connect UI](http://streamingplatform:28001) to see the connector running.
 
 ## MQTT to Kafa using Confluent MQTT Proxy (3)
 
@@ -330,13 +345,15 @@ Make sure that the MQTT proxy has been started as a service in the `docker-compo
   mqtt-proxy:
     image: confluentinc/cp-kafka-mqtt:5.2.1
     hostname: mqtt-proxy
+    container_name: mqtt-proxy
     ports:
       - "1884:1884"
     environment:
       KAFKA_MQTT_TOPIC_REGEX_LIST: 'truck_position:.*position,truck_engine:.*engine'
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1884
       KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://broker-1:9092,broker-2:9093
-      KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
+      KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATION_FACTOR: 1
+    restart: always
 ```
 
 Change the truck simulator to produce on port 1884, which is the one the MQTT proxy listens on.

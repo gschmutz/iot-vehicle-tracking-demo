@@ -243,7 +243,7 @@ services:
       KAFKA_MQTT_TOPIC_REGEX_LIST: 'truck_position:.*position,truck_engine:.*engine'
       KAFKA_MQTT_LISTENERS: 0.0.0.0:1884
       KAFKA_MQTT_BOOTSTRAP_SERVERS: PLAINTEXT://broker-1:9092,broker-2:9093
-      KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATIN_FACTOR: 1
+      KAFKA_MQTT_CONFLUENT_TOPIC_REPLICATION_FACTOR: 1
     restart: always
 
   control-center:
