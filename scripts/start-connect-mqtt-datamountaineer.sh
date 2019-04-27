@@ -2,7 +2,7 @@
 
 echo "removing MQTT Source Connector"
 
-curl -X "DELETE" "$DOCKER_HOST_IP:8083/connectors/mqtt-source"
+curl -X "DELETE" "$DOCKER_HOST_IP:8083/connectors/mqtt-truck-position-source"
 
 
 echo "creating MQTT Source Connector"
@@ -10,7 +10,7 @@ echo "creating MQTT Source Connector"
 curl -X "POST" "$DOCKER_HOST_IP:8083/connectors" \
      -H "Content-Type: application/json" \
      -d '{
-  "name": "mqtt-source",
+  "name": "mqtt-truck-position-source",
   "config": {
     "connector.class": "com.datamountaineer.streamreactor.connect.mqtt.source.MqttSourceConnector",
     "connect.mqtt.connection.timeout": "1000",
