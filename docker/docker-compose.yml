@@ -340,7 +340,7 @@ services:
       - broker-1
       - schema-registry
     ports:
-      - "8002:8000"
+      - "28002:8000"
     environment:
       SCHEMAREGISTRY_URL: 'http://${PUBLIC_IP}:8081'
     restart: always
