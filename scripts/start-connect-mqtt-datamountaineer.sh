@@ -16,7 +16,6 @@ curl -X "POST" "$DOCKER_HOST_IP:8083/connectors" \
     "connect.mqtt.connection.timeout": "1000",
     "tasks.max": "1",
     "connect.mqtt.kcql": "INSERT INTO truck_position SELECT * FROM truck/+/position",
-    "name": "mqtt-source",
     "connect.mqtt.connection.clean": "true",
     "connect.mqtt.service.quality": "0",
     "connect.mqtt.connection.keep.alive": "1000",
