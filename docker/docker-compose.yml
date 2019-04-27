@@ -256,9 +256,9 @@ services:
       - schema-registry
       - connect-1
     ports:
-      - "9021:9021"
+      - "29021:9021"
     environment:
-      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker-1:9092'
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker-1:9092,broker-2:9093'
       CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
       CONTROL_CENTER_CONNECT_CLUSTER: 'connect-1:8083'
       CONTROL_CENTER_KSQL_URL: "http://ksql-server-1:8088"
