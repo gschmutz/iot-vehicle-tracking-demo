@@ -6,13 +6,21 @@ This project shows how to setup and run the demo used in various talks, such as 
 
 The environment is completley based on docker containers. In order to easily start the multiple containers, we are going to use Docker Compose. You need to have at least 8 GB of RAM available, better is 12 GB or 16 GB. 
 
-We will create the necessary files manually, you don't have to clone the Github repository. This way your environment will be completely independent. I just assume that you are able to download some files from the GitHub project. 
+Clone the github repo
 
-I'm asuming that you have a Docker environment with Docker-Compose available. All the rest we will setup in this tutorial. 
+```
+git clone https://github.com/gschmutz/iot-truck-demo.git
+```
+
+and navigate to the folder `iot-truck-demo`
+
+```
+cd iot-truck-demo
+```
 
 ### Preparing environment
 
-or Kafka to work with this Docker Compose setup, two envrionment variables are necessary, which are configured with the IP address of the docker machine as well as the Public IP of the docker machine. 
+In order for Kafka to work with this Docker Compose setup, two envrionment variables are necessary, which are configured with the IP address of the docker machine as well as the Public IP of the docker machine. 
 
 You can either add them to `/etc/environment` (without export) to make them persistent:
 
@@ -55,33 +63,12 @@ Copyright (c) 2014-2017, Magnus Edenhill
 Version 1.4.0 (JSON) (librdkafka 1.0.0 builtin.features=gzip,snappy,ssl,sasl,regex,lz4,sasl_gssapi,sasl_plain,sasl_scram,plugins,zstd)
 ```
 
-### Preparing the infrastructure with Docker Compose
-
-First create a folder to keep the `docker-compose.yml` file and the necessary artifacts. I'm using `streamingfolder` for the folder name here, but any other name would work as well. 
-
-```
-mkdir streamingplatform
-cd streamingplatform
-```
-
-Now let's download the `docker-compose.yml` file from the GitHub repository.
-
-```
-wget https://raw.githubusercontent.com/gschmutz/various-demos/master/iot-truck-demo/docker/docker-compose.yml
-```
-
-Before we can start the environment, we have to create the folders which will later hold the Kafka Connect connector jars and the MQTT broker config
-
-```
-mkdir kafka-connect
-mkdir mosquitto
-```
-
 ### Starting the infrastructure using Docker Compose
 
-From the `streamingplatform` folder, let's start the vaious docker containers 
+From the `iot-truck-demo` folder, navigate to the docker folder and start the vaious docker containers 
 
 ```
+cd docker
 docker-compose up -d
 ```
 
@@ -140,6 +127,12 @@ kafka-topics --zookeeper zookeeper-1:2181 --create --topic dangerous_driving_and
 kafka-topics --zookeeper zookeeper-1:2181 --create --topic truck_driver --partitions 8 --replication-factor 2 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
 ```
 
+Make sure to exit from the container after the topics have been created successfully.
+
+```
+exit
+```
+
 If you don't like to work with the CLI, you can also create the Kafka topics using the [Kafka Manager GUI](http://streamingplatform:9000). 
 
 ### Prepare Database Table
@@ -192,6 +185,7 @@ INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate",
 INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (31,'Rosemarie', 'Ruiz', 'Y', '22-SEP-80', CURRENT_TIMESTAMP);
 INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (32,'Shaun', ' Marshall', 'Y', '22-JAN-85', CURRENT_TIMESTAMP);
 ```
+
 ## Runnging the Truck Simulator (1)
 
 For simulating truck data, we are going to use a Java program (adapted from Hortonworks) and maintained in this [GitHub project](https://github.com/TrivadisBDS/various-bigdata-prototypes/tree/master/streaming-sources/iot-truck-simulator/impl).
@@ -211,7 +205,7 @@ docker exec -ti broker-1 kafka-console-consumer --bootstrap-server broker-1:9092
 * To start consuming using kafkacat (using the quiet option):
 
 ```
-kafkacat -b analyticsplatform:9092 -t truck_position -q
+kafkacat -b streamingplatform:9092 -t truck_position -q
 ```
 
 Now let's produce the truck events to the Kafka topic `truck_position `.
@@ -219,6 +213,10 @@ Now let's produce the truck events to the Kafka topic `truck_position `.
 ```
 docker run trivadis/iot-truck-simulator '-s' 'KAFKA' '-h' $DOCKER_HOST_IP '-p' '9092' '-f' 'CSV' "-t" "sec"
 ```
+
+After a couple of seconds, you should see the data arriving on the `truck_position` topic. 
+
+So we can see that we can produce data directly to Kafka. But this is not how the demo is setup. We want the trucks to send their data to MQTT first and then bridge from MQTT to Kafka. So let's see how we can change the simulator to write to MQTT. 
 
 ### Producing to MQTT
 
