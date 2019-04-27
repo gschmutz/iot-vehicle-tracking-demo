@@ -90,13 +90,13 @@ Some services in the `docker-compose.yml` are optional and can be removed, if yo
 
 The following user interfaces are available:
 
- * Confluent Control Center: <http://streamingplatform:9021>
- * Kafka Manager: <http://streamingplatform:9000> 
+ * Confluent Control Center: <http://streamingplatform:29021>
+ * Kafka Manager: <http://streamingplatform:29000> 
  * KAdmin: <http://streamingplatform:28080>
  * KafkaHQ: <http://streamingplatform:28082>
  * Kafdrop: <http://streamingplatform:29020>
- * Schema Registry UI: <http://streamingplatform:8002>
- * Kafka Connect UI: <http://streamingplatform:8003>
+ * Schema Registry UI: <http://streamingplatform:28002>
+ * Kafka Connect UI: <http://streamingplatform:28001>
  * StreamSets Data Collector: <http://streamingplatform:18630>
  * Tsujun KSQL UI: <http://streamingplatform:28083>
  * MQTT UI: <http://streamingplatform:29080>
@@ -250,31 +250,48 @@ Alternatively you can also use the [MQTT.fx](https://mqttfx.jensd.de/) or the [M
 
 ## Using Kafka Connect to bridge between MQTT and Kafka (2)
 
-In order to get the messages from MQTT into Kafka, we will be using Kafka Connect. Luckily, there are multiple Kafka Connectors available for MQTT. We will be using the one available from the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) called `kafka-connect-mqtt`.
+In order to get the messages from MQTT into Kafka, we will be using Kafka Connect. Luckily, there are multiple Kafka Connectors available for MQTT. We can either use the one provided by [Confluent Inc.](https://www.confluent.io/connector/kafka-connect-mqtt/) (in preview and available as evaluation license on Confluent Hub) or the one provided as part of the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) available on GitHub. We will show both of them in action in the section below. Choose the one you like best.
 
-As part of the restart of the `connect` service, the `kafka-connect` folder mapped into the container should have been created on the Docker host. Make sure that it belongs to the `cas` user by executing the following command:
-
-```
-sudo chown bigdata:bigdata -R kafka-connect
-```
-
-Then navigate into the `kafka-connect` folder, create a folder `mqtt` and navigate into this folder.
+### Using the Conluent MQTT Connector
+Navigate into the `kafka-connect` folder and download the `confluentinc-kafka-connect-mqtt-1.2.1-preview.zip` file from [the Confluent Hub](https://www.confluent.io/connector/kafka-connect-mqtt/).
 
 ```
-mkdir mqtt
-cd mqtt
+wget https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-mqtt/versions/1.2.1-preview/confluentinc-kafka-connect-mqtt-1.2.1-preview.zip
 ```
 
-In here, download the `kafka-connect-mqtt-1.1.1-2.1.0-all.tar.gz` file from the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt).
+Now unzip the connector artefacts and remove the zip file. 
+
+```
+unzip confluentinc-kafka-connect-mqtt-1.2.1-preview.zip
+rm confluentinc-kafka-connect-mqtt-1.2.1-preview.zip
+```
+
+Restart the connect cluster
+
+```
+docker-compose restart connect-1 connect-2
+```
+
+Navigate to the `scripts` folder and start the connector
+
+```
+cd ../../scripts
+./start-connect-mqtt-confluent.sh
+```
+
+### Using Landoop MQTT Connector
+
+Navigate into the `kafka-connect` folder and download the `kafka-connect-mqtt-1.1.1-2.1.0-all.tar.gz` file from the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) project.
 
 ```
 wget https://github.com/Landoop/stream-reactor/releases/download/1.2.1/kafka-connect-mqtt-1.2.1-2.1.0-all.tar.gz
 ```
 
-Once it is successfully downloaded, untar it using this `tar` command. 
+Once it is successfully downloaded, uncompress it using this `tar` command and remove the file. 
 
 ```
-tar xvf kafka-connect-mqtt-1.0.0-1.0.0-all.tar.gz
+mkdir kafka-connect-mqtt-1.2.1-2.1.0-all && tar xvf kafka-connect-mqtt-1.2.1-2.1.0-all.tar.gz -C kafka-connect-mqtt-1.2.1-2.1.0-all
+rm kafka-connect-mqtt-1.2.1-2.1.0-all.tar.gz
 ```
 
 Now let's restart Kafka connect in order to pick up the new connector. 
