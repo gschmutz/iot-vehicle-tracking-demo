@@ -322,15 +322,15 @@ services:
       - connect-1
     restart: always
     
-  ksqlui:
-    image: trivadis/tsujun:latest
-    hostname: ksqlui
-    container_name: ksqlui
-    ports: 
-      - "28083:8080"
-    environment:
-      - KSQL_SERVER=http://${PUBLIC_IP}:8088
-    restart: always
+#  ksqlui:
+#    image: trivadis/tsujun:latest
+#    hostname: ksqlui
+#    container_name: ksqlui
+#    ports: 
+#      - "28083:8080"
+#    environment:
+#      - KSQL_SERVER=http://${PUBLIC_IP}:8088
+#    restart: always
 
   schema-registry-ui:
     image: landoop/schema-registry-ui:latest
