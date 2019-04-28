@@ -375,19 +375,27 @@ KSQL statements can be executed from KSQL CLI. Start it using the follwoing dock
 docker run -it --network docker_default confluentinc/cp-ksql-cli http://ksql-server-1:8088
 ```
 
+### Displaying information
+
 Show the available Kafka topics
 
 ```
 show topics;
 ```
 
+Let's consume the data from the `truck_position` topic, assuming the truck simulator is still running.
+
 ```
 print 'truck_position';
 ```
 
+you can also add the keyword `from beginning` to start consuming at the beginning of the topic.
+
 ```
 print 'truck_position' from beginning;
 ```
+
+You can also use the show commands for showing the other KSQL objects (which we will now create)
 
 ```
 show streams;
@@ -397,13 +405,11 @@ show queries;
 
 ### Basic Streaming Query
 
-Create a KSQL STREAM object on the `truck_position`
+Create a KSQL STREAM object on the `truck_position` topic. 
 
 ```
 DROP STREAM IF EXISTS truck_position_s;
-```
 
-```
 CREATE STREAM truck_position_s \
   (ts VARCHAR, \
    truckId VARCHAR, \
@@ -417,6 +423,8 @@ CREATE STREAM truck_position_s \
         value_format='DELIMITED');
 ```
 
+We are using the `DELIMTED` value format, as our stream is a CSV-formatted string. 
+
 Get info on the stream using the `DESCRIBE` command
 
 ```
@@ -424,15 +432,13 @@ DESCRIBE truck_position_s;
 DESCRIBE EXTENDED truck_position_s;
 ```
 
+Now let's see the stream by using the `SELECT` clause. 
+
 ```
 SELECT * FROM truck_position_s;
 ```
 
-```
-cd $SAMPLE_HOME/scripts/
-./stop-connect-mqtt.sh
-```
-
+you should see a continous stream of events as a result of the SELECT statement, similar as shown below:
 
 ```
 ksql> SELECT * from truck_position_s;
@@ -444,13 +450,17 @@ ksql> SELECT * from truck_position_s;
 1539711992051 | truck/97/position | null | 97 | 30 | 1325712174 | Normal | 41.89 | -87.66 | -6187001306629414077
 ```
 
+We have submitted our first simple KSQL statement. Let's now add some analytics to this base statement. 
+
 ### Streaming Filter with KSQL
 
-Now let's filter on all the info messages, where the `eventType` is not normal:
+First we start with a filter to see all the messages, where the `eventType` is not `Normal`:
 
 ```
 SELECT * FROM truck_position_s WHERE eventType != 'Normal';
 ```
+
+We now get much less data, basically only the anomalies (dangerous driving) we are interested in:
 
 ```
 1539712101614 | truck/67/position | null | 67 | 11 | 160405074 | Lane Departure | 38.98 | -92.53 | -6187001306629414077
@@ -459,11 +469,13 @@ SELECT * FROM truck_position_s WHERE eventType != 'Normal';
 1539712120102 | truck/31/position | null | 31 | 12 | 927636994 | Unsafe following distance | 38.22 | -91.18 | -6187001306629414077
 ```
 
+Using a SELECT from the CLI as shown above is only interesting while "developing" and finding the right statement. After that you want it to execute continously and provide the result to other interested parties. 
+
 ## Create a new Stream based on the KSQL SELECT (5)
 
-Let's provide the data as a topic:
+In order to provide the filtered result to other intrested parties, we can create a new stream based on a SELECT statement. 
 
-First create a topic where all "dangerous driving" events should be sent to
+First create a topic where all "dangerous driving" events should be published to
 	
 ```
 docker exec broker-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic dangerous_driving --partitions 8 --replication-factor 2
@@ -481,15 +493,11 @@ or the `kafkacat` utility.
 kafkacat -b analyticsplatform -t dangerous_driving
 ```
 
-```
-docker run -it --network analyticsplatform_default confluentinc/cp-ksql-cli http://ksql-server-1:8088
-```
+In the KSQL CLI use a `CREATE STREAM .. AS SELECT` statement to create a new stream based on the results of the SELECT statement.
 
 ```
 DROP STREAM dangerous_driving_s;
-```
 
-```
 CREATE STREAM dangerous_driving_s \
   WITH (kafka_topic='dangerous_driving', \
         value_format='JSON', \
@@ -498,15 +506,36 @@ AS SELECT * FROM truck_position_s \
 WHERE eventType != 'Normal';
 ```
 
+You should see messages in the "console" listener. 
+
+Alternatively you can also query the new stream to get the same results. 
+
 ```
 SELECT * FROM dangerous_driving_s;
 ```
 
+So we have seen filtering in action and we have created a new stream which only holds the filtered messages signaling "dangerous drving" behaviour.
+
 ## Aggregations using KSQL (6)
 
-DROP TABLE dangerous_driving_count;
+Let's use the new stream and do some aggregations on it. 
+
+First we want to count the number of events per 30 seconds and grouped by event type.
+
+We can first just do it as a SELECT to see if it produces the correct results
 
 ```
+SELECT eventType, count(*) nof \
+FROM dangerous_driving_s \
+WINDOW TUMBLING (SIZE 30 SECONDS) \
+GROUP BY eventType;
+```
+
+and then create a new stream with it
+
+```
+DROP TABLE dangerous_driving_count;
+
 CREATE TABLE dangerous_driving_count \
 AS SELECT eventType, count(*) nof \
 FROM dangerous_driving_s \
@@ -514,12 +543,18 @@ WINDOW TUMBLING (SIZE 30 SECONDS) \
 GROUP BY eventType;
 ```
 
+Using the new stream, we can also nicely format the timestamp:
+
 ```
 SELECT  TIMESTAMPTOSTRING(ROWTIME, 'yyyy-MM-dd HH:mm:ss.SSS'), eventType, nof \
 FROM dangerous_driving_count;
 ```
 
+Alterantively we can also use a "sliding window" where we still count over 30 seconds, but now with a slide of 10 seconds.
+
 ```
+DROP TABLE dangerous_driving_count;
+
 CREATE TABLE dangerous_driving_count
 AS
 SELECT eventType, count(*) nof \
