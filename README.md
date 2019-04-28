@@ -92,13 +92,10 @@ The following user interfaces are available:
 
  * Confluent Control Center: <http://streamingplatform:29021>
  * Kafka Manager: <http://streamingplatform:29000> 
- * KAdmin: <http://streamingplatform:28080>
  * KafkaHQ: <http://streamingplatform:28082>
- * Kafdrop: <http://streamingplatform:29020>
  * Schema Registry UI: <http://streamingplatform:28002>
  * Kafka Connect UI: <http://streamingplatform:28001>
  * StreamSets Data Collector: <http://streamingplatform:18630>
- * Tsujun KSQL UI: <http://streamingplatform:28083>
  * MQTT UI: <http://streamingplatform:29080>
 
 ### Creating the necessary Kafka Topics
@@ -372,7 +369,7 @@ Now with the data in the Kafka topic, let's do some anlaytics on the truck posit
 KSQL statements can be executed from KSQL CLI. Start it using the follwoing docker command:
 
 ```
-docker run -it --network docker_default confluentinc/cp-ksql-cli http://ksql-server-1:8088
+docker run -it --network docker_default confluentinc/cp-ksql-cli:5.2.1 http://ksql-server-1:8088
 ```
 
 ### Displaying information
