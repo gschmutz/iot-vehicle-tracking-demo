@@ -323,7 +323,7 @@ services:
     restart: always
     
   ksqlui:
-    image: matsumana/tsujun:0.0.1
+    image: trivadis/tsujun:latest
     hostname: ksqlui
     container_name: ksqlui
     ports: 
