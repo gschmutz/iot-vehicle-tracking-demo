@@ -4,9 +4,9 @@ This project shows how to setup and run the demo used in various talks, such as 
 
 ## Prepare Environment
 
-The environment is completley based on docker containers. In order to easily start the multiple containers, we are going to use Docker Compose. You need to have at least 8 GB of RAM available, better is 12 GB or 16 GB. 
+The environment is completely based on docker containers. In order to easily start the multiple containers, we are going to use Docker Compose. You need to have at least 8 GB of RAM available, better is 12 GB or 16 GB. 
 
-Clone the github repo
+Clone the GitHub repo
 
 ```
 git clone https://github.com/gschmutz/iot-truck-demo.git
@@ -46,7 +46,7 @@ Last but not least add `streamingplatform` as an alias to the `/etc/hosts` file 
 
 ### Installing Kafkacat (optional)
 
-To simplify peeking into a Kafka topic, the kafkacat tool becomes handy. You can optinally install it using the follwing command:
+To simplify peeking into a Kafka topic, the kafkacat tool becomes handy. You can optionally install it using the following command:
 
 ```
 sudo apt-get install kafkacat
@@ -65,7 +65,7 @@ Version 1.4.0 (JSON) (librdkafka 1.0.0 builtin.features=gzip,snappy,ssl,sasl,reg
 
 ### Starting the infrastructure using Docker Compose
 
-From the `iot-truck-demo` folder, navigate to the docker folder and start the vaious docker containers 
+From the `iot-truck-demo` folder, navigate to the docker folder and start the various docker containers 
 
 ```
 cd docker
@@ -136,7 +136,7 @@ If you don't like to work with the CLI, you can also create the Kafka topics usi
 
 We also need a database table holding the information of the truck driver. 
 
-The infrastructure we have started above also conains an instance of Postgresql in a separate docker container. 
+The infrastructure we have started above also contains an instance of Postgresql in a separate docker container. 
 
 Let's connect to that container 
 
@@ -183,7 +183,7 @@ INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate",
 INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (32,'Shaun', ' Marshall', 'Y', '22-JAN-85', CURRENT_TIMESTAMP);
 ```
 
-## Runnging the Truck Simulator (1)
+## Running the Truck Simulator (1)
 
 For simulating truck data, we are going to use a Java program (adapted from Hortonworks) and maintained in this [GitHub project](https://github.com/TrivadisBDS/various-bigdata-prototypes/tree/master/streaming-sources/iot-truck-simulator/impl).
 
@@ -193,7 +193,7 @@ The simulator can produce data either to a **Kafka** or **MQTT**. These two opti
 
 First let's start a consumer on the topic `truck_position` either using the `kafka-console-consumer `or `kafkacat` CLI. 
 
-* To start consuming using the kafka console consumer:
+* To start consuming using the Kafka console consumer:
  
 ```
 docker exec -ti broker-1 kafka-console-consumer --bootstrap-server broker-1:9092 --topic truck_position
@@ -249,7 +249,7 @@ Alternatively you can also use the [MQTT.fx](https://mqttfx.jensd.de/) or the [M
 
 In order to get the messages from MQTT into Kafka, we will be using Kafka Connect. Luckily, there are multiple Kafka Connectors available for MQTT. We can either use the one provided by [Confluent Inc.](https://www.confluent.io/connector/kafka-connect-mqtt/) (in preview and available as evaluation license on Confluent Hub) or the one provided as part of the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) available on GitHub. We will show both of them in action in the section below. Choose the one you like best.
 
-First let's listen on the topic, eitehr with using `kafka-console-consumer` 
+First let's listen on the topic, either using `kafka-console-consumer` 
 
 ```
 docker exec -ti broker-1 kafka-console-consumer --bootstrap-server broker-1:9092 --topic truck_position
@@ -336,7 +336,7 @@ Navigate to the [Kafka Connect UI](http://streamingplatform:28001) to see the co
 
 ## MQTT to Kafa using Confluent MQTT Proxy (3)
 
-Instead of using a MQTT broker and bridge to Kafka using Kafka Connect, you can also provsion the [MQTT Proxy](https://docs.confluent.io/current/kafka-mqtt/index.html), which allows a MQTT client to produce messages directly to Kafka. 	
+Instead of using a MQTT broker and bridge to Kafka using Kafka Connect, you can also provision the [MQTT Proxy](https://docs.confluent.io/current/kafka-mqtt/index.html), which allows a MQTT client to produce messages directly to Kafka. 	
 Make sure that the MQTT proxy has been started as a service in the `docker-compose.yml`.
 
 ```
@@ -362,11 +362,11 @@ mvn exec:java -Dexec.args="-s MQTT -f CSV -p 1884 -m SPLIT -t millisec"
 
 ## Using KSQL for Stream Analytics (4)
 
-Now with the data in the Kafka topic, let's do some anlaytics on the truck position events. In this section we are using KSQL for that. 
+Now with the data in the Kafka topic, let's do some analytics on the truck position events. In this section we are using KSQL for that. 
 
 ### Connecting to KSQL CLI
 
-KSQL statements can be executed from KSQL CLI. Start it using the follwoing docker command:
+KSQL statements can be executed from KSQL CLI. Start it using the following docker command:
 
 ```
 docker run -it --network docker_default confluentinc/cp-ksql-cli:5.2.1 http://ksql-server-1:8088
@@ -420,7 +420,7 @@ CREATE STREAM truck_position_s \
         value_format='DELIMITED');
 ```
 
-We are using the `DELIMTED` value format, as our stream is a CSV-formatted string. 
+We are using the `DELIMITED` value format, as our stream is a CSV-formatted string. 
 
 Get info on the stream using the `DESCRIBE` command
 
@@ -435,7 +435,7 @@ Now let's see the stream by using the `SELECT` clause.
 SELECT * FROM truck_position_s;
 ```
 
-you should see a continous stream of events as a result of the SELECT statement, similar as shown below:
+you should see a continuous stream of events as a result of the SELECT statement, similar as shown below:
 
 ```
 ksql> SELECT * from truck_position_s;
@@ -466,11 +466,11 @@ We now get much less data, basically only the anomalies (dangerous driving) we a
 1539712120102 | truck/31/position | null | 31 | 12 | 927636994 | Unsafe following distance | 38.22 | -91.18 | -6187001306629414077
 ```
 
-Using a SELECT from the CLI as shown above is only interesting while "developing" and finding the right statement. After that you want it to execute continously and provide the result to other interested parties. 
+Using a SELECT from the CLI as shown above is only interesting while "developing" and finding the right statement. After that you want it to execute continuously and provide the result to other interested parties. 
 
 ## Create a new Stream based on the KSQL SELECT (5)
 
-In order to provide the filtered result to other intrested parties, we can create a new stream based on a SELECT statement. 
+In order to provide the filtered result to other interested parties, we can create a new stream based on a SELECT statement. 
 
 First create a topic where all "dangerous driving" events should be published to
 	
@@ -511,7 +511,7 @@ Alternatively you can also query the new stream to get the same results.
 SELECT * FROM dangerous_driving_s;
 ```
 
-So we have seen filtering in action and we have created a new stream which only holds the filtered messages signaling "dangerous drving" behaviour.
+So we have seen filtering in action and we have created a new stream which only holds the filtered messages signalling "dangerous driving" behaviour.
 
 ## Aggregations using KSQL (6)
 
@@ -547,7 +547,7 @@ SELECT  TIMESTAMPTOSTRING(ROWTIME, 'yyyy-MM-dd HH:mm:ss.SSS'), eventType, nof \
 FROM dangerous_driving_count;
 ```
 
-Alterantively we can also use a "sliding window" where we still count over 30 seconds, but now with a slide of 10 seconds.
+Alternatively we can also use a "sliding window" where we still count over 30 seconds, but now with a slide of 10 seconds.
 
 ```
 DROP TABLE dangerous_driving_count;
@@ -562,7 +562,8 @@ GROUP BY eventType;
 
 ## Join with Static Driver Data (7)
 
-### Start the synchronization from the RDBMS table "truck"
+### Start the synchronisation from the RDBMS table "truck"
+
 First start the console consumer on the `truck_driver` topic:
 
 ```
@@ -782,7 +783,7 @@ GROUP BY first_name, last_name, eventType;
 
 
 
-## Using Kafka Streams to detect danagerous driving
+## Using Kafka Streams to detect dangerous driving
 
 ```
 docker exec -ti broker-1 bash
