@@ -208,7 +208,7 @@ kafkacat -b streamingplatform:9092 -t truck_position -q
 Now let's produce the truck events to the Kafka topic `truck_position `.
 
 ```
-docker run trivadis/iot-truck-simulator '-s' 'KAFKA' '-h' $DOCKER_HOST_IP '-p' '9092' '-f' 'CSV' "-t" "sec"
+docker run trivadis/iot-truck-simulator '-s' 'KAFKA' '-h' $PUBLIC_IP '-p' '9092' '-f' 'CSV' "-t" "sec"
 ```
 
 After a couple of seconds, you should see the data arriving on the `truck_position` topic. 
