@@ -2,17 +2,19 @@
 
 This project shows how to setup and run the demo used in various talks, such as "Introduction into Stream Processing". 
 
-## Prepare Environment
+## Startup Environment
 
 The environment is completely based on docker containers. In order to easily start the multiple containers, we are going to use Docker Compose. You need to have at least 8 GB of RAM available, better is 12 GB or 16 GB. 
 
-Clone the GitHub repo
+### Getting artefacts from GitHub Repo
+
+Clone the GitHub repo `iot-truck-demo`
 
 ```
 git clone https://github.com/gschmutz/iot-truck-demo.git
 ```
 
-and navigate to the folder `iot-truck-demo`
+and then navigate into the folder `iot-truck-demo`
 
 ```
 cd iot-truck-demo
@@ -20,7 +22,7 @@ cd iot-truck-demo
 
 ### Preparing environment
 
-In order for Kafka to work with this Docker Compose setup, two envrionment variables are necessary, which are configured with the IP address of the docker machine as well as the Public IP of the docker machine. 
+In order for Kafka to work with this Docker Compose setup, two environment variables are necessary, which are configured with the IP address of the docker machine as well as the Public IP of the docker machine. 
 
 You can either add them to `/etc/environment` (without export) to make them persistent:
 
@@ -102,13 +104,13 @@ The following user interfaces are available:
 
 The Kafka cluster is configured with `auto.topic.create.enable` set to `false`. Therefore we first have to create all the necessary topics, using the `kafka-topics` command line utility of Apache Kafka. 
 
-We can easily get access to the `kafka-topics` CLI by navigating into one of the containers for the 3 Kafka Borkers. Let's use `broker-1`
+We can easily get access to the `kafka-topics` CLI by navigating into one of the containers for the 3 Kafka Brokers. Let's use `broker-1`
 
 ```
 docker exec -ti broker-1 bash
 ```
 
-First lets see all existing topics
+First let's see all existing topics
 
 ```
 kafka-topics --zookeeper zookeeper-1:2181 --list
@@ -130,7 +132,7 @@ Make sure to exit from the container after the topics have been created successf
 exit
 ```
 
-If you don't like to work with the CLI, you can also create the Kafka topics using the [Kafka Manager GUI](http://streamingplatform:9000). 
+If you don't like to work with the CLI, you can also create the Kafka topics using the [Kafka Manager GUI](http://streamingplatform:29000). 
 
 ### Prepare Database Table
 
@@ -219,25 +221,37 @@ So we can see that we can produce data directly to Kafka. But this is not how th
 
 First let's start a consumer on the MQTT topics `trucks/+/position`. 
 
- * To start consuming using through a command line, perform the following docker command:
+For this demo we show two options for consuming from MQTT
+ 
+ * use dockerized MQTT client in the terminal
+ * use browser-based HiveMQ Web UI
+
+#### Using Dockerized MQTT Client
+
+To start consuming using through a command line, perform the following docker command:
 
 ```
 docker run -it --rm efrecon/mqtt-client sub -h $DOCKER_HOST_IP -t "truck/+/position" -v
 ```
-  
- * to start consuming using the MQTT UI (HiveMQ Web Client), navigate to <http://streamingplatform:29080> and connect using `streamingplatform` for the **Host** field, `9001` for the **Port** field and then click on **Connect**: 
 
-	![Alt Image Text](./images/mqtt-ui-connect.png "MQTT UI Connect")
+The consumed messages will show up in the terminal.
+
+#### Using HiveMQ Web UI  
+
+To start consuming using the MQTT UI ([HiveMQ Web UI](https://www.hivemq.com/docs/3.4/web-ui/introduction.html)), navigate to <http://streamingplatform:29080> and connect using `streamingplatform` for the **Host** field, `9001` for the **Port** field and then click on **Connect**: 
+
+![Alt Image Text](./images/mqtt-ui-connect.png "MQTT UI Connect")
 	
-	When successfully connected, click on Add New Topic Subscription and enter `truck/+/position` into **Topic** field and click **Subscribe**:
+When successfully connected, click on Add New Topic Subscription and enter `truck/+/position` into **Topic** field and click **Subscribe**:
 	
-	![Alt Image Text](./images/mqtt-ui-subscription.png "MQTT UI Connect")
+![Alt Image Text](./images/mqtt-ui-subscription.png "MQTT UI Connect")
 	
 Now let's produce the truck events to the MQTT broker running on port 1883:
 
 ```
 docker run trivadis/iot-truck-simulator '-s' 'MQTT' '-h' $DOCKER_HOST_IP '-p' '1883' '-f' 'CSV'
 ```
+
 
 As soon as messages are produced to MQTT, you should see them either on the CLI or in the MQTT UI (Hive MQ) as shown below.
 
@@ -261,7 +275,7 @@ or `kafkacat`
 kafkacat -b streamingplatform:9092 -t truck_position -q
 ```
 
-### Using the Conluent MQTT Connector
+### Using the Confluent MQTT Connector
 Navigate into the `kafka-connect` folder and download the `confluentinc-kafka-connect-mqtt-1.2.1-preview.zip` file from [the Confluent Hub](https://www.confluent.io/connector/kafka-connect-mqtt/).
 
 ```
@@ -275,7 +289,7 @@ unzip confluentinc-kafka-connect-mqtt-1.2.1-preview.zip
 rm confluentinc-kafka-connect-mqtt-1.2.1-preview.zip
 ```
 
-Restart the connect cluster
+Restart the Kafka Connect cluster
 
 ```
 docker-compose restart connect-1 connect-2
@@ -297,7 +311,7 @@ You can stop the connector using
 
 ### Using Landoop MQTT Connector
 
-Navigate into the `kafka-connect` folder and download the `kafka-connect-mqtt-1.1.1-2.1.0-all.tar.gz` file from the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) project.
+Navigate into the `kafka-connect` folder and download the `kafka-connect-mqtt-1.2.1-2.1.0-all.tar.gz` file from the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) project.
 
 ```
 wget https://github.com/Landoop/stream-reactor/releases/download/1.2.1/kafka-connect-mqtt-1.2.1-2.1.0-all.tar.gz
@@ -310,11 +324,36 @@ mkdir kafka-connect-mqtt-1.2.1-2.1.0-all && tar xvf kafka-connect-mqtt-1.2.1-2.1
 rm kafka-connect-mqtt-1.2.1-2.1.0-all.tar.gz
 ```
 
-Now let's restart Kafka connect in order to pick up the new connector. 
+### Restart Kafka Connect Cluster
+
+Now lets restart Kafka connect in order to pick up the new connector. 
 
 ```
 docker-compose restart connect-1 connect-2
 ```
+
+The connector should now be added to the Kafka cluster. You can confirm that by watching the log file of the two containers
+
+```
+docker-compose logs -f connect-1 connect-2
+```
+
+After a while you should see an output similar to the one below with a message that the MQTT connector was added and later that the connector finished starting ...
+
+```
+...
+connect-2             | [2019-06-08 18:01:02,590] INFO Registered loader: PluginClassLoader{pluginLocation=file:/etc/kafka-connect/custom-plugins/kafka-connect-mqtt-1.2.1-2.1.0-all/} (org.apache.kafka.connect.runtime.isolation.DelegatingClassLoader)
+connect-2             | [2019-06-08 18:01:02,591] INFO Added plugin 'com.datamountaineer.streamreactor.connect.mqtt.source.MqttSourceConnector' (org.apache.kafka.connect.runtime.isolation.DelegatingClassLoader)
+connect-2             | [2019-06-08 18:01:02,591] INFO Added plugin 'com.datamountaineer.streamreactor.connect.mqtt.sink.MqttSinkConnector' (org.apache.kafka.connect.runtime.isolation.DelegatingClassLoader)
+connect-2             | [2019-06-08 18:01:02,592] INFO Added plugin 'com.datamountaineer.streamreactor.connect.converters.source.JsonResilientConverter' (org.apache.kafka.connect.runtime.isolation.DelegatingClassLoader)
+connect-2             | [2019-06-08 18:01:02,592] INFO Added plugin 'com.landoop.connect.sql.Transformation' (org.apache.kafka.connect.runtime.isolation.DelegatingClassLoader)
+...
+connect-2             | [2019-06-08 18:01:11,520] INFO Starting connectors and tasks using config offset -1 (org.apache.kafka.connect.runtime.distributed.DistributedHerder)
+connect-2             | [2019-06-08 18:01:11,520] INFO Finished starting connectors and tasks (org.apache.kafka.connect.runtime.distributed.DistributedHerder)
+
+```
+
+### Run connector instance 
 
 Add and start the MQTT connector (make sure that consumer is still running):
 
@@ -323,9 +362,10 @@ cd $SAMPLE_HOME/scripts
 ./start-connect-mqtt-datamountaineer.sh
 ```
 
-The truck position messages are sent to the `truck_position` topic and show up on the consumer. 
+A soon as the connector starts getting the messages from MQTT, they should start appearing on the console where the Kafka consumer is running. 
 
 You can stop the connector using
+
 ```
 ./stop-connect-mqtt-datamountaineer.sh
 ```
@@ -334,9 +374,10 @@ You can stop the connector using
 
 Navigate to the [Kafka Connect UI](http://streamingplatform:28001) to see the connector running.
 
-## MQTT to Kafa using Confluent MQTT Proxy (3)
+## MQTT to Kafka using Confluent MQTT Proxy (3)
 
 Instead of using a MQTT broker and bridge to Kafka using Kafka Connect, you can also provision the [MQTT Proxy](https://docs.confluent.io/current/kafka-mqtt/index.html), which allows a MQTT client to produce messages directly to Kafka. 	
+
 Make sure that the MQTT proxy has been started as a service in the `docker-compose.yml`.
 
 ```
@@ -386,7 +427,7 @@ Let's consume the data from the `truck_position` topic, assuming the truck simul
 print 'truck_position';
 ```
 
-you can also add the keyword `from beginning` to start consuming at the beginning of the topic.
+You can also add the keyword `from beginning` to start consuming at the beginning of the topic.
 
 ```
 print 'truck_position' from beginning;
@@ -435,7 +476,7 @@ Now let's see the stream by using the `SELECT` clause.
 SELECT * FROM truck_position_s;
 ```
 
-you should see a continuous stream of events as a result of the SELECT statement, similar as shown below:
+You should see a continuous stream of events as a result of the SELECT statement, similar as shown below:
 
 ```
 ksql> SELECT * from truck_position_s;
@@ -747,12 +788,13 @@ GROUP BY eventType, geohash;
 
 ## Current Positions
 
+```
 CREATE TABLE truck_position_t \
   WITH (kafka_topic='truck_position_t', \
         value_format='JSON', \
         KEY = 'truckid') \
 AS SELECT truck_id,  FROM truck_position_s GROUP BY truckid; 
-
+```
 
 
 ## More complex analytics in KSQL
