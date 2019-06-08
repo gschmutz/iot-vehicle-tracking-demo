@@ -71,7 +71,6 @@ services:
       KAFKA_DELETE_TOPIC_ENABLE: 'true'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
       KAFKA_JMX_PORT: 9992
-
     restart: always
       
   schema-registry:
@@ -291,11 +290,11 @@ services:
       ZOOKEEPER_HOST: zookeeper-1:2181
       KAFKA_HOST: broker-1:9092
       #SECURITY_PROTOCOL: SSL
-      #TRUST_STORE_LOCATION: ssl/client.truststore.jks
-      #TRUST_STORE_PASSWORD: password
-      #KEY_STORE_LOCATION: ssl/server.keystore.jks
-      #KEY_STORE_PASSWORD: password
-      #KEY_PASSWORD: password
+      TRUST_STORE_LOCATION: ssl/client.truststore.jks
+      TRUST_STORE_PASSWORD: password
+      KEY_STORE_LOCATION: ssl/server.keystore.jks
+      KEY_STORE_PASSWORD: password
+      KEY_PASSWORD: password
     restart: always
     
   streamsets:
