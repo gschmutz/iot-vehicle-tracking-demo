@@ -2,6 +2,8 @@
 
 This project shows how to setup and run the demo used in various talks, such as "Introduction into Stream Processing". 
 
+![Alt Image Text](./images/use-case-overview.png "Use Case Overview")
+
 ## Preparation
 
 The platform where the demos can be run on, has been generated using the [`platys`](http://github.com/trivadispf/platys)  toolset using the [`platys-modern-data-platform`](http://github.com/trivadispf/platys-modern-data-platform) stack.
@@ -84,13 +86,53 @@ docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --top
 
 If you don't like to work with the CLI, you can also create the Kafka topics using the graphical user interfaces [Cluster Manager for Kafka (CMAK)](http://dataplatform:28104) or the [Apache Kafka HQ (AKHQ)](http://dataplatform:28107). 
 
-### Setup logistics_db Postgresql Database
+### Check logistics_db Postgresql Database
 
 The necessary tables are created automatically when running the stack using Docker Compose. Use the following command in a terminal window, to show the content of the `driver` table:
 
 ``` bash
 docker exec -ti postgresql psql -d demodb -U demo -c "SELECT * FROM logistics_db.driver"
 ``` 
+
+### Setup Shipment MySQL Database
+
+
+```sql
+CREATE USER 'debezium'@'%' IDENTIFIED WITH mysql_native_password BY 'dbz';
+CREATE USER 'replicator'@'%' IDENTIFIED BY 'replpass';
+GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT  ON *.* TO 'debezium';
+GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'replicator';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON sample.* TO sample;
+
+USE sample;
+
+DROP TABLE shipment;
+
+CREATE TABLE shipment (
+                id INT PRIMARY KEY,
+                vehicle_id INT,
+                target_wkt VARCHAR(2000),
+                create_ts timestamp DEFAULT CURRENT_TIMESTAMP,
+                update_ts timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+                
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (1,11, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))');     
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (2, 42, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))');         
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (3, 12, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))'); 
+                
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (4, 13, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))'); 
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (5, 14, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (6, 15, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (7, 32, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (8, 48, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
+```
 
 ### Simulating Vehicle Tracking Data
 
@@ -106,9 +148,11 @@ docker run trivadis/iot-truck-simulator '-s' 'MQTT' '-h' $DOCKER_HOST_IP '-p' '1
 
 Leave this running in the terminal window. 
 
-## Demo 1 - Consume Vehicle Tracking messages from MQTT and send to Kafka
+## Step 1 - Consume Vehicle Tracking messages from MQTT and send to Kafka
 
 In this part we will show how we can consume the data from the MQTT broker and send it to a Kafka topic. We will be using *Kafka Connect* for that. 
+
+![Alt Image Text](./images/use-case-step-1.png "Demo 1 - KsqlDB")
 
 ### Check message in MQTT
 
@@ -200,7 +244,9 @@ curl -X "DELETE" "$DOCKER_HOST_IP:8083/connectors/mqtt-vehicle-position-source"
 
 Navigate to the [Kafka Connect UI](http://dataplatform:28001) to view the connector in a graphical window.
 
-## Demo 2 - Using KSQL to Refine the data
+## Step 2 - Using KSQL to Refine the data
+
+![Alt Image Text](./images/use-case-step-2.png "Demo 1 - KsqlDB")
 
 ### Connect to ksqlDB engine
 
@@ -294,7 +340,7 @@ DESCRIBE vehicle_tracking_sysA_s;
 DESCRIBE EXTENDED vehicle_tracking_sysA_s;
 ```
 
-### Create th new "refined" stream where the data is transformed into Avro
+### Create a new "refined" stream where the data is transformed into Avro
 
 First drop the stream if it already exists:
 
@@ -356,7 +402,9 @@ docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_refined -s avro
 
 You can use the Schema Registry UI on <http://dataplatform:28102> to view the Avro Schema created by ksqlDB.
 
-## Demo 3 - Integrate System B
+## Step 3 - Integrate System B
+
+![Alt Image Text](./images/use-case-step-3.png "Demo 1 - KsqlDB")
 
 In this part we are going to integrate the data from the vehicle tracking system B. 
 
@@ -373,7 +421,10 @@ docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysB -f "%k - %
 ```
 
 
-## Demo 4 - Refinement of data from System B into same topic as above
+## Step 4 - Refinement of data from System B into same topic as above
+
+![Alt Image Text](./images/use-case-step-4.png "Demo 1 - KsqlDB")
+
 
 ```sql
 DROP STREAM IF EXISTS vehicle_tracking_sysB_s;
@@ -414,7 +465,39 @@ SELECT ROWKEY
 FROM vehicle_tracking_sysB_s
 EMIT CHANGES;
 ```
-## Demo 5 - Investigate Driving behaviour
+
+## Demo 5 - Pull Query on Vehicle Tracking Info ("Device Shadow")
+
+![Alt Image Text](./images/use-case-step-5.png "Demo 1 - KsqlDB")
+
+Pull query on Stream does not work
+
+``` sql
+SELECT * FROM vehicle_tracking_refined_s WHERE vehicleId = 42;
+```
+
+``` sql
+DROP TABLE IF EXISTS vehicle_tracking_refined_t;
+```
+
+``` sql
+CREATE TABLE IF NOT EXISTS vehicle_tracking_refined_t
+WITH (kafka_topic = 'vehicle_tracking_refined_t')
+AS
+SELECT vehicleId
+       , latest_by_offset(driverId)	   driverId
+		, latest_by_offset(source)			source
+		, latest_by_offset(eventType)		eventType
+		, latest_by_offset(latitude)		latitude
+		, latest_by_offset(longitude)		longitude
+FROM vehicle_tracking_refined_s
+GROUP BY vehicleId
+EMIT CHANGES;
+```
+
+## Step 6 - Investigate Driving behaviour
+
+![Alt Image Text](./images/use-case-step-6.png "Demo 1 - KsqlDB")
 
 Now with the data from both system integrated, let's work with it!
 
@@ -454,50 +537,9 @@ We can also see the same information by directly getting the data from the under
 docker exec -ti kafkacat kafkacat -b kafka-1 -t problematic_driving -s avro -r http://schema-registry-1:8081
 ```
 
-## Demo 6 - Aggregate Driving Behaviour
+## Demo 7 - Materialize Driver Information ("static information")
 
-``` sql
-DROP TABLE IF EXISTS event_type_by_5min_t;
-```
-
-``` sql
-CREATE TABLE event_type_by_1hour_tumbl_t AS
-SELECT windowstart AS winstart
-	, windowend 	AS winend
-	, eventType
-	, count(*) 	AS nof 
-FROM problematic_driving_s 
-WINDOW TUMBLING (SIZE 60 minutes)
-GROUP BY eventType;
-```
-
-``` sql
-CREATE TABLE event_type_by_1hour_hopp_t AS
-SELECT windowstart AS winstart
-	, windowend 	AS winend
-	, eventType
-	, count(*) 	AS nof 
-FROM problematic_driving_s 
-WINDOW HOPPING (SIZE 60 minutes, ADVANCE BY 30 minutes)
-GROUP BY eventType;
-```
-
-
-
-```
-SELECT TIMESTAMPTOSTRING(WINDOWSTART,'yyyy-MM-dd HH:mm:SS','CET') wsf
-, TIMESTAMPTOSTRING(WINDOWEND,'yyyy-MM-dd HH:mm:SS','CET') wef
-, ws
-, we
-, eventType
-, nof
-FROM event_type_by_1hour_tumbl_t
-WHERE ws > UNIX_TIMESTAMP()-300001 and ws < UNIX_TIMESTAMP()- 240001
-EMIT CHANGES;
-```
-
-
-## Demo 7 - Join with Driver ("static information")
+![Alt Image Text](./images/use-case-step-7.png "Demo 1 - KsqlDB")
 
 First let's register the Kafka topic `logisticsdb_driver`, which we created and populated in the [Preparation](0-Preparation.md) section.
 
@@ -563,6 +605,10 @@ Now perform an update on one of the drivers in the PostgreSQL database (original
 docker exec -ti postgresql psql -d demodb -U demo -c "UPDATE logistics_db.driver SET available = 'N', last_update = CURRENT_TIMESTAMP  WHERE id = 11"
 ```
 
+## Demo 8 - Join with Driver ("static information")
+
+![Alt Image Text](./images/use-case-step-8.png "Demo 1 - KsqlDB")
+
 Now with the ksqlDB table in place, let's join it with the `problematic_driving_s` ksqlDB stream to enrich it with driver information available in the `driver_t` table (first_name, last_name and availability):
 
 ``` sql
@@ -600,7 +646,58 @@ we can use `kafkacat` to show the data stream in the newly created Kafka topic `
 docker exec -ti kafkacat kafkacat -b kafka-1 -t problematic_driving_and_driver -s avro -r http://schema-registry-1:8081
 ```
 
-## Demo 8 - Integrate with Shipment Info
+
+## Demo 9 - Aggregate Driving Behaviour
+
+![Alt Image Text](./images/use-case-step-9.png "Demo 1 - KsqlDB")
+
+``` sql
+DROP TABLE IF EXISTS event_type_by_5min_t;
+```
+
+``` sql
+CREATE TABLE event_type_by_1hour_tumbl_t AS
+SELECT windowstart AS winstart
+	, windowend 	AS winend
+	, eventType
+	, count(*) 	AS nof 
+FROM problematic_driving_s 
+WINDOW TUMBLING (SIZE 60 minutes)
+GROUP BY eventType;
+```
+
+``` sql
+CREATE TABLE event_type_by_1hour_hopp_t AS
+SELECT windowstart AS winstart
+	, windowend 	AS winend
+	, eventType
+	, count(*) 	AS nof 
+FROM problematic_driving_s 
+WINDOW HOPPING (SIZE 60 minutes, ADVANCE BY 30 minutes)
+GROUP BY eventType;
+```
+
+
+
+```
+SELECT TIMESTAMPTOSTRING(WINDOWSTART,'yyyy-MM-dd HH:mm:SS','CET') wsf
+, TIMESTAMPTOSTRING(WINDOWEND,'yyyy-MM-dd HH:mm:SS','CET') wef
+, ws
+, we
+, eventType
+, nof
+FROM event_type_by_1hour_tumbl_t
+WHERE ws > UNIX_TIMESTAMP()-300001 and ws < UNIX_TIMESTAMP()- 240001
+EMIT CHANGES;
+```
+
+
+
+## Demo 10 - Materialize Shipment Information ("static information")
+
+![Alt Image Text](./images/use-case-step-10.png "Demo 1 - KsqlDB")
+
+Create the MySQL table with shipment information:
 
 ``` bash
 docker exec -it mysql bash -c 'mysql -u root -pmanager'
@@ -641,16 +738,12 @@ INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (6, 15, 'POLYGON ((-91
 INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (7, 32, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
 
 INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (8, 48, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
+```
 
+```sql
 UPDATE shipment SET target_wkt = 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))', update_ts = CURRENT_TIMESTAMP;
 ```
 
-```
-POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))
-
-POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))
-
-```
 
 ```bash
 docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic sample.sample.shipment --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
@@ -698,6 +791,10 @@ CREATE TABLE IF NOT EXISTS shipment_t (id VARCHAR PRIMARY KEY,
 SELECT * FROM shipment_t EMIT CHANGES;
 ```
 
+## Demo 11 - Geo-Fencing for "near" destination
+
+![Alt Image Text](./images/use-case-step-11.png "Demo 1 - KsqlDB")
+
 ```sql
 DROP TABLE IF EXISTS shipment_by_vehicle_t;
 
@@ -706,7 +803,6 @@ AS SELECT vehicle_id, collect_list(target_wkt) AS target_wkts
 FROM shipment_t
 GROUP BY vehicle_id;
 ```
-
 
 
 ```sql
@@ -740,7 +836,7 @@ EMIT CHANGES;
 SELECT vehicleId, geo_fence(array_lag(collect_list(geo_fence(latitude, longitude, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))')),1), array_lag(collect_list(geo_fence(latitude, longitude, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))')),0)) status FROM vehicle_tracking_refined_s group by vehicleId EMIT CHANGES;
 
 
-## Demo 9 - Dashboard Integration
+## Demo 12 - Dashboard Integration
 
 First let's create a stream backed by the `dashboard` topic, which will be the channel to the Tipboard dashboard solution. 
 
@@ -866,366 +962,8 @@ curl http://dataplatform:28172/api/v0.1/e2c3275d0e1a4bc0da360dd225d74a43/push -X
 
 ${str:replace(str:replace(str:replace('tile=TILE&key=KEY&data=DATA', 'TILE', record:value('/TILE')), 'KEY', record:value('/KEY')), 'DATA', record:value('/DATA'))}
 
------
-## Geo Fencing
 
-SELECT vehicleId, geo_fence(array_lag(collect_list(geo_fence(latitude, longitude, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))')),1), array_lag(collect_list(geo_fence(latitude, longitude, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))')),0)) status FROM vehicle_tracking_refined_s group by vehicleId EMIT CHANGES;
 
 
 
 
-
-
------
-
-
-
-### Streaming Filter with KSQL
-
-First we start with a filter to see all the messages, where the `eventType` is not `Normal`:
-
-```
-SELECT * FROM truck_position_s WHERE eventType != 'Normal' EMIT CHANGES;
-```
-
-We now get much less data, basically only the anomalies (dangerous driving) we are interested in:
-
-```
-1539712101614 | truck/67/position | null | 67 | 11 | 160405074 | Lane Departure | 38.98 | -92.53 | -6187001306629414077
-1539712116450 | truck/18/position | null | 18 | 25 | 987179512 | Overspeed | 40.76 | -88.77 | -6187001306629414077
-1539712118653 | truck/67/position | null | 67 | 11 | 160405074 | Overspeed | 38.83 | -90.79 | -6187001306629414077
-1539712120102 | truck/31/position | null | 31 | 12 | 927636994 | Unsafe following distance | 38.22 | -91.18 | -6187001306629414077
-```
-
-Using a SELECT from the CLI as shown above is only interesting while "developing" and finding the right statement. After that you want it to execute continuously and provide the result to other interested parties. 
-
-## Create a new Stream based on the KSQL SELECT (5)
-
-In order to provide the filtered result to other interested parties, we can create a new stream based on a SELECT statement. 
-
-First create a topic where all "dangerous driving" events should be published to
-	
-```
-docker exec broker-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic dangerous_driving --partitions 8 --replication-factor 2
-```
-
-Now create a "console" listener on the topic, either using the `kafka-console-consumer`
-
-```
-kafka-console-consumer --bootstrap-server broker-1:9092 --topic dangerous_driving
-```
-
-or the `kafkacat` utility.
-
-```
-kafkacat -b analyticsplatform -t dangerous_driving
-```
-
-In the KSQL CLI use a `CREATE STREAM .. AS SELECT` statement to create a new stream based on the results of the SELECT statement.
-
-```
-DROP STREAM dangerous_driving_s;
-
-CREATE STREAM dangerous_driving_s \
-  WITH (kafka_topic='dangerous_driving', \
-        value_format='JSON', \
-        partitions=8) \
-AS SELECT * FROM truck_position_s \
-WHERE eventType != 'Normal';
-```
-
-You should see messages in the "console" listener. 
-
-Alternatively you can also query the new stream to get the same results. 
-
-```
-SELECT * FROM dangerous_driving_s;
-```
-
-So we have seen filtering in action and we have created a new stream which only holds the filtered messages signalling "dangerous driving" behaviour.
-
-## Aggregations using KSQL (6)
-
-Let's use the new stream and do some aggregations on it. 
-
-First we want to count the number of events per 30 seconds and grouped by event type.
-
-We can first just do it as a SELECT to see if it produces the correct results
-
-```
-SELECT eventType, count(*) nof \
-FROM problematic_driving_s \
-WINDOW TUMBLING (SIZE 30 SECONDS) \
-GROUP BY eventType
-EMIT CHANGES;
-```
-
-and then create a new stream with it
-
-```
-DROP TABLE dangerous_driving_count;
-
-CREATE TABLE dangerous_driving_count \
-AS SELECT eventType, count(*) nof \
-FROM dangerous_driving_s \
-WINDOW TUMBLING (SIZE 30 SECONDS) \
-GROUP BY eventType;
-```
-
-Using the new stream, we can also nicely format the timestamp:
-
-```
-SELECT  TIMESTAMPTOSTRING(ROWTIME, 'yyyy-MM-dd HH:mm:ss.SSS'), eventType, nof \
-FROM dangerous_driving_count;
-```
-
-Alternatively we can also use a "sliding window" where we still count over 30 seconds, but now with a slide of 10 seconds.
-
-```
-DROP TABLE dangerous_driving_count;
-
-CREATE TABLE dangerous_driving_count
-AS
-SELECT eventType, count(*) nof \
-FROM dangerous_driving_s \
-WINDOW HOPPING (SIZE 30 SECONDS, ADVANCE BY 10 SECONDS) \
-GROUP BY eventType;
-```
-
-## Join with Static Driver Data (7)
-
-### Start the synchronisation from the RDBMS table "truck"
-
-First start the console consumer on the `truck_driver` topic:
-
-```
-docker exec -ti kafka-1 kafka-console-consumer --bootstrap-server kafka-1:9092 --topic truck_driver --from-beginning
-```
-
-Print the key and value of the truck_driver topic
-
-```
-kafkacat -b dataplatform -t truck_driver -f "%k::%s\n" -u -q
-```
-
-then start the JDBC connector:
-
-```
-cd $SAMPLE_HOME
-./scripts/start-connect-jdbc.sh
-```
-
-To stop the connector execute the following command
-
-```
-curl -X "DELETE" "http://$DOCKER_HOST_IP:8083/connectors/jdbc-driver-source"
-```
-
-Perform an update to see that these will be delivered
-
-```
-docker exec -ti postgresql psql -d sample -U sample
-```
-
-```
-UPDATE "driver" SET "available" = 'N', "last_update" = CURRENT_TIMESTAMP  WHERE "id" = 21;
-```
-
-```
-UPDATE "driver" SET "available" = 'N', "last_update" = CURRENT_TIMESTAMP  WHERE "id" = 14;
-```
-
-Stop the consumer and restart with `--from-beginning` option
-
-```
-docker exec -ti kafka-1 kafka-console-consumer --bootstrap-server kafka-1:9092 --topic truck_driver --from-beginning
-```
-
-### Create a KSQL table
-
-In the KSQL CLI, let's create a table over the `truck_driver` topic. It will hold the latest state of all the drivers:
-
-```
-set 'commit.interval.ms'='5000';
-set 'cache.max.bytes.buffering'='10000000';
-set 'auto.offset.reset'='earliest';
-
-DROP TABLE driver_t;
-
-CREATE TABLE driver_t  \
-   (id BIGINT,  \
-   first_name VARCHAR, \
-   last_name VARCHAR, \
-   available VARCHAR, \
-   birthdate VARCHAR) \
-  WITH (kafka_topic='truck_driver', \
-        value_format='JSON', \
-        KEY = 'id');
-```
-
-Let's see that we actually have some drivers in the table. 
-
-```
-set 'commit.interval.ms'='5000';
-set 'cache.max.bytes.buffering'='10000000';
-set 'auto.offset.reset'='earliest';
-
-SELECT * FROM driver_t;
-```
-
-
-```
-docker exec -ti postgresql psql -d sample -U sample
-```
-
-```
-UPDATE "driver" SET "available" = 'N', "last_update" = CURRENT_TIMESTAMP  WHERE "id" = 21;
-```
-
-
-join `dangerous_driving_s` stream to `driver_t` table
-
-```
-set 'commit.interval.ms'='5000';
-set 'cache.max.bytes.buffering'='10000000';
-set 'auto.offset.reset'='latest';
-```
-
-```
-SELECT driverid, first_name, last_name, truckId, routeId, eventType, latitude, longitude \
-FROM dangerous_driving_s \
-LEFT JOIN driver_t \
-ON dangerous_driving_s.driverId = driver_t.id;
-```
-
-with outer join
-
-```
-SELECT driverid, first_name, last_name, truckId, routeId, eventType, latitude, longitude \
-FROM dangerous_driving_s \
-LEFT OUTER JOIN driver_t \
-ON dangerous_driving_s.driverId = driver_t.id;
-```
-
-Create Stream `dangerous_driving_and_driver`
-
-```
-DROP STREAM dangerous_driving_and_driver_s;
-CREATE STREAM dangerous_driving_and_driver_s  \
-  WITH (kafka_topic='dangerous_driving_and_driver', \
-        value_format='JSON', partitions=8) \
-AS SELECT driverid, first_name, last_name, truckId, routeId, eventType, latitude, longitude \
-FROM dangerous_driving_s \
-LEFT JOIN driver_t \
-ON dangerous_driving_s.driverId = driver_t.id;
-```
-
-
-```
-SELECT * FROM dangerous_driving_and_driver_s;
-```
-
-```
-SELECT * FROM dangerous_driving_and_driver_s WHERE driverid = 11;
-```
-
-Perform an update on the first_name to see the change in the live stream:
-
-```
-docker exec -ti docker_db_1 bash
-
-psql -d sample -U sample
-```
-
-```
-UPDATE "driver" SET "first_name" = 'Slow Down Mickey', "last_update" = CURRENT_TIMESTAMP  WHERE "id" = 11;
-UPDATE "driver" SET "first_name" = 'Slow Down Patricia', "last_update" = CURRENT_TIMESTAMP  WHERE "id" = 22;
-```
-
-## GeoHash and Aggregation (8)
-
-```
-SELECT latitude, longitude, geohash(latitude, longitude, 4) \
-FROM dangerous_driving_s;
-```
-
-```
-ksql> SELECT latitude, longitude, geohash(latitude, longitude, 4) \
-      FROM dangerous_driving_s;
-38.31 | -91.07 | 9yz1
-37.7 | -92.61 | 9ywn
-34.78 | -92.31 | 9ynm
-42.23 | -91.78 | 9zw8
-```
-
-```
-DROP STREAM dangerous_driving_and_driver_geohashed_s;
-CREATE STREAM dangerous_driving_and_driver_geohashed_s \
-  WITH (kafka_topic='dangerous_and_position', \
-        value_format='JSON', partitions=8) \
-AS SELECT driverid, first_name, last_name, truckid, routeid, eventtype, geohash(latitude, longitude, 4) as geohash \
-FROM dangerous_driving_and_driver_s;
-```
-
-```
-SELECT eventType, geohash, count(*) nof \
-FROM dangerous_driving_and_driver_geohashed_s \
-WINDOW TUMBLING (SIZE 120 SECONDS) \
-GROUP BY eventType, geohash;
-```
-
-
-## Current Positions
-
-```
-CREATE TABLE truck_position_t \
-  WITH (kafka_topic='truck_position_t', \
-        value_format='JSON', \
-        KEY = 'truckid') \
-AS SELECT truck_id,  FROM truck_position_s GROUP BY truckid; 
-```
-
-
-## More complex analytics in KSQL
-
-```
-CREATE TABLE dangerous_driving_count \
-AS SELECT eventType, count(*) \
-FROM dangerous_driving_and_driver_s \
-WINDOW TUMBLING (SIZE 30 SECONDS) \
-GROUP BY eventType;
-```
-
-```
-CREATE TABLE dangerous_driving_count
-AS
-SELECT eventType, count(*) \
-FROM dangerous_driving_and_driver_s \
-WINDOW HOPPING (SIZE 30 SECONDS, ADVANCE BY 10 SECONDS) \
-GROUP BY eventType;
-```
-
-```
-SELECT first_name, last_name, eventType, count(*) \
-FROM dangerous_driving_and_driver_s \
-WINDOW TUMBLING (SIZE 20 SECONDS) \
-GROUP BY first_name, last_name, eventType;
-```
-
-
-
-## Using Kafka Streams to detect dangerous driving
-
-```
-docker exec -ti broker-1 bash
-```
-
-```
-kafka-topics --zookeeper zookeeper-1:2181 --create --topic dangerous_driving --partitions 8 --replication-factor 2
-kafka-console-consumer --bootstrap-server broker-1:9092 --topic dangerous_driving
-```
-
-```
-cd $SAMPLE_HOME/src/kafka-streams-truck
-mvn exec:java
-```
