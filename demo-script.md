@@ -56,6 +56,12 @@ docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysA
 
 ![Alt Image Text](./images/use-case-step-2.png "Demo 1 - KsqlDB")
 
+### What is ksqlDB?
+
+![Alt Image Text](https://docs.ksqldb.io/en/latest/img/ksqldb-architecture.png "Demo 1 - KsqlDB")
+
+[_Source: Confluent_](https://docs.ksqldb.io/en/latest/)
+
 ``` bash
 docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
 ```
@@ -209,9 +215,38 @@ GROUP BY source
 EMIT CHANGES;
 ```
 
-## Demo 5 - Investigate Driving behaviour
+## Demo 5 - Pull Query on Vehicle Tracking Info ("Device Shadow")
 
 ![Alt Image Text](./images/use-case-step-5.png "Demo 1 - KsqlDB")
+
+Pull query on Stream does not work
+
+``` sql
+SELECT * FROM vehicle_tracking_refined_s WHERE vehicleId = 42;
+```
+
+``` sql
+DROP TABLE IF EXISTS vehicle_tracking_refined_t;
+```
+
+``` sql
+CREATE TABLE IF NOT EXISTS vehicle_tracking_refined_t
+WITH (kafka_topic = 'vehicle_tracking_refined_t')
+AS
+SELECT vehicleId
+       , latest_by_offset(driverId)	   driverId
+		, latest_by_offset(source)			source
+		, latest_by_offset(eventType)		eventType
+		, latest_by_offset(latitude)		latitude
+		, latest_by_offset(longitude)		longitude
+FROM vehicle_tracking_refined_s
+GROUP BY vehicleId
+EMIT CHANGES;
+```
+
+## Demo 6 - Investigate Driving behaviour
+
+![Alt Image Text](./images/use-case-step-6.png "Demo 1 - KsqlDB")
 
 ``` sql
 SELECT * FROM vehicle_tracking_refined_s 
@@ -247,9 +282,9 @@ docker exec -ti kafkacat kafkacat -b kafka-1 -t problematic_driving -s avro -r h
 
 
 
-## Demo 6 - Materialize Driver Information ("static information")
+## Demo 7 - Materialize Driver Information ("static information")
 
-![Alt Image Text](./images/use-case-step-6.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/use-case-step-7.png "Demo 1 - KsqlDB")
 
 ```bash
 docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic logisticsdb_driver --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
@@ -299,9 +334,9 @@ CREATE TABLE IF NOT EXISTS driver_t (id BIGINT PRIMARY KEY,
         value_format='JSON');
 ```
 
-## Demo 7 - Join with Driver ("static information")
+## Demo 8 - Join with Driver ("static information")
 
-![Alt Image Text](./images/use-case-step-7.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/use-case-step-8.png "Demo 1 - KsqlDB")
 
 
 ``` sql
@@ -320,22 +355,165 @@ docker exec -ti postgresql psql -d demodb -U demo
 ```sql
 UPDATE logistics_db.driver SET available = 'N', last_update = CURRENT_TIMESTAMP  WHERE id = 11;
 ```
-## Demo 8 - Aggregate Driving Behaviour
+### Demo 9 - Aggregate Driving Behaviour
 
-![Alt Image Text](./images/use-case-step-8.png "Demo 1 - KsqlDB")
-
+### ![Alt Image Text](./images/use-case-step-9.png "Demo 1 - KsqlDB")
 
 ![Alt Image Text](https://docs.ksqldb.io/en/latest/img/ksql-window-aggregation.png "Demo 1 - KsqlDB")
 
 
-## Demo 9 - Materialize Shipment Information ("static information")
+``` sql
+DROP TABLE IF EXISTS event_type_by_5min_t;
+```
 
+``` sql
+CREATE TABLE event_type_by_1hour_tumbl_t AS
+SELECT windowstart AS winstart
+	, windowend 	AS winend
+	, eventType
+	, count(*) 	AS nof 
+FROM problematic_driving_s 
+WINDOW TUMBLING (SIZE 60 minutes)
+GROUP BY eventType;
+```
 
-![Alt Image Text](./images/use-case-step-9.png "Demo 1 - KsqlDB")
+``` sql
+CREATE TABLE event_type_by_1hour_hopp_t AS
+SELECT windowstart AS winstart
+	, windowend 	AS winend
+	, eventType
+	, count(*) 	AS nof 
+FROM problematic_driving_s 
+WINDOW HOPPING (SIZE 60 minutes, ADVANCE BY 30 minutes)
+GROUP BY eventType;
+```
 
-
-## Demo 10 - Geo-Fencing for "near" destination
-
+## Demo 10 - Materialize Shipment Information ("static information")
 
 ![Alt Image Text](./images/use-case-step-10.png "Demo 1 - KsqlDB")
 
+```sql
+CREATE USER 'debezium'@'%' IDENTIFIED WITH mysql_native_password BY 'dbz';
+CREATE USER 'replicator'@'%' IDENTIFIED BY 'replpass';
+GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT  ON *.* TO 'debezium';
+GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'replicator';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON sample.* TO sample;
+
+USE sample;
+
+DROP TABLE shipment;
+
+CREATE TABLE shipment (
+                id INT PRIMARY KEY,
+                vehicle_id INT,
+                target_wkt VARCHAR(2000),
+                create_ts timestamp DEFAULT CURRENT_TIMESTAMP,
+                update_ts timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+                
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (1,11, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))');     
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (2, 42, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))');         
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (3, 12, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))'); 
+                
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (4, 13, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))'); 
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (5, 14, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (6, 15, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (7, 32, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (8, 48, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
+```
+
+
+```bash
+docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic sample.sample.shipment --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
+```
+
+
+```sql
+DROP CONNECTOR debz_shipment_sc;
+
+CREATE SOURCE CONNECTOR debz_shipment_sc WITH (
+    'connector.class' = 'io.debezium.connector.mysql.MySqlConnector',
+    'database.hostname' = 'mysql',
+    'database.port' = '3306',
+    'database.user' = 'debezium',
+    'database.password' = 'dbz',
+    'database.server.id' = '42',
+    'database.server.name' = 'sample',
+    'table.whitelist' = 'sample.shipment',
+    'database.history.kafka.bootstrap.servers' = 'kafka-1:19092',
+    'database.history.kafka.topic' = 'dbhistory.sample' ,
+    'schema_only_recovery' = 'true',
+    'include.schema.changes' = 'false',
+    'transforms'= 'unwrap, extractkey',
+    'transforms.unwrap.type'= 'io.debezium.transforms.ExtractNewRecordState',
+    'transforms.extractkey.type'= 'org.apache.kafka.connect.transforms.ExtractField$Key',
+    'transforms.extractkey.field'= 'id',
+    'key.converter'= 'org.apache.kafka.connect.storage.StringConverter',
+    'value.converter'= 'io.confluent.connect.avro.AvroConverter',
+    'value.converter.schema.registry.url'= 'http://schema-registry-1:8081'
+    );
+```
+
+
+``` sql
+DROP TABLE IF EXISTS shipment_t;
+
+CREATE TABLE IF NOT EXISTS shipment_t (id VARCHAR PRIMARY KEY,
+   vehicle_id INTEGER,  
+   target_wkt VARCHAR)  
+  WITH (kafka_topic='sample.sample.shipment', 
+        value_format='AVRO');
+```
+
+```sql
+SELECT * FROM shipment_t EMIT CHANGES;
+```
+
+
+## Demo 11 - Geo-Fencing for "near" destination
+
+
+![Alt Image Text](./images/use-case-step-11.png "Demo 1 - KsqlDB")
+
+```sql
+DROP TABLE IF EXISTS shipment_by_vehicle_t;
+
+CREATE TABLE shipment_by_vehicle_t
+AS SELECT vehicle_id, collect_list(target_wkt) AS target_wkts
+FROM shipment_t
+GROUP BY vehicle_id;
+```
+
+
+```sql
+SELECT vtr.vehicleId
+		,array_lag(collect_list(geo_fence(vtr.latitude, vtr.longitude, sbv.target_wkts[1])),1) AS status_before
+		,array_lag(collect_list(geo_fence(vtr.latitude, vtr.longitude, sbv.target_wkts[1])),0) AS status_now
+FROM vehicle_tracking_refined_s	vtr
+LEFT JOIN shipment_by_vehicle_t	sbv
+ON CAST (vtr.vehicleId AS INTEGER) = sbv.vehicle_id
+WHERE sbv.target_wkts IS NOT NULL
+GROUP BY vehicleId
+EMIT CHANGES;
+```
+
+```sql
+CREATE TABLE geo_fence_status_t AS
+SELECT vtr.vehicleId
+		, geo_fence (array_lag(collect_list(geo_fence(vtr.latitude, vtr.longitude, sbv.target_wkts[1])),1) ,
+					array_lag(collect_list(geo_fence(vtr.latitude, vtr.longitude, sbv.target_wkts[1])),0) 
+					) AS status
+FROM vehicle_tracking_refined_s	vtr
+LEFT JOIN shipment_by_vehicle_t	sbv
+ON CAST (vtr.vehicleId AS INTEGER) = sbv.vehicle_id
+WHERE sbv.target_wkts IS NOT NULL
+GROUP BY vehicleId
+EMIT CHANGES;
+```
