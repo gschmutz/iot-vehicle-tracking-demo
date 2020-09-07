@@ -1,0 +1,4 @@
+
+java/kafka-streams-truck/.idea/**
+java/kafka-streams-truck/kafka-streams-truck.iml
+java/kafka-streams-truck/target/**
