@@ -321,7 +321,12 @@ EMIT CHANGES;
 docker exec -ti kafkacat kafkacat -b kafka-1 -t problematic_driving -s avro -r http://schema-registry-1:8081
 ```
 
+### Alternative with Kafka Streams
 
+
+``` bash
+docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic problematic_driving_kstreams --partitions 8 --replication-factor 3
+```
 
 ## Demo 7 - Materialize Driver Information ("static information")
 
