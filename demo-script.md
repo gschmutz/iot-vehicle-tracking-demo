@@ -16,6 +16,14 @@ docker run -it --rm efrecon/mqtt-client sub -h $DOCKER_HOST_IP -t "truck/+/posit
 ```
 
 ```bash
+docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic vehicle_tracking_sysA --partitions 8 --replication-factor 3
+```
+
+![Alt Image Text](./images/kafka-connect-vs-streams.png "Demo 1 - KsqlDB")
+
+[Confluent Connector Hub](https://www.confluent.io/hub/)
+
+```bash
 curl -XGET http://dataplatform:8083/connector-plugins | jq
 ```
 
@@ -23,7 +31,10 @@ curl -XGET http://dataplatform:8083/connector-plugins | jq
 docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic vehicle_tracking_sysA --partitions 8 --replication-factor 3
 ```
 
-[Confluent Connector Hub](https://www.confluent.io/hub/)
+
+```bash
+docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysA
+```
 
 ```bash
 curl -X "POST" "$DOCKER_HOST_IP:8083/connectors" \
@@ -46,11 +57,6 @@ curl -X "POST" "$DOCKER_HOST_IP:8083/connectors" \
     "value.converter": "org.apache.kafka.connect.converters.ByteArrayConverter"
     }
   }'
-```
-
-
-```bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysA
 ```
 
 ## Demo 2 - Using KSQL to Refine the data
@@ -102,6 +108,11 @@ CREATE STREAM IF NOT EXISTS vehicle_tracking_sysA_s
         value_format='JSON');
 ```
 
+#### push query
+
+![Alt Image Text](https://docs.ksqldb.io/en/latest/img/ksqldb-push-query.svg "Demo 1 - KsqlDB")
+
+
 ``` sql
 SELECT * FROM vehicle_tracking_sysA_s EMIT CHANGES;
 ```
@@ -111,11 +122,16 @@ DESCRIBE vehicle_tracking_sysA_s;
 DESCRIBE EXTENDED vehicle_tracking_sysA_s;
 ```
 
+
+[CREATE STREAM AS SELECT](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-stream-as-select/)
+
 ``` sql
 DROP STREAM IF EXISTS vehicle_tracking_refined_s;
 ```
 
-[CREATE STREAM AS SELECT](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-stream-as-select/)
+[Schema Registry](http://analyticsplatform:28102/#/)
+[Apache Avro](http://avro.apache.org)
+
 
 ``` sql
 CREATE STREAM IF NOT EXISTS vehicle_tracking_refined_s 
@@ -149,7 +165,10 @@ docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_refined -s avro
 
 ![Alt Image Text](./images/use-case-step-3.png "Demo 1 - KsqlDB")
 
+```bash
 cd platys-iot-trucking
+sudo rm data-transfer/logs/TruckData.dat
+```
 
 ```bash
 docker run -v "${PWD}/data-transfer/logs:/out" --rm trivadis/iot-truck-simulator "-s" "FILE" "-f" "CSV" "-d" "1000" "-vf" "50-100" "-es" "2"
@@ -159,7 +178,18 @@ docker run -v "${PWD}/data-transfer/logs:/out" --rm trivadis/iot-truck-simulator
 tail -f data-transfer/logs/TruckData.dat
 ```
 
+``` bash
+docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic vehicle_tracking_sysB --partitions 8 --replication-factor 3
+```
+
 <http://http://dataplatform:18630/>
+
+* File to Tail / Path: ```/data-transfer/logs/TruckData.dat```
+* Kafka Topic: ```vehicle_tracking_sysB```
+* Expression for Key: ```${record:value('/parsed/2')}```
+
+* Key with Expression
+
 
 ```bash
 docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysB -f "%k - %s\n" -q
@@ -198,6 +228,7 @@ DESCRIBE vehicle_tracking_refined_s;
 ``` sql
 INSERT INTO vehicle_tracking_refined_s 
 SELECT ROWKEY
+    , 'Tracking_SysB' AS source
 	, timestamp
 	, vehicleId
 	, driverId
@@ -220,6 +251,11 @@ EMIT CHANGES;
 
 ![Alt Image Text](./images/use-case-step-5.png "Demo 1 - KsqlDB")
 
+#### pull query
+
+![Alt Image Text](https://docs.ksqldb.io/en/latest/img/ksqldb-pull-query.svg "Demo 1 - KsqlDB")
+
+
 Pull query on Stream does not work
 
 ``` sql
@@ -227,7 +263,7 @@ SELECT * FROM vehicle_tracking_refined_s WHERE vehicleId = 42;
 ```
 
 ``` sql
-DROP TABLE IF EXISTS vehicle_tracking_refined_t;
+DROP TABLE IF EXISTS vehicle_tracking_refined_t DELETE TOPIC;
 ```
 
 ``` sql
@@ -243,6 +279,10 @@ SELECT vehicleId
 FROM vehicle_tracking_refined_s
 GROUP BY vehicleId
 EMIT CHANGES;
+```
+
+``` sql
+SELECT * FROM vehicle_tracking_refined_t WHERE vehicleId = 42;
 ```
 
 ## Demo 6 - Investigate Driving behaviour
@@ -348,27 +388,51 @@ ON pd.driverId  = d.id
 EMIT CHANGES;
 ```
 
+``` sql
+DROP STREAM IF EXISTS problematic_driving_and_driver_s;
+```
+
+``` sql
+CREATE STREAM IF NOT EXISTS problematic_driving_and_driver_s \
+  WITH (kafka_topic='problematic_driving_and_driver', \
+        value_format='AVRO', \
+        partitions=8) \
+AS 
+SELECT pd.driverId, d.first_name, d.last_name, d.available, pd.vehicleId, pd.routeId, pd.eventType 
+FROM problematic_driving_s 	pd
+LEFT JOIN driver_t 				d
+ON pd.driverId  = d.id;
+```
+
 
 ```bash
 docker exec -ti postgresql psql -d demodb -U demo
 ```
 
 ```sql
-UPDATE logistics_db.driver SET available = 'N', last_update = CURRENT_TIMESTAMP  WHERE id = 11;
+UPDATE logistics_db.driver SET available = 'Y', last_update = CURRENT_TIMESTAMP  WHERE id = 12;
 ```
-### Demo 9 - Aggregate Driving Behaviour
+## Demo 9 - Aggregate Driving Behaviour
 
-### ![Alt Image Text](./images/use-case-step-9.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/use-case-step-9.png "Demo 1 - KsqlDB")
+
+### What is a Windowed Aggregation?
+
+![Alt Image Text](https://docs.ksqldb.io/en/latest/img/ksql-window.png "Demo 1 - KsqlDB")
+
+### Window Types
 
 ![Alt Image Text](https://docs.ksqldb.io/en/latest/img/ksql-window-aggregation.png "Demo 1 - KsqlDB")
 
 
 ``` sql
-DROP TABLE IF EXISTS event_type_by_5min_t;
+DROP TABLE IF EXISTS event_type_by_1hour_tumbl_t;
 ```
 
 ``` sql
-CREATE TABLE event_type_by_1hour_tumbl_t AS
+CREATE TABLE event_type_by_1hour_tumbl_t 
+WITH (kafka_topic = 'event_type_by_1hour_tumbl_t')
+AS
 SELECT windowstart AS winstart
 	, windowend 	AS winend
 	, eventType
@@ -389,9 +453,25 @@ WINDOW HOPPING (SIZE 60 minutes, ADVANCE BY 30 minutes)
 GROUP BY eventType;
 ```
 
+
+
+```sql
+SELECT TIMESTAMPTOSTRING(WINDOWSTART,'yyyy-MM-dd HH:mm:SS','CET') wsf
+, TIMESTAMPTOSTRING(WINDOWEND,'yyyy-MM-dd HH:mm:SS','CET') wef
+, TIMESTAMPTOSTRING(winstart,'yyyy-MM-dd HH:mm:SS','CET') wsf1
+, eventType
+, nof
+FROM event_type_by_1hour_tumbl_t
+EMIT CHANGES;
+```
+
 ## Demo 10 - Materialize Shipment Information ("static information")
 
 ![Alt Image Text](./images/use-case-step-10.png "Demo 1 - KsqlDB")
+
+``` bash
+docker exec -it mysql bash -c 'mysql -u root -pmanager'
+```
 
 ```sql
 CREATE USER 'debezium'@'%' IDENTIFIED WITH mysql_native_password BY 'dbz';
@@ -429,7 +509,6 @@ INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (7, 32, 'POLYGON ((-91
 
 INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (8, 48, 'POLYGON ((-91.29638671875 39.04478604850143, -91.4501953125 38.46219172306828, -90.98876953125 37.94419750075404, -89.912109375 37.78808138412046, -88.9892578125 38.37611542403604, -88.92333984375 38.77121637244273, -89.71435546875 39.470125122358176, -90.19775390625 39.825413103424786, -91.29638671875 39.04478604850143))'); 
 ```
-
 
 ```bash
 docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic sample.sample.shipment --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
@@ -477,6 +556,16 @@ CREATE TABLE IF NOT EXISTS shipment_t (id VARCHAR PRIMARY KEY,
 SELECT * FROM shipment_t EMIT CHANGES;
 ```
 
+Check with MySQL that CDC works
+
+``` bash
+docker exec -it mysql bash -c 'mysql -u root -pmanager'
+```
+
+```sql
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (8, 48, 'POLYGON ((-91.29638671875 39.04478604850143, -91.4501953125 38.46219172306828, -90.98876953125 37.94419750075404, -89.912109375 37.78808138412046, -88.9892578125 38.37611542403604, -88.92333984375 38.77121637244273, -89.71435546875 39.470125122358176, -90.19775390625 39.825413103424786, -91.29638671875 39.04478604850143))'); 
+```
+
 Destination is St. Louis: <http://geojson.io/>
 
 ![Alt Image Text](./images/st-louis.png "Demo 1 - KsqlDB")
@@ -486,7 +575,6 @@ POLYGON ((-91.29638671875 39.04478604850143, -91.4501953125 38.46219172306828, -
 ```
 
 ## Demo 11 - Geo-Fencing for "near" destination
-
 
 ![Alt Image Text](./images/use-case-step-11.png "Demo 1 - KsqlDB")
 
@@ -528,3 +616,60 @@ WHERE sbv.target_wkts IS NOT NULL
 GROUP BY vehicleId
 EMIT CHANGES;
 ```
+
+
+```sql
+CREATE STREAM event_type_by_1hour_tumbl_s (eventType STRING KEY
+												, winstart BIGINT
+												, winend BIGINT
+												, nof BIGINT)
+WITH (kafka_topic='EVENT_TYPE_BY_1HOUR_TUMBL_T'
+					, partitions=8
+					, value_format='AVRO'
+					, window_type='Tumbling'
+					, window_size='60 minutes');
+```
+
+## Demo 12 - Dashboard
+
+![Alt Image Text](./images/use-case-step-12.png "Demo 1 - KsqlDB")
+
+
+``` sql
+DROP STREAM event_type_by_1hour_tumbl_s;
+
+CREATE STREAM event_type_by_1hour_tumbl_s (eventType STRING KEY
+												, winstart BIGINT
+												, winend BIGINT
+												, nof BIGINT)
+WITH (kafka_topic='EVENT_TYPE_BY_1HOUR_TUMBL_T'
+					, partitions=8
+					, value_format='AVRO'
+					, window_type='Tumbling'
+					, window_size='60 minutes');
+
+SELECT winstart
+		, collect_list(eventType) 
+		, collect_list(nof) 
+FROM  event_type_by_1hour_tumbl_s 
+GROUP BY winstart
+EMIT CHANGES;
+
+SELECT winstart, as_map(collect_list(eventType), collect_list(nof) ) as counts
+FROM  event_type_by_1hour_tumbl_s 
+GROUP BY winstart
+EMIT CHANGES;
+
+DROP TABLE tipboard_pie_t DELETE TOPIC;
+
+CREATE TABLE tipboard_pie_t 
+WITH (value_format = 'JSON', kafka_topic = 'tipboard_pie_t', partitions=1)
+AS
+SELECT winstart
+		, 'pie_chart' AS tile
+		, 'pie' AS key
+		, tipboard_pie_chart('Last Hour', as_map(collect_list(eventType), collect_list(nof) )) as data
+FROM  event_type_by_1hour_tumbl_s 
+GROUP BY winstart
+EMIT CHANGES;
+
