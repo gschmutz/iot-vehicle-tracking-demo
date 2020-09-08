@@ -1,4 +1,4 @@
-# IoT Vehicle Tvehicle_trackingracking Streaming Pipeline
+# IoT Vehicle Tracking Streaming Pipeline
 
 This project shows how to setup and run the demo used in various talks, such as "Introduction into Stream Processing". 
 
