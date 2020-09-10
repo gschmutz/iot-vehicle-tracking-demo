@@ -1,4 +1,4 @@
-# IoT Vehicle Tracking Streaming Pipeline
+# IoT Vehicle Tracking Streaming Demo
 
 This project shows how to setup and run the demo used in various talks, such as "Introduction into Stream Processing". 
 
@@ -196,7 +196,11 @@ Alternatively you can also use the [MQTT.fx](https://mqttfx.jensd.de/) or the [M
 
 ### Setup Kafka Connect to bridge between MQTT and Kafka
 
-In order to get the messages from MQTT into Kafka, we will be using Kafka Connect. 
+In order to get the messages from MQTT into Kafka, we will be using the Kafka Connect framework. Kafka Connect is part of the Apache Kafka project and can run various connectors, either as Source or as a Sink Connector, as shown in the following diagram: 
+
+![Alt Image Text](./images/kafka-connect.png "Kafka Connect")
+
+Connectors are available from Confluent as well as other, 3rd party organisations. A good source for connectors is the [Confluent Hub](https://www.confluent.io/hub/), although it is not complete, some connectors can also be found on GitHub projects.
 
 There are multiple Kafka Connectors available for MQTT. We can either use the one provided by [Confluent Inc.](https://www.confluent.io/connector/kafka-connect-mqtt/) (in preview and available as evaluation license on Confluent Hub) or the one provided as part of the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) available on GitHub. Here we will use the one provided by Confluent. Just be aware that is part of Confluent Enterprise, but available for evaluation. 
 
@@ -251,10 +255,19 @@ Navigate to the [Kafka Connect UI](http://dataplatform:28001) to view the connec
 
 ## Step 2 - Using KSQL to Refine the data
 
+In this part we will refine the data and place it in a new topic. The idea here is to have one normalised topic in Avro format, where all the tracking data from both system A and B will be placed, so that further processing can take it from there. For the refinement we will be using ksqlDB.
+
 ![Alt Image Text](./images/use-case-step-2.png "Demo 1 - KsqlDB")
 
-### Connect to ksqlDB engine
+### What is ksqlDB? 
 
+ksqlDB is an event streaming database purpose-built to help developers create stream processing applications on top of Apache Kafka.
+
+![Alt Image Text](https://docs.ksqldb.io/en/latest/img/ksqldb-architecture.png "Demo 1 - KsqlDB")
+
+[_Source: Confluent_](https://docs.ksqldb.io/en/latest/)
+
+### Connect to ksqlDB engine
 Let's connect to the ksqlDB shell
 
 ``` bash
@@ -322,6 +335,12 @@ Let's see the live data by using a `SELECT` on the Stream with the `EMIT CHANGES
 SELECT * FROM vehicle_tracking_sysA_s EMIT CHANGES;
 ```
 
+This is a so-called *Push Query* (declared by the `EMIT CHANGES` clause). A push query is a form of query issued by a client that subscribes to a result as it changes in real-time.  
+
+![Alt Image Text](https://docs.ksqldb.io/en/latest/img/ksqldb-push-query.svg "Push Query")
+
+[_Source: Confluent_](https://docs.ksqldb.io/en/latest/concepts/queries/push/)
+
 You should see a continuous stream of events as a result of the SELECT statement, similar as shown below:
 
 ```
@@ -353,7 +372,7 @@ First drop the stream if it already exists:
 DROP STREAM IF EXISTS vehicle_tracking_refined_s;
 ```
 
-And now create the refined ksqlDB Stream:
+And now create the refined ksqlDB Stream with a `CREATE STREAM ... AS SELECT ...` statement. We include an additional column `source`, which holds the system the data is coming from.
 
 ``` sql
 CREATE STREAM IF NOT EXISTS vehicle_tracking_refined_s 
@@ -375,7 +394,7 @@ PARTITION BY truckId
 EMIT CHANGES;
 ```
 
-to check that the refined topic does in fact hold avro formatted data, let's just do a normal kafkacat on the `truck_position_refined` topic
+To check that the refined topic does in fact hold Avro formatted data, let's just do a normal kafkacat on the `truck_position_refined` topic
 
 ``` bash
 docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_refined
@@ -409,9 +428,9 @@ You can use the Schema Registry UI on <http://dataplatform:28102> to view the Av
 
 ## Step 3 - Integrate System B
 
-![Alt Image Text](./images/use-case-step-3.png "Demo 1 - KsqlDB")
+In this part we will show how we can integrate the data from the 2nd vehicle tracking system (System B), where the only integration point available is a set of log files. We can tail these log files and by that get the information as soon as it arrives. We convert the file source into a streaming data source by that. We will be using [StreamSets Data Collector](https://streamsets.com/products/dataops-platform/data-collector/) for the tail operation, as in real life this data collector would have to run on the Vehicle Tracking System itself or at least on a machine next to it. At the end it needs to be able to access the actual, active file while it is being written to by the application. StreamSets even has an Edge option which is a down-sized version of the full version and is capable of running on a Rasperry Pi.
 
-In this part we are going to integrate the data from the vehicle tracking system B. 
+![Alt Image Text](./images/use-case-step-3.png "Demo 1 - KsqlDB")
 
 Let's again start a simulator, but this time simulating the file where the tracking data is appended to:
 
@@ -419,23 +438,39 @@ Let's again start a simulator, but this time simulating the file where the track
 docker run -v "${PWD}/data-transfer/logs:/out" --rm trivadis/iot-truck-simulator "-s" "FILE" "-f" "CSV" "-d" "1000" "-vf" "50-100" "-es" "2"
 ```
 
-Create StreamSets to tail File into Kafka topic `vehicle_tracking_sysB`. 
+Create a StreamSets data flow to tail File into Kafka topic `vehicle_tracking_sysB`. 
+
+![Alt Image Text](./images/streamsets.png "Streamsets Data Flow")
+
+You can import that data flow from `./streamsets/File_to_Kafka.json` if you don't want to create it from scratch. 
+
+Now let's listen on the new topic
 
 ```bash
 docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysB -f "%k - %s\n" -q
 ```
 
+and then start the flow in StreamSets. You should see the data from the file arriving as a stream of vehicle tracking data. 
+
+```
+Field[STRING:97] - {"text":"SystemB,1599556302227,97,21,1325712174,Normal,37.7:-92.61,4331001611104251967"}
+Field[STRING:97] - {"text":"SystemB,1599556302994,97,21,1325712174,Normal,37.6:-92.74,4331001611104251967"}
+Field[STRING:97] - {"text":"SystemB,1599556303791,97,21,1325712174,Normal,37.51:-92.89,4331001611104251967"}
+```
+
+The first part (before the dash) shows the content of the Kafka key, generated in the `Expression Evaluator` component in StreamSets. The second part represents the Kafka value. Compared to the data from System A, this system delivers its data in CSV format. Additionally the system name is produced and there is only one value for latitude/longitude, it is sent as string and the two values are delimited by a colon character (`:`).
 
 ## Step 4 - Refinement of data from System B into same topic as above
 
+In this part we will do the refinement on the raw data from System B and place it into the same topic `vehicle_tracking_refined` as used in step 2.
+
 ![Alt Image Text](./images/use-case-step-4.png "Demo 1 - KsqlDB")
 
+Firs lets create the Stream on the raw data topic:
 
 ```sql
 DROP STREAM IF EXISTS vehicle_tracking_sysB_s;
-```
 
-```sql
 CREATE STREAM IF NOT EXISTS vehicle_tracking_sysB_s 
   (ROWKEY VARCHAR KEY,
    system VARCHAR,
@@ -450,10 +485,14 @@ CREATE STREAM IF NOT EXISTS vehicle_tracking_sysB_s
         value_format='DELIMITED');
 ```
 
+System B delivers the latitude and longitude in one field as a string, with the two values delimited by a colon character.
+
 ```sql
 DESCRIBE vehicle_tracking_sysB_s;
 DESCRIBE vehicle_tracking_refined_s;
 ```
+
+Now we can use the `INSERT` statement to write the data into the `vehicle_tracking_refined_s` stream we have created in step 2. We have to make sure that the structure matches (the refinement we perform), which in this case is providing the right value for the `soruce` column as well as splitting the `latLong` value into a `latitude` and `longitude` value:
 
 ``` sql
 INSERT INTO vehicle_tracking_refined_s 
@@ -473,19 +512,31 @@ EMIT CHANGES;
 
 ## Demo 5 - Pull Query on Vehicle Tracking Info ("Device Shadow")
 
+So with the vehicle position data from both source systems normalized into the `vehicle_tracking_refined` topic and available in ksqlDB throught the `vehicle_tracking_refined_s` stream object, is it possible to query for the latest position for a given vehicle. 
+
 ![Alt Image Text](./images/use-case-step-5.png "Demo 1 - KsqlDB")
 
-Pull query on Stream does not work
+In ksqlDB suche queries are called *pull queries*, in contrast to the streaming queries we have seen so far, known as *push queries* (using the `EMIT CHANGES` clause). A pull query is a form of query issued by a client that retrieves a result as of "now", like a query against a traditional RDBS. 
+
+![Alt Image Text](https://docs.ksqldb.io/en/latest/img/ksqldb-pull-query.svg "Demo 1 - KsqlDB")
+
+[_Source: Confluent_](https://docs.ksqldb.io/en/latest/concepts/queries/pull/)
+
+So let's do a `SELECT` on the stream, restricting on the `vehicleId` without an `EMIT CHANGES`
 
 ``` sql
 SELECT * FROM vehicle_tracking_refined_s WHERE vehicleId = 42;
 ```
 
-``` sql
-DROP TABLE IF EXISTS vehicle_tracking_refined_t;
-```
+We get the following error from ksqlDB: `Pull queries are not supported on streams.`. 
+
+Pull queries only work on Materialized Views, which are the `Table`s and not the `Stream`s. So can we create a table which delivers the information?
+
+Of course! Here is the necessary statement:
 
 ``` sql
+DROP TABLE IF EXISTS vehicle_tracking_refined_t DELETE TOPIC;
+
 CREATE TABLE IF NOT EXISTS vehicle_tracking_refined_t
 WITH (kafka_topic = 'vehicle_tracking_refined_t')
 AS
@@ -500,7 +551,41 @@ GROUP BY vehicleId
 EMIT CHANGES;
 ```
 
+This table uses the vehicleId as the primary key (due to the GROUP BY) and materializes all values as the latest one from the aggregation. 
+
 ``` sql
+DESCRIBE vehicle_tracking_refined_t;
+```
+
+A describe on the table shows that this primary key is of type `STRING`:
+
+```
+ksql> DESCRIBE vehicle_tracking_refined_t;
+
+Name                 : VEHICLE_TRACKING_REFINED_T
+ Field     | Type
+--------------------------------------------
+ VEHICLEID | VARCHAR(STRING)  (primary key)
+ DRIVERID  | BIGINT
+ SOURCE    | VARCHAR(STRING)
+ EVENTTYPE | VARCHAR(STRING)
+ LATITUDE  | DOUBLE
+ LONGITUDE | DOUBLE
+--------------------------------------------
+```
+
+So to test the pull query, we have to switch to a string, otherwise an error is shown:
+
+``` sql
+SELECT * FROM vehicle_tracking_refined_t WHERE vehicleId = '42';
+```
+
+But we could also change the `CREATE TABLE` statement to CAST the `vehicleId` into a `BIGINT`:
+
+
+``` sql
+DROP TABLE IF EXISTS vehicle_tracking_refined_t DELETE TOPIC;
+
 CREATE TABLE IF NOT EXISTS vehicle_tracking_refined_t
 WITH (kafka_topic = 'vehicle_tracking_refined_t')
 AS
@@ -515,7 +600,15 @@ GROUP BY CAST(vehicleId AS BIGINT)
 EMIT CHANGES;
 ```
 
+Now we can use it with an integer:
+
+``` sql
+SELECT * FROM vehicle_tracking_refined_t WHERE vehicleId = 42;
+```
+
 ## Step 6 - Investigate Driving behaviour
+
+In this part we will be using ksqlDB and as an alternative solution Kafka Streams to analyze the data in the refined topic `vehicle_tracking_refined`.
 
 ![Alt Image Text](./images/use-case-step-6.png "Demo 1 - KsqlDB")
 
@@ -559,9 +652,15 @@ docker exec -ti kafkacat kafkacat -b kafka-1 -t problematic_driving -s avro -r h
 
 ## Demo 7 - Materialize Driver Information ("static information")
 
+In this part of the demo, we are integrating the `driver` information from the Dispatching system into a Kafka topic, so it is available for enrichments of data streams. 
+
+, which we created and populated in the [Preparation](0-Preparation.md) section.
+
+
+
 ![Alt Image Text](./images/use-case-step-7.png "Demo 1 - KsqlDB")
 
-First let's register the Kafka topic `logisticsdb_driver`, which we created and populated in the [Preparation](0-Preparation.md) section.
+First let's register the Kafka topic `logisticsdb_driver`. 
 
 ```bash
 docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic logisticsdb_driver --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
@@ -626,6 +725,7 @@ docker exec -ti postgresql psql -d demodb -U demo -c "UPDATE logistics_db.driver
 ```
 
 ## Demo 8 - Join with Driver ("static information")
+
 
 ![Alt Image Text](./images/use-case-step-8.png "Demo 1 - KsqlDB")
 
@@ -852,8 +952,9 @@ EMIT CHANGES;
 
 
 
+```sql
 SELECT vehicleId, geo_fence(array_lag(collect_list(geo_fence(latitude, longitude, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))')),1), array_lag(collect_list(geo_fence(latitude, longitude, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))')),0)) status FROM vehicle_tracking_refined_s group by vehicleId EMIT CHANGES;
-
+```
 
 ## Demo 12 - Dashboard Integration (wip)
 

@@ -21,7 +21,7 @@ docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --top
 
 ![Alt Image Text](./images/kafka-connect-vs-streams.png "Demo 1 - KsqlDB")
 
-[Confluent Connector Hub](https://www.confluent.io/hub/)
+[Confluent Hub](https://www.confluent.io/hub/)
 
 ```bash
 curl -XGET http://dataplatform:8083/connector-plugins | jq
@@ -66,7 +66,6 @@ curl -X "POST" "$DOCKER_HOST_IP:8083/connectors" \
 ### What is ksqlDB?
 
 ![Alt Image Text](https://docs.ksqldb.io/en/latest/img/ksqldb-architecture.png "Demo 1 - KsqlDB")
-
 [_Source: Confluent_](https://docs.ksqldb.io/en/latest/)
 
 ``` bash
