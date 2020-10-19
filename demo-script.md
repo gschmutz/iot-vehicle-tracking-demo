@@ -77,7 +77,7 @@ show topics;
 ```
 
 ```sql
-print 'vehicle_tracking';
+print 'vehicle_tracking_sysA';
 ```
 
 ```sql
@@ -165,7 +165,7 @@ docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_refined -s avro
 ![Alt Image Text](./images/use-case-step-3.png "Demo 1 - KsqlDB")
 
 ```bash
-cd platys-iot-trucking
+cd $DATAPLATFORM_HOME
 sudo rm data-transfer/logs/TruckData.dat
 ```
 
@@ -174,7 +174,7 @@ docker run -v "${PWD}/data-transfer/logs:/out" --rm trivadis/iot-truck-simulator
 ```
 
 ```bash
-tail -f data-transfer/logs/TruckData.dat
+tail -f $DATAPLATFORM_HOME/data-transfer/logs/TruckData.dat
 ```
 
 ``` bash
