@@ -6,9 +6,9 @@ version: '3.0'
 # enforce some dependencies
 # enforce some dependencies
 services:
-  #  ================================== Zookeeper ========================================== #}
+  #  ================================== Zookeeper ========================================== #
   zookeeper-1:
-    image: confluentinc/cp-zookeeper:5.5.0
+    image: confluentinc/cp-zookeeper:6.0.0
     container_name: zookeeper-1
     hostname: zookeeper-1
     ports:
@@ -22,10 +22,9 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  # make sure that internal replication factor is not larger than the number of Kafka nodes
-#  ================================== Kafka ========================================== #}
+#  ================================== Kafka ========================================== #
   kafka-1:
-    image: confluentinc/cp-kafka:5.5.0
+    image: confluentinc/cp-kafka:6.0.0
     container_name: kafka-1
     hostname: kafka-1
     depends_on:
@@ -36,19 +35,20 @@ services:
       - 9992:9992
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_BROKER_RACK: r1
+      KAFKA_BROKER_RACK: dc1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
       KAFKA_LISTENERS: LISTENER_INTERNAL://kafka-1:19092,LISTENER_DOCKERHOST://kafka-1:29092,LISTENER_EXTERNAL://kafka-1:9092
       KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-1:19092,LISTENER_DOCKERHOST://localhost:29092,LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
       KAFKA_MESSAGE_TIMESTAMP_TYPE: CreateTime
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      KAFKA_MIN_INSYNC_REPLICAS: 1
       KAFKA_DELETE_TOPIC_ENABLE: 'True'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'False'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       KAFKA_JMX_PORT: 9992
       KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=9992
       KAFKA_JMX_HOSTNAME: ${PUBLIC_IP:-127.0.0.1}
@@ -56,7 +56,7 @@ services:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
   kafka-2:
-    image: confluentinc/cp-kafka:5.5.0
+    image: confluentinc/cp-kafka:6.0.0
     container_name: kafka-2
     hostname: kafka-2
     depends_on:
@@ -67,19 +67,20 @@ services:
       - 9993:9993
     environment:
       KAFKA_BROKER_ID: 2
-      KAFKA_BROKER_RACK: r2
+      KAFKA_BROKER_RACK: dc1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
       KAFKA_LISTENERS: LISTENER_INTERNAL://kafka-2:19093,LISTENER_DOCKERHOST://kafka-2:29093,LISTENER_EXTERNAL://kafka-2:9093
       KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-2:19093,LISTENER_DOCKERHOST://localhost:29093,LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
       KAFKA_MESSAGE_TIMESTAMP_TYPE: CreateTime
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      KAFKA_MIN_INSYNC_REPLICAS: 1
       KAFKA_DELETE_TOPIC_ENABLE: 'True'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'False'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       KAFKA_JMX_PORT: 9993
       KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=9993
       KAFKA_JMX_HOSTNAME: ${PUBLIC_IP:-127.0.0.1}
@@ -87,7 +88,7 @@ services:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
   kafka-3:
-    image: confluentinc/cp-kafka:5.5.0
+    image: confluentinc/cp-kafka:6.0.0
     container_name: kafka-3
     hostname: kafka-3
     depends_on:
@@ -98,40 +99,38 @@ services:
       - 9994:9994
     environment:
       KAFKA_BROKER_ID: 3
-      KAFKA_BROKER_RACK: r3
+      KAFKA_BROKER_RACK: dc1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
       KAFKA_LISTENERS: LISTENER_INTERNAL://kafka-3:19094,LISTENER_DOCKERHOST://kafka-3:29094,LISTENER_EXTERNAL://kafka-3:9094
       KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-3:19094,LISTENER_DOCKERHOST://localhost:29094,LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
       KAFKA_MESSAGE_TIMESTAMP_TYPE: CreateTime
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      KAFKA_MIN_INSYNC_REPLICAS: 1
       KAFKA_DELETE_TOPIC_ENABLE: 'True'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'False'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       KAFKA_JMX_PORT: 9994
       KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=9994
       KAFKA_JMX_HOSTNAME: ${PUBLIC_IP:-127.0.0.1}
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== Schema Registry ========================================== #}
+  #  ================================== Schema Registry ========================================== #
   schema-registry-1:
-    image: confluentinc/cp-schema-registry:5.5.0
+    image: confluentinc/cp-schema-registry:6.0.0
     hostname: schema-registry-1
     container_name: schema-registry-1
     labels:
       com.mdps.service.restapi.url: http://${PUBLIC_IP}:8081
-    depends_on:
-      - zookeeper-1
-      - kafka-1
     ports:
       - 8081:8081
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-1:19092
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
       SCHEMA_REGISTRY_MASTER_ELIGIBILITY: 'true'
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
       SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
@@ -139,20 +138,18 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== Kafka Connect ========================================== #}
+  #  ================================== Kafka Connect ========================================== #
   kafka-connect-1:
-    image: confluentinc/cp-kafka-connect:5.5.0
+    image: confluentinc/cp-kafka-connect:6.0.0
     container_name: kafka-connect-1
     labels:
       com.mdps.service.restapi.url: http://${PUBLIC_IP}:8083
     depends_on:
-      - zookeeper-1
-      - kafka-1
       - schema-registry-1
     ports:
       - 8083:8083
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092
+      CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect-1
       CONNECT_REST_PORT: 8083
       CONNECT_GROUP_ID: kafka-connect
@@ -173,6 +170,9 @@ services:
       CONNECT_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: '[%d] %p %X{connector.context}%m (%c:%L)%n'
       CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/addl-plugins
+      #CONNECT_SECURITY_PROTOCOL: SSL
+      #CONNECT_SASL_MECHANISM: PLAIN
+      #CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$CLUSTER_API_KEY" password="$CLUSTER_API_SECRET";
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
@@ -196,18 +196,16 @@ services:
         #
         sleep infinity
   kafka-connect-2:
-    image: confluentinc/cp-kafka-connect:5.5.0
+    image: confluentinc/cp-kafka-connect:6.0.0
     container_name: kafka-connect-2
     labels:
       com.mdps.service.restapi.url: http://${PUBLIC_IP}:8084
     depends_on:
-      - zookeeper-1
-      - kafka-1
       - schema-registry-1
     ports:
       - 8084:8084
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092
+      CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect-2
       CONNECT_REST_PORT: 8084
       CONNECT_GROUP_ID: kafka-connect
@@ -228,6 +226,9 @@ services:
       CONNECT_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: '[%d] %p %X{connector.context}%m (%c:%L)%n'
       CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/addl-plugins
+      #CONNECT_SECURITY_PROTOCOL: SSL
+      #CONNECT_SASL_MECHANISM: PLAIN
+      #CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$CLUSTER_API_KEY" password="$CLUSTER_API_SECRET";
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
@@ -235,9 +236,9 @@ services:
       - ./data-transfer:/data-transfer
       - ./plugins/kafka-connect:/etc/kafka-connect/addl-plugins
     restart: unless-stopped
-  #  ================================== ksqlDB ========================================== #}
+  #  ================================== ksqlDB ========================================== #
   ksqldb-server-1:
-    image: confluentinc/ksqldb-server:0.11.0
+    image: confluentinc/ksqldb-server:0.12.0
     hostname: ksqldb-server-1
     container_name: ksqldb-server-1
     labels:
@@ -246,7 +247,6 @@ services:
       - 8088:8088
       - 1095:1095
     depends_on:
-      - kafka-1
       - schema-registry-1
     environment:
       KSQL_CONFIG_DIR: /etc/ksql
@@ -256,12 +256,18 @@ services:
       KSQL_APPLICATION_ID: kafka-demo
       KSQL_KSQL_SERVICE_ID: kafka-demo
       KSQL_LISTENERS: http://0.0.0.0:8088
-      KSQL_BOOTSTRAP_SERVERS: kafka-1:19092
+      KSQL_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
+      #KSQL_SECURITY_PROTOCOL: SASL_SSL
+      #KSQL_SASL_MECHANISM: PLAIN
+      #KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="None" password="None";
       KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083
       KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
-      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092
+      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092,kafka-2:19093,kafka-3:19094
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: demo_processing_log
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: demo_processing_log
+      KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
+      KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: 1
+      KSQL_KSQL_STREAMS_REPLICATION_FACTOR: 1
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: 'true'
@@ -272,7 +278,7 @@ services:
       - ./plugins/ksql:/etc/ksqldb/ext
     restart: unless-stopped
   ksqldb-server-2:
-    image: confluentinc/ksqldb-server:0.11.0
+    image: confluentinc/ksqldb-server:0.12.0
     hostname: ksqldb-server-2
     container_name: ksqldb-server-2
     labels:
@@ -281,7 +287,6 @@ services:
       - 8089:8088
       - 1096:1095
     depends_on:
-      - kafka-1
       - schema-registry-1
     environment:
       KSQL_CONFIG_DIR: /etc/ksql
@@ -291,12 +296,18 @@ services:
       KSQL_APPLICATION_ID: kafka-demo
       KSQL_KSQL_SERVICE_ID: kafka-demo
       KSQL_LISTENERS: http://0.0.0.0:8088
-      KSQL_BOOTSTRAP_SERVERS: kafka-1:19092
+      KSQL_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
+      #KSQL_SECURITY_PROTOCOL: SASL_SSL
+      #KSQL_SASL_MECHANISM: PLAIN
+      #KSQL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="None" password="None";
       KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083
       KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
-      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092
+      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092,kafka-2:19093,kafka-3:19094
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: demo_processing_log
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: demo_processing_log
+      KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
+      KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: 1
+      KSQL_KSQL_STREAMS_REPLICATION_FACTOR: 1
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: 'true'
@@ -307,7 +318,7 @@ services:
       - ./plugins/ksql:/etc/ksqldb/ext
     restart: unless-stopped
   ksqldb-cli:
-    image: confluentinc/ksqldb-cli:0.11.0
+    image: confluentinc/ksqldb-cli:0.12.0
     container_name: ksqldb-cli
     hostname: ksqldb-cli
     depends_on:
@@ -316,7 +327,7 @@ services:
       - ./data-transfer:/data-transfer
     entrypoint: /bin/sh
     tty: true
-  #  ================================== Kafkacat  ========================================== #}
+  #  ================================== Kafkacat  ========================================== #
   kafkacat:
     image: edenhill/kafkacat:1.6.0
     container_name: kafkacat
@@ -330,7 +341,7 @@ services:
         apk add jq;
         while [ 1 -eq 1 ];do sleep 60;done
     restart: unless-stopped
-  #  ================================== Schema Registry UI ========================================== #}
+  #  ================================== Schema Registry UI ========================================== #
   schema-registry-ui:
     image: landoop/schema-registry-ui:latest
     container_name: schema-registry-ui
@@ -347,7 +358,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== Kafka Connect UI ========================================== #}
+  #  ================================== Kafka Connect UI ========================================== #
   kafka-connect-ui:
     image: landoop/kafka-connect-ui:latest
     container_name: kafka-connect-ui
@@ -364,7 +375,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== Cluster Manager for Apache Kafka (CMAK) ========================================== #}
+  #  ================================== Cluster Manager for Apache Kafka (CMAK) ========================================== #
   cmak:
     image: trivadis/cmak:latest
     container_name: cmak
@@ -385,7 +396,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== Apache Kafka HQ (AKHQ) ========================================== #}
+  #  ================================== Apache Kafka HQ (AKHQ) ========================================== #
   akhq:
     image: tchiotludo/akhq:latest
     container_name: akhq
@@ -400,7 +411,7 @@ services:
           connections:
             docker-kafka-server:
               properties:
-                bootstrap.servers: "kafka-1:19092"
+                bootstrap.servers: 'kafka-1:19092,kafka-2:19093,kafka-3:19094'
               schema-registry:
                 url: "http://schema-registry-1:8081"
               connect:
@@ -410,9 +421,9 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== StreamSets DataCollector ========================================== #}
+  #  ================================== StreamSets DataCollector ========================================== #
   streamsets-1:
-    image: trivadis/streamsets-kafka-hadoop-aws:3.17.0
+    image: trivadis/streamsets-kafka-hadoop-aws:3.18.1
     container_name: streamsets-1
     hostname: streamsets-1
     labels:
@@ -430,15 +441,15 @@ services:
       SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
     volumes:
       - ./data-transfer:/data-transfer
-#      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-3.17.0/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
-#      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-3.17.0/libs-common-lib:Z
+#      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-3.18.1/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
+#      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-3.18.1/libs-common-lib:Z
 #      - ./streamsets-extras/user-libs:/opt/streamsets-datacollector-user-libs:Z
     ulimits:
       nofile:
         soft: 32768
         hard: 32768
     restart: unless-stopped
-  #  ================================== Smashing ========================================== #}
+  #  ================================== Smashing ========================================== #
   smashing:
     image: trivadis/smashing:1.3.0
     hostname: smashing
@@ -451,7 +462,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== Tiboard Dashboard ========================================== #}
+  #  ================================== Tiboard Dashboard ========================================== #
   tipboard:
     image: trivadis/tipboard:latest
     hostname: tipboard
@@ -474,7 +485,7 @@ services:
       - ./scripts/tipboard:/dashboards
       - ./plugins/tipboard:/root/.tipboard/custom_tiles
     restart: unless-stopped
-  #  ================================== Tiboard Dashboard ========================================== #}
+  #  ================================== Tiboard Dashboard ========================================== #
   chartboard:
     image: trivadis/chartboard:latest
     hostname: chartboard
@@ -484,7 +495,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== Redis ========================================== #}
+  #  ================================== Redis ========================================== #
   redis-1:
     image: redis:6.0.6
     hostname: redis-1
@@ -508,7 +519,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== MySQL ========================================== #}
+  #  ================================== MySQL ========================================== #
   mysql:
     image: mysql:8
     container_name: mysql
@@ -523,7 +534,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== PostgreSQL ========================================== #}
+  #  ================================== PostgreSQL ========================================== #
   postgresql:
     image: postgres:13
     container_name: postgresql
@@ -539,7 +550,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./init/postgresql:/docker-entrypoint-initdb.d/
     restart: unless-stopped
-  #  ================================== Cloudbeaver ========================================== #}
+  #  ================================== Cloudbeaver ========================================== #
   cloudbeaver:
     image: trivadis/cloudbeaver:latest
     container_name: cloudbeaver
@@ -550,7 +561,7 @@ services:
     ports:
       - 8978:8978
     restart: unless-stopped
-  #  ================================== Mosquitto ========================================== #}
+  #  ================================== Mosquitto ========================================== #
   mosquitto-1:
     image: eclipse-mosquitto:1.6
     hostname: mosquitto-1
@@ -562,7 +573,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./conf/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
     restart: unless-stopped
-  #  ================================== MQTT UI ========================================== #}
+  #  ================================== MQTT UI ========================================== #
   mqtt-ui:
     image: vergissberlin/hivemq-mqtt-web-client:latest
     container_name: mqtt-ui
