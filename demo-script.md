@@ -2,6 +2,8 @@
 
 ![Alt Image Text](./images/use-case-overview.png "Demo 1 - KsqlDB")
 
+export DATAPLATFORM_HOME=/home/docker/iot-vehicle-tracking-demo/docker
+
 ## Demo 1 - Consume Vehicle Tracking messages from MQTT and send to Kafka
 
 ![Alt Image Text](./images/use-case-step-1.png "Demo 1 - KsqlDB")
@@ -198,6 +200,10 @@ docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysB -f "%k - %
 
 ![Alt Image Text](./images/use-case-step-4.png "Demo 1 - KsqlDB")
 
+``` bash
+docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
+```
+
 ```sql
 DROP STREAM IF EXISTS vehicle_tracking_sysB_s;
 ```
@@ -246,7 +252,11 @@ GROUP BY source
 EMIT CHANGES;
 ```
 
-## Demo 5 - Pull Query on Vehicle Tracking Info ("Device Shadow")
+``` bash
+docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_refined -s avro -r http://schema-registry-1:8081
+```
+
+## Demo 5 - Pull Query on Vehicle Tracking Info ("Device Shadow/Device Twin")
 
 ![Alt Image Text](./images/use-case-step-5.png "Demo 1 - KsqlDB")
 
@@ -269,14 +279,14 @@ DROP TABLE IF EXISTS vehicle_tracking_refined_t DELETE TOPIC;
 CREATE TABLE IF NOT EXISTS vehicle_tracking_refined_t
 WITH (kafka_topic = 'vehicle_tracking_refined_t')
 AS
-SELECT vehicleId
+SELECT CAST(vehicleId AS BIGINT)			vehicleId
        , latest_by_offset(driverId)	   driverId
 		, latest_by_offset(source)			source
 		, latest_by_offset(eventType)		eventType
 		, latest_by_offset(latitude)		latitude
 		, latest_by_offset(longitude)		longitude
 FROM vehicle_tracking_refined_s
-GROUP BY vehicleId
+GROUP BY CAST(vehicleId AS BIGINT)
 EMIT CHANGES;
 ```
 
@@ -301,13 +311,13 @@ DROP STREAM IF EXISTS problematic_driving_s;
 ```
 
 ``` sql
-CREATE STREAM IF NOT EXISTS problematic_driving_s \
-  WITH (kafka_topic='problematic_driving', \
-        value_format='AVRO', \
-        partitions=8) \
+CREATE STREAM IF NOT EXISTS problematic_driving_s
+  WITH (kafka_topic='problematic_driving',
+        value_format='AVRO',
+        partitions=8)
 AS 
 SELECT * 
-FROM vehicle_tracking_refined_s \
+FROM vehicle_tracking_refined_s
 WHERE eventtype != 'Normal';
 ```
 
@@ -327,7 +337,7 @@ docker exec -ti kafkacat kafkacat -b kafka-1 -t problematic_driving -s avro -r h
 docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic problematic_driving_kstreams --partitions 8 --replication-factor 3
 ```
 
-## Demo 7 - Materialize Driver Information ("static information")
+## Demo 7 - Materialise Driver Information ("static information")
 
 ![Alt Image Text](./images/use-case-step-7.png "Demo 1 - KsqlDB")
 
@@ -377,6 +387,10 @@ CREATE TABLE IF NOT EXISTS driver_t (id BIGINT PRIMARY KEY,
    birthdate VARCHAR)  
   WITH (kafka_topic='logisticsdb_driver', 
         value_format='JSON');
+```
+
+```bash
+docker exec -ti kafkacat kafkacat -b kafka-1 -t logisticsdb_driver -o beginning
 ```
 
 ## Demo 8 - Join with Driver ("static information")
@@ -462,10 +476,12 @@ GROUP BY eventType;
 ```sql
 SELECT TIMESTAMPTOSTRING(WINDOWSTART,'yyyy-MM-dd HH:mm:SS','CET') wsf
 , TIMESTAMPTOSTRING(WINDOWEND,'yyyy-MM-dd HH:mm:SS','CET') wef
-, TIMESTAMPTOSTRING(winstart,'yyyy-MM-dd HH:mm:SS','CET') wsf1
+, ws
+, we
 , eventType
 , nof
 FROM event_type_by_1hour_tumbl_t
+WHERE ws > UNIX_TIMESTAMP()-300001 and ws < UNIX_TIMESTAMP()- 240001
 EMIT CHANGES;
 ```
 
@@ -567,7 +583,9 @@ docker exec -it mysql bash -c 'mysql -u root -pmanager'
 ```
 
 ```sql
-INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (8, 48, 'POLYGON ((-91.29638671875 39.04478604850143, -91.4501953125 38.46219172306828, -90.98876953125 37.94419750075404, -89.912109375 37.78808138412046, -88.9892578125 38.37611542403604, -88.92333984375 38.77121637244273, -89.71435546875 39.470125122358176, -90.19775390625 39.825413103424786, -91.29638671875 39.04478604850143))'); 
+USE sample;
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (9, 49, 'POLYGON ((-91.29638671875 39.04478604850143, -91.4501953125 38.46219172306828, -90.98876953125 37.94419750075404, -89.912109375 37.78808138412046, -88.9892578125 38.37611542403604, -88.92333984375 38.77121637244273, -89.71435546875 39.470125122358176, -90.19775390625 39.825413103424786, -91.29638671875 39.04478604850143))'); 
 ```
 
 Destination is St. Louis: <http://geojson.io/>
@@ -622,17 +640,6 @@ EMIT CHANGES;
 ```
 
 
-```sql
-CREATE STREAM event_type_by_1hour_tumbl_s (eventType STRING KEY
-												, winstart BIGINT
-												, winend BIGINT
-												, nof BIGINT)
-WITH (kafka_topic='EVENT_TYPE_BY_1HOUR_TUMBL_T'
-					, partitions=8
-					, value_format='AVRO'
-					, window_type='Tumbling'
-					, window_size='60 minutes');
-```
 
 ## Demo 12 - Dashboard
 

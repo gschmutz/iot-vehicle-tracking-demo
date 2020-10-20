@@ -608,7 +608,7 @@ SELECT * FROM vehicle_tracking_refined_t WHERE vehicleId = 42;
 
 ## Step 6 - Investigate Driving behaviour
 
-In this part we will be using ksqlDB and as an alternative solution Kafka Streams to analyze the data in the refined topic `vehicle_tracking_refined`.
+In this part we will be using ksqlDB and as an alternative solution Kafka Streams to analyse the data in the refined topic `vehicle_tracking_refined`.
 
 ![Alt Image Text](./images/use-case-step-6.png "Demo 1 - KsqlDB")
 
@@ -627,13 +627,13 @@ Now let's create a new stream with that information.
 ``` sql
 DROP STREAM IF EXISTS problematic_driving_s;
 
-CREATE STREAM IF NOT EXISTS problematic_driving_s \
-  WITH (kafka_topic='problematic_driving', \
-        value_format='AVRO', \
-        partitions=8) \
+CREATE STREAM IF NOT EXISTS problematic_driving_s
+  WITH (kafka_topic='problematic_driving',
+        value_format='AVRO',
+        partitions=8)
 AS 
 SELECT * 
-FROM vehicle_tracking_refined_s \
+FROM vehicle_tracking_refined_s
 WHERE eventtype != 'Normal';
 ```
 
@@ -700,6 +700,12 @@ CREATE SOURCE CONNECTOR jdbc_logistics_sc WITH (
     "transforms.extractInt.type" = 'org.apache.kafka.connect.transforms.ExtractField$Key',
     "transforms.extractInt.field" = 'id'
     );
+```
+
+we can see that all the drivers from the `driver` table have been produced into the `logisticsdb_driver` topic:
+
+```bash
+docker exec -ti kafkacat kafkacat -b kafka-1 -t logisticsdb_driver -o beginning
 ```
 
 ``` sql
@@ -819,7 +825,7 @@ EMIT CHANGES;
 Create the MySQL table with shipment information:
 
 ``` bash
-docker exec -it mysql bash -c 'mysql -u root -pmanager'
+≈
 ```
 
 ```sql
