@@ -10,7 +10,7 @@ export DATAPLATFORM_HOME=/home/docker/iot-vehicle-tracking-demo/docker
 
 
 ``` bash
-docker run trivadis/iot-truck-simulator '-s' 'MQTT' '-h' $DOCKER_HOST_IP '-p' '1883' '-f' 'JSON' '-vf' '1-49'
+docker run --rm trivadis/iot-truck-simulator '-s' 'MQTT' '-h' $DOCKER_HOST_IP '-p' '1883' '-f' 'JSON' '-vf' '1-49'
 ```
 
 ``` bash
@@ -114,15 +114,14 @@ CREATE STREAM IF NOT EXISTS vehicle_tracking_sysA_s
 ![Alt Image Text](https://docs.ksqldb.io/en/latest/img/ksqldb-push-query.svg "Demo 1 - KsqlDB")
 
 
-``` sql
-SELECT * FROM vehicle_tracking_sysA_s EMIT CHANGES;
-```
-
 ```sql
 DESCRIBE vehicle_tracking_sysA_s;
 DESCRIBE EXTENDED vehicle_tracking_sysA_s;
 ```
 
+``` sql
+SELECT * FROM vehicle_tracking_sysA_s EMIT CHANGES;
+```
 
 [CREATE STREAM AS SELECT](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-stream-as-select/)
 
@@ -172,7 +171,7 @@ sudo rm data-transfer/logs/TruckData.dat
 ```
 
 ```bash
-docker run -v "${PWD}/data-transfer/logs:/out" --rm trivadis/iot-truck-simulator "-s" "FILE" "-f" "CSV" "-d" "1000" "-vf" "50-100" "-es" "2"
+docker run --rm -v "${PWD}/data-transfer/logs:/out" --rm trivadis/iot-truck-simulator "-s" "FILE" "-f" "CSV" "-d" "1000" "-vf" "50-100" "-es" "2"
 ```
 
 ```bash
@@ -318,7 +317,8 @@ CREATE STREAM IF NOT EXISTS problematic_driving_s
 AS 
 SELECT * 
 FROM vehicle_tracking_refined_s
-WHERE eventtype != 'Normal';
+WHERE eventtype != 'Normal'
+PARTITION BY driverid;
 ```
 
 ``` sql
@@ -380,7 +380,7 @@ DROP TABLE IF EXISTS driver_t;
 ```
 
 ``` sql
-CREATE TABLE IF NOT EXISTS driver_t (id BIGINT PRIMARY KEY,
+CREATE TABLsE IF NOT EXISTS driver_t (id BIGINT PRIMARY KEY,
    first_name VARCHAR,  
    last_name VARCHAR,  
    available VARCHAR, 
@@ -391,6 +391,10 @@ CREATE TABLE IF NOT EXISTS driver_t (id BIGINT PRIMARY KEY,
 
 ```bash
 docker exec -ti kafkacat kafkacat -b kafka-1 -t logisticsdb_driver -o beginning
+```
+
+```sql
+SELECT * FROM driver_t EMIT CHANGES;
 ```
 
 ## Demo 8 - Join with Driver ("static information")
