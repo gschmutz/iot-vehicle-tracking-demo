@@ -1037,7 +1037,7 @@ CREATE STREAM event_type_by_1hour_tumbl_s (eventType STRING KEY
 												, winstart BIGINT
 												, winend BIGINT
 												, nof BIGINT)
-WITH (kafka_topic='EVENT_TYPE_BY_1HOUR_TUMBL_T'
+WITH (kafka_topic='event_type_by_1hour_tumbl_t'
 					, partitions=8
 					, value_format='AVRO'
 					, window_type='Tumbling'

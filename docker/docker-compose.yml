@@ -1,7 +1,10 @@
 # =====================================================
 # Platform: default
 # =====================================================
-version: '3.0'
+version: '3.5'
+networks:
+  default:
+    name: default
 # enforce some dependencies
 # enforce some dependencies
 # enforce some dependencies
@@ -238,7 +241,7 @@ services:
     restart: unless-stopped
   #  ================================== ksqlDB ========================================== #
   ksqldb-server-1:
-    image: confluentinc/ksqldb-server:0.12.0
+    image: confluentinc/ksqldb-server:0.13.0
     hostname: ksqldb-server-1
     container_name: ksqldb-server-1
     labels:
@@ -278,7 +281,7 @@ services:
       - ./plugins/ksql:/etc/ksqldb/ext
     restart: unless-stopped
   ksqldb-server-2:
-    image: confluentinc/ksqldb-server:0.12.0
+    image: confluentinc/ksqldb-server:0.13.0
     hostname: ksqldb-server-2
     container_name: ksqldb-server-2
     labels:
@@ -318,7 +321,7 @@ services:
       - ./plugins/ksql:/etc/ksqldb/ext
     restart: unless-stopped
   ksqldb-cli:
-    image: confluentinc/ksqldb-cli:0.12.0
+    image: confluentinc/ksqldb-cli:0.13.0
     container_name: ksqldb-cli
     hostname: ksqldb-cli
     depends_on:
@@ -423,7 +426,7 @@ services:
     restart: unless-stopped
   #  ================================== StreamSets DataCollector ========================================== #
   streamsets-1:
-    image: trivadis/streamsets-kafka-hadoop-aws:3.18.1
+    image: trivadis/streamsets-kafka-hadoop-aws:3.19.0
     container_name: streamsets-1
     hostname: streamsets-1
     labels:
@@ -441,8 +444,8 @@ services:
       SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
     volumes:
       - ./data-transfer:/data-transfer
-#      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-3.18.1/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
-#      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-3.18.1/libs-common-lib:Z
+#      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-3.19.0/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
+#      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-3.19.0/libs-common-lib:Z
 #      - ./streamsets-extras/user-libs:/opt/streamsets-datacollector-user-libs:Z
     ulimits:
       nofile:
@@ -497,25 +500,17 @@ services:
     restart: unless-stopped
   #  ================================== Redis ========================================== #
   redis-1:
-    image: redis:6.0.6
+    image: bitnami/redis:6.0.9
     hostname: redis-1
     container_name: redis-1
     ports:
       - 6379:6379
-    volumes:
-      - ./data-transfer:/data-transfer
-    restart: unless-stopped
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: redis-commander
-    hostname: redis-commander
-    labels:
-      com.mdps.service.webui.name: Redis Commander UI
-      com.mdps.service.webui.url: http://${PUBLIC_IP}:28119
-    ports:
-      - 28119:8081
     environment:
-      - REDIS_HOSTS=local:redis-1:6379
+      - REDIS_REPLICATION_MODE=master
+      - ALLOW_EMPTY_PASSWORD=yes
+      - DISABLE_COMMANDS=None
+      - REDIS_PASSWORD=abc123!
+      - REDIS_AOF_ENABLED=no
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped

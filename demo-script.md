@@ -2,7 +2,9 @@
 
 ![Alt Image Text](./images/use-case-overview.png "Demo 1 - KsqlDB")
 
+```
 export DATAPLATFORM_HOME=/home/docker/iot-vehicle-tracking-demo/docker
+```
 
 ## Demo 1 - Consume Vehicle Tracking messages from MQTT and send to Kafka
 
@@ -15,10 +17,6 @@ docker run --rm trivadis/iot-truck-simulator '-s' 'MQTT' '-h' $DOCKER_HOST_IP '-
 
 ``` bash
 docker run -it --rm efrecon/mqtt-client sub -h $DOCKER_HOST_IP -t "truck/+/position" -v
-```
-
-```bash
-docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic vehicle_tracking_sysA --partitions 8 --replication-factor 3
 ```
 
 ![Alt Image Text](./images/kafka-connect-vs-streams.png "Demo 1 - KsqlDB")
@@ -36,6 +34,8 @@ docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --top
 
 ```bash
 docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysA
+
+
 ```
 
 ```bash
@@ -116,7 +116,6 @@ CREATE STREAM IF NOT EXISTS vehicle_tracking_sysA_s
 
 ```sql
 DESCRIBE vehicle_tracking_sysA_s;
-DESCRIBE EXTENDED vehicle_tracking_sysA_s;
 ```
 
 ``` sql
@@ -171,7 +170,7 @@ sudo rm data-transfer/logs/TruckData.dat
 ```
 
 ```bash
-docker run --rm -v "${PWD}/data-transfer/logs:/out" --rm trivadis/iot-truck-simulator "-s" "FILE" "-f" "CSV" "-d" "1000" "-vf" "50-100" "-es" "2"
+docker run --rm -v "${DATAPLATFORM_HOME}/data-transfer/logs:/out" --rm trivadis/iot-truck-simulator "-s" "FILE" "-f" "CSV" "-d" "1000" "-vf" "50-100" "-es" "2"
 ```
 
 ```bash
@@ -185,10 +184,9 @@ docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --top
 <http://http://dataplatform:18630/>
 
 * File to Tail / Path: ```/data-transfer/logs/TruckData.dat```
+* Data Parser: ```/text```, ```/parsed``` with DataFormat ```Delimited```
 * Kafka Topic: ```vehicle_tracking_sysB```
-* Expression for Key: ```${record:value('/parsed/2')}```
-
-* Key with Expression
+* Expression Evaluator: ```kafkaMessageKey``` ```${record:value('/parsed/2')}```
 
 
 ```bash
@@ -347,6 +345,11 @@ docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --top
 
 [Kafka Connect JDBC Connector](https://docs.confluent.io/current/connect/kafka-connect-jdbc/index.html#connect-jdbc)
 
+
+``` bash
+docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
+```
+
 ``` sql
 DROP CONNECTOR jdbc_logistics_sc;
 ```
@@ -380,7 +383,7 @@ DROP TABLE IF EXISTS driver_t;
 ```
 
 ``` sql
-CREATE TABLsE IF NOT EXISTS driver_t (id BIGINT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS driver_t (id BIGINT PRIMARY KEY,
    first_name VARCHAR,  
    last_name VARCHAR,  
    available VARCHAR, 
@@ -401,6 +404,10 @@ SELECT * FROM driver_t EMIT CHANGES;
 
 ![Alt Image Text](./images/use-case-step-8.png "Demo 1 - KsqlDB")
 
+
+``` bash
+docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
+```
 
 ``` sql
 SELECT pd.driverId, d.first_name, d.last_name, d.available, pd.vehicleId, pd.routeId, pd.eventType 
@@ -480,12 +487,11 @@ GROUP BY eventType;
 ```sql
 SELECT TIMESTAMPTOSTRING(WINDOWSTART,'yyyy-MM-dd HH:mm:SS','CET') wsf
 , TIMESTAMPTOSTRING(WINDOWEND,'yyyy-MM-dd HH:mm:SS','CET') wef
-, ws
-, we
+, WINDOWSTART
+, WINDOWEND
 , eventType
 , nof
 FROM event_type_by_1hour_tumbl_t
-WHERE ws > UNIX_TIMESTAMP()-300001 and ws < UNIX_TIMESTAMP()- 240001
 EMIT CHANGES;
 ```
 
@@ -538,6 +544,9 @@ INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (8, 48, 'POLYGON ((-91
 docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic sample.sample.shipment --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
 ```
 
+``` bash
+docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
+```
 
 ```sql
 DROP CONNECTOR debz_shipment_sc;
@@ -657,7 +666,7 @@ CREATE STREAM event_type_by_1hour_tumbl_s (eventType STRING KEY
 												, winstart BIGINT
 												, winend BIGINT
 												, nof BIGINT)
-WITH (kafka_topic='EVENT_TYPE_BY_1HOUR_TUMBL_T'
+WITH (kafka_topic='event_type_by_1hour_tumbl_t'
 					, partitions=8
 					, value_format='AVRO'
 					, window_type='Tumbling'
