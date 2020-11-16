@@ -1,10 +1,10 @@
 # =====================================================
-# Platform: default
+# Platform: iot-vehicle-tracking-demo
 # =====================================================
 version: '3.5'
 networks:
   default:
-    name: default
+    name: iot-vehicle-tracking-demo
 # enforce some dependencies
 # enforce some dependencies
 # enforce some dependencies
