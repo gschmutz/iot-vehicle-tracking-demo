@@ -581,3 +581,18 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
+  #  ================================== cAdvisor ========================================== #
+  wetty:
+    image: svenihoney/wetty:latest
+    container_name: wetty
+    hostname: wetty
+    ports:
+      - 3001:3000
+    environment:
+      - REMOTE_SSH_SERVER=${DOCKER_HOST_IP}
+      - REMOTE_SSH_PORT=22
+      - REMOTE_SSH_USER=
+      - WETTY_PORT=3000
+    volumes:
+      - ./data-transfer:/data-transfer
+    restart: unless-stopped
