@@ -251,7 +251,7 @@ curl -X "DELETE" "$DOCKER_HOST_IP:8083/connectors/mqtt-vehicle-position-source"
 
 ### Monitor connector in Kafka Connect UI
 
-Navigate to the [Kafka Connect UI](http://dataplatform:28001) to view the connector in a graphical window.
+Navigate to the [Kafka Connect UI](http://dataplatform:28003) to view the connector in a graphical window.
 
 ## Step 2 - Using KSQL to Refine the data
 
