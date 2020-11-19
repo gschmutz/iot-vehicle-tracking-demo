@@ -16,16 +16,24 @@ docker run --rm trivadis/iot-truck-simulator '-s' 'MQTT' '-h' $DOCKER_HOST_IP '-
 ```
 
 ``` bash
-docker run -it --rm efrecon/mqtt-client sub -h $DOCKER_HOST_IP -t "truck/+/position" -v
+docker run -it --rm --name mqttclient efrecon/mqtt-client sub -h $DOCKER_HOST_IP -t "truck/+/position" -v
+```
+
+to stop the MQTT CLI reader, either use ctrl-C or if it does not work, stop the container
+
+``` bash
+docker stop mqttclient 
 ```
 
 ![Alt Image Text](./images/kafka-connect-vs-streams.png "Demo 1 - KsqlDB")
 
-[Confluent Hub](https://www.confluent.io/hub/)
+[Confluent Hub](https://www.confluent.io/hub/){:target="_blank" rel="noopener"}
 
 ```bash
 curl -XGET http://dataplatform:8083/connector-plugins | jq
 ```
+
+<http://dataplatform:8083/connector-plugins>
 
 ```bash
 docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic vehicle_tracking_sysA --partitions 8 --replication-factor 3
@@ -34,8 +42,6 @@ docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --top
 
 ```bash
 docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysA
-
-
 ```
 
 ```bash
