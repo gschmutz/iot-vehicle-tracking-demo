@@ -27,7 +27,7 @@ docker stop mqttclient
 
 ![Alt Image Text](./images/kafka-connect-vs-streams.png "Demo 1 - KsqlDB")
 
-[Confluent Hub](https://www.confluent.io/hub/){:target="_blank" rel="noopener"}
+[Confluent Hub](https://www.confluent.io/hub/)
 
 ```bash
 curl -XGET http://dataplatform:8083/connector-plugins | jq
@@ -98,7 +98,7 @@ show queries;
 DROP STREAM IF EXISTS vehicle_tracking_sysA_s;
 ```
 
-[CREATE STREAM](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-stream/)
+* [CREATE STREAM](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-stream/)
 
 ``` sql
 CREATE STREAM IF NOT EXISTS vehicle_tracking_sysA_s 
@@ -128,14 +128,14 @@ DESCRIBE vehicle_tracking_sysA_s;
 SELECT * FROM vehicle_tracking_sysA_s EMIT CHANGES;
 ```
 
-[CREATE STREAM AS SELECT](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-stream-as-select/)
+* [CREATE STREAM AS SELECT](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-stream-as-select/)
 
 ``` sql
 DROP STREAM IF EXISTS vehicle_tracking_refined_s;
 ```
 
-[Schema Registry](http://analyticsplatform:28102/#/)
-[Apache Avro](http://avro.apache.org)
+* [Schema Registry](http://analyticsplatform:28102/#/)
+* [Apache Avro](http://avro.apache.org)
 
 
 ``` sql
