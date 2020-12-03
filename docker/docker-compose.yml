@@ -1,6 +1,8 @@
-# =====================================================
-# Platform: iot-vehicle-tracking-demo
-# =====================================================
+# =======================================================================
+# Platform Name            iot-vehicle-tracking-demo
+# Platform Stack:          trivadis/platys-modern-data-platform
+# Platform Stack Version:  1.9.0-preview
+# =======================================================================
 version: '3.5'
 networks:
   default:
@@ -128,7 +130,8 @@ services:
     hostname: schema-registry-1
     container_name: schema-registry-1
     labels:
-      com.mdps.service.restapi.url: http://${PUBLIC_IP}:8081
+      com.platys.restapi.title: Schema Registry REST API
+      com.platys.restapi.url: http://${PUBLIC_IP}:8081
     ports:
       - 8081:8081
     environment:
@@ -146,7 +149,8 @@ services:
     image: confluentinc/cp-kafka-connect:6.0.0
     container_name: kafka-connect-1
     labels:
-      com.mdps.service.restapi.url: http://${PUBLIC_IP}:8083
+      com.platys.restapi.title: Kafka Connect REST API
+      com.platys.restapi.url: http://${PUBLIC_IP}:8083
     depends_on:
       - schema-registry-1
     ports:
@@ -179,6 +183,10 @@ services:
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      # External secrets config
+      # See https://docs.confluent.io/current/connect/security.html#externalizing-secrets
+      CONNECT_CONFIG_PROVIDERS: file
+      CONNECT_CONFIG_PROVIDERS_FILE_CLASS: org.apache.kafka.common.config.provider.FileConfigProvider
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/kafka-connect:/etc/kafka-connect/addl-plugins
@@ -202,7 +210,8 @@ services:
     image: confluentinc/cp-kafka-connect:6.0.0
     container_name: kafka-connect-2
     labels:
-      com.mdps.service.restapi.url: http://${PUBLIC_IP}:8084
+      com.platys.restapi.title: Kafka Connect REST API
+      com.platys.restapi.url: http://${PUBLIC_IP}:8084
     depends_on:
       - schema-registry-1
     ports:
@@ -235,6 +244,10 @@ services:
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      # External secrets config
+      # See https://docs.confluent.io/current/connect/security.html#externalizing-secrets
+      CONNECT_CONFIG_PROVIDERS: file
+      CONNECT_CONFIG_PROVIDERS_FILE_CLASS: org.apache.kafka.common.config.provider.FileConfigProvider
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/kafka-connect:/etc/kafka-connect/addl-plugins
@@ -245,7 +258,8 @@ services:
     hostname: ksqldb-server-1
     container_name: ksqldb-server-1
     labels:
-      com.mdps.service.restapi.url: http://${PUBLIC_IP}:8088
+      com.platys.restapi.title: ksqlDB Server REST API
+      com.platys.restapi.url: http://${PUBLIC_IP}:8088
     ports:
       - 8088:8088
       - 1095:1095
@@ -275,6 +289,8 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: 'true'
       KSQL_KSQL_HIDDEN_TOPICS: ^_.*
+      KSQL_KSQL_SUPPRESS_ENABLED: 'False'
+      KSQL_KSQL_SUPPRESS_BUFFER_SIZE_BYTES: '-1'
       KSQL_JMX_OPTS: -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1095 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port=1095
     volumes:
       - ./data-transfer:/data-transfer
@@ -285,7 +301,8 @@ services:
     hostname: ksqldb-server-2
     container_name: ksqldb-server-2
     labels:
-      com.mdps.service.restapi.url: http://${PUBLIC_IP}:8089
+      com.platys.restapi.title: ksqlDB Server REST API
+      com.platys.restapi.url: http://${PUBLIC_IP}:8089
     ports:
       - 8089:8088
       - 1096:1095
@@ -315,6 +332,8 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
       KSQL_KSQL_QUERY_PULL_METRICS_ENABLED: 'true'
       KSQL_KSQL_HIDDEN_TOPICS: ^_.*
+      KSQL_KSQL_SUPPRESS_ENABLED: 'False'
+      KSQL_KSQL_SUPPRESS_BUFFER_SIZE_BYTES: '-1'
       KSQL_JMX_OPTS: -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1095 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port=1095
     volumes:
       - ./data-transfer:/data-transfer
@@ -350,7 +369,8 @@ services:
     container_name: schema-registry-ui
     hostname: schema-registry-ui
     labels:
-      com.mdps.service.webui.url: http://${PUBLIC_IP}:28102
+      com.platys.webui.title: Confluent Schema Registry UI
+      com.platys.webui.url: http://${PUBLIC_IP}:28102
     depends_on:
       - kafka-1
       - schema-registry-1
@@ -367,7 +387,8 @@ services:
     container_name: kafka-connect-ui
     hostname: kafka-connect-ui
     labels:
-      com.mdps.service.webui.url: http://${PUBLIC_IP}:28103
+      com.platys.webui.title: Kafka Connect UI
+      com.platys.webui.url: http://${PUBLIC_IP}:28103
     depends_on:
       - kafka-connect-1
     ports:
@@ -384,7 +405,8 @@ services:
     container_name: cmak
     hostname: cmak
     labels:
-      com.mdps.service.webui.url: http://${PUBLIC_IP}:28104
+      com.platys.webui.title: Cluster Manager for Apache Kafka UI
+      com.platys.webui.url: http://${PUBLIC_IP}:28104
     depends_on:
       - zookeeper-1
       - kafka-1
@@ -405,7 +427,8 @@ services:
     container_name: akhq
     hostname: akhq
     labels:
-      com.mdps.service.webui.url: http://${PUBLIC_IP}:28107
+      com.platys.webui.title: Apache Kafka AQ UI
+      com.platys.webui.url: http://${PUBLIC_IP}:28107
     ports:
       - 28107:8080
     environment:
@@ -418,7 +441,10 @@ services:
               schema-registry:
                 url: "http://schema-registry-1:8081"
               connect:
-                url: "http://kafka-connect-1:8083"
+                - name: "kafka-connect-1"
+                  url: "http://kafka-connect-1:8083"
+                - name: "kafka-connect-2"
+                  url: "http://kafka-connect-1:8084"
     depends_on:
       - kafka-1
     volumes:
@@ -430,10 +456,10 @@ services:
     container_name: streamsets-1
     hostname: streamsets-1
     labels:
-      com.mdps.service.webui.name: StreamSets Data Collector UI
-      com.mdps.service.webui.url: http://${PUBLIC_IP}:18630
-      com.mdps.service.restapi.name: StreamSets Data Collector REST API
-      com.mdps.service.restapi.url: http://${PUBLIC_IP}:18630/collector/restapi
+      com.platys.webui.title: StreamSets Data Collector UI
+      com.platys.webui.url: http://${PUBLIC_IP}:18630
+      com.platys.restapi.title: StreamSets Data Collector REST API
+      com.platys.restapi.url: http://${PUBLIC_IP}:18630/collector/restapi
     ports:
       - 18630:18630
     environment:
@@ -442,6 +468,7 @@ services:
       SDC_JAVA8_OPTS: -XX:+UseG1GC
       SDC_CONF_MONITOR_MEMORY: 'true'
       SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
+      SDC_CONF_http_authentication: form
     volumes:
       - ./data-transfer:/data-transfer
 #      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-3.19.0/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
@@ -551,8 +578,8 @@ services:
     container_name: cloudbeaver
     hostname: cloudbeaver
     labels:
-      com.mdps.service.webui.name: Cloudbeaver UI
-      com.mdps.service.webui.url: http://${PUBLIC_IP}:8978
+      com.platys.webui.title: Cloudbeaver UI
+      com.platys.webui.url: http://${PUBLIC_IP}:8978
     ports:
       - 8978:8978
     restart: unless-stopped
@@ -574,8 +601,8 @@ services:
     container_name: mqtt-ui
     hostname: mqtt-ui
     labels:
-      com.mdps.service.webui.name: HiveMQ UI
-      com.mdps.service.webui.url: http://${PUBLIC_IP}:28136
+      com.platys.webui.title: HiveMQ UI
+      com.platys.webui.url: http://${PUBLIC_IP}:28136
     ports:
       - 28136:80
     volumes:
@@ -586,6 +613,9 @@ services:
     image: svenihoney/wetty:latest
     container_name: wetty
     hostname: wetty
+    labels:
+      com.platys.webui.title: WeTTY UI
+      com.platys.webui.url: http://${PUBLIC_IP}:3001
     ports:
       - 3001:3000
     environment:
@@ -596,3 +626,31 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
+  #  ================================== markdown-viewer ========================================== #
+  markdown-viewer:
+    image: minimum/markdown-web:latest
+    container_name: markdown-viewer
+    hostname: markdown-viewer
+    labels:
+      com.platys.webui.title: Markdown Viewer UI
+      com.platys.webui.url: http://${PUBLIC_IP}
+    ports:
+      - 80:80
+    volumes:
+      - ./documentation:/home/python/markdown
+      - ./data-transfer:/data-transfer
+    restart: unless-stopped
+  markdown-renderer:
+    image: trivadis/jinja2-renderer:latest
+    container_name: markdown-renderer
+    hostname: markdown-renderer
+    environment:
+      PUBLIC_IP: ${PUBLIC_IP}
+      DOCKER_HOST_IP: ${DOCKER_HOST_IP}
+      DATAPLATFORM_HOME: ${DATAPLATFORM_HOME}
+    volumes:
+      - ./documentation/templates:/templates
+      - ./documentation/templates:/scripts
+      - .:/variables
+      - ./documentation:/output
+      - ./data-transfer:/data-transfer
