@@ -1,7 +1,7 @@
 # =======================================================================
 # Platform Name            iot-vehicle-tracking-demo
 # Platform Stack:          trivadis/platys-modern-data-platform
-# Platform Stack Version:  1.9.0-preview
+# Platform Stack Version:  1.9.0-preview2
 # =======================================================================
 version: '3.5'
 networks:
@@ -177,9 +177,9 @@ services:
       CONNECT_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: '[%d] %p %X{connector.context}%m (%c:%L)%n'
       CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/addl-plugins
-      #CONNECT_SECURITY_PROTOCOL: SSL
-      #CONNECT_SASL_MECHANISM: PLAIN
-      #CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$CLUSTER_API_KEY" password="$CLUSTER_API_SECRET";
+      # CONNECT_SECURITY_PROTOCOL: SSL
+      # CONNECT_SASL_MECHANISM: PLAIN
+      # CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$CLUSTER_API_KEY" password="$CLUSTER_API_SECRET";
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
@@ -238,9 +238,9 @@ services:
       CONNECT_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
       CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: '[%d] %p %X{connector.context}%m (%c:%L)%n'
       CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/addl-plugins
-      #CONNECT_SECURITY_PROTOCOL: SSL
-      #CONNECT_SASL_MECHANISM: PLAIN
-      #CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$CLUSTER_API_KEY" password="$CLUSTER_API_SECRET";
+      # CONNECT_SECURITY_PROTOCOL: SSL
+      # CONNECT_SASL_MECHANISM: PLAIN
+      # CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="$CLUSTER_API_KEY" password="$CLUSTER_API_SECRET";
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-4.0.0.jar
       AWS_ACCESS_KEY_ID: V42FCGRVMK24JJ8DHUYG
       AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
@@ -478,6 +478,7 @@ services:
       nofile:
         soft: 32768
         hard: 32768
+    user: '1000'
     restart: unless-stopped
   #  ================================== Smashing ========================================== #
   smashing:
@@ -585,7 +586,7 @@ services:
     restart: unless-stopped
   #  ================================== Mosquitto ========================================== #
   mosquitto-1:
-    image: eclipse-mosquitto:1.6
+    image: eclipse-mosquitto:2.0
     hostname: mosquitto-1
     container_name: mosquitto-1
     ports:
