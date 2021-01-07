@@ -1,7 +1,7 @@
 # =======================================================================
 # Platform Name            iot-vehicle-tracking-demo
 # Platform Stack:          trivadis/platys-modern-data-platform
-# Platform Stack Version:  1.9.0-preview2
+# Platform Stack Version:  1.10.0
 # =======================================================================
 version: '3.5'
 networks:
@@ -13,7 +13,7 @@ networks:
 services:
   #  ================================== Zookeeper ========================================== #
   zookeeper-1:
-    image: confluentinc/cp-zookeeper:6.0.0
+    image: confluentinc/cp-zookeeper:6.0.1
     container_name: zookeeper-1
     hostname: zookeeper-1
     ports:
@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
 #  ================================== Kafka ========================================== #
   kafka-1:
-    image: confluentinc/cp-kafka:6.0.0
+    image: confluentinc/cp-kafka:6.0.1
     container_name: kafka-1
     hostname: kafka-1
     depends_on:
@@ -61,7 +61,7 @@ services:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
   kafka-2:
-    image: confluentinc/cp-kafka:6.0.0
+    image: confluentinc/cp-kafka:6.0.1
     container_name: kafka-2
     hostname: kafka-2
     depends_on:
@@ -93,7 +93,7 @@ services:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
   kafka-3:
-    image: confluentinc/cp-kafka:6.0.0
+    image: confluentinc/cp-kafka:6.0.1
     container_name: kafka-3
     hostname: kafka-3
     depends_on:
@@ -126,7 +126,7 @@ services:
     restart: unless-stopped
   #  ================================== Schema Registry ========================================== #
   schema-registry-1:
-    image: confluentinc/cp-schema-registry:6.0.0
+    image: confluentinc/cp-schema-registry:6.0.1
     hostname: schema-registry-1
     container_name: schema-registry-1
     labels:
@@ -146,13 +146,11 @@ services:
     restart: unless-stopped
   #  ================================== Kafka Connect ========================================== #
   kafka-connect-1:
-    image: confluentinc/cp-kafka-connect:6.0.0
+    image: confluentinc/cp-kafka-connect:6.0.1
     container_name: kafka-connect-1
     labels:
       com.platys.restapi.title: Kafka Connect REST API
       com.platys.restapi.url: http://${PUBLIC_IP}:8083
-    depends_on:
-      - schema-registry-1
     ports:
       - 8083:8083
     environment:
@@ -207,13 +205,11 @@ services:
         #
         sleep infinity
   kafka-connect-2:
-    image: confluentinc/cp-kafka-connect:6.0.0
+    image: confluentinc/cp-kafka-connect:6.0.1
     container_name: kafka-connect-2
     labels:
       com.platys.restapi.title: Kafka Connect REST API
       com.platys.restapi.url: http://${PUBLIC_IP}:8084
-    depends_on:
-      - schema-registry-1
     ports:
       - 8084:8084
     environment:
@@ -254,7 +250,7 @@ services:
     restart: unless-stopped
   #  ================================== ksqlDB ========================================== #
   ksqldb-server-1:
-    image: confluentinc/ksqldb-server:0.13.0
+    image: confluentinc/ksqldb-server:0.14.0
     hostname: ksqldb-server-1
     container_name: ksqldb-server-1
     labels:
@@ -297,7 +293,7 @@ services:
       - ./plugins/ksql:/etc/ksqldb/ext
     restart: unless-stopped
   ksqldb-server-2:
-    image: confluentinc/ksqldb-server:0.13.0
+    image: confluentinc/ksqldb-server:0.14.0
     hostname: ksqldb-server-2
     container_name: ksqldb-server-2
     labels:
@@ -340,7 +336,7 @@ services:
       - ./plugins/ksql:/etc/ksqldb/ext
     restart: unless-stopped
   ksqldb-cli:
-    image: confluentinc/ksqldb-cli:0.13.0
+    image: confluentinc/ksqldb-cli:0.14.0
     container_name: ksqldb-cli
     hostname: ksqldb-cli
     depends_on:
@@ -452,7 +448,7 @@ services:
     restart: unless-stopped
   #  ================================== StreamSets DataCollector ========================================== #
   streamsets-1:
-    image: trivadis/streamsets-kafka-hadoop-aws:3.19.0
+    image: trivadis/streamsets-kafka-hadoop-aws:3.20.0
     container_name: streamsets-1
     hostname: streamsets-1
     labels:
@@ -468,12 +464,11 @@ services:
       SDC_JAVA8_OPTS: -XX:+UseG1GC
       SDC_CONF_MONITOR_MEMORY: 'true'
       SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
-      SDC_CONF_http_authentication: form
     volumes:
       - ./data-transfer:/data-transfer
-#      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-3.19.0/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
-#      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-3.19.0/libs-common-lib:Z
-#      - ./streamsets-extras/user-libs:/opt/streamsets-datacollector-user-libs:Z
+#      - ./streamsets-extras/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/postgresql-42.2.6.jar:/opt/streamsets-datacollector-3.20.0/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/postgresql-42.2.6.jar:Z
+#      - ./streamsets-extras/libs-common-lib:/opt/streamsets-datacollector-3.20.0/libs-common-lib:Z
+      - ./plugins/streamsets/user-libs:/opt/streamsets-datacollector-user-libs:Z
     ulimits:
       nofile:
         soft: 32768
@@ -634,7 +629,7 @@ services:
     hostname: markdown-viewer
     labels:
       com.platys.webui.title: Markdown Viewer UI
-      com.platys.webui.url: http://${PUBLIC_IP}
+      com.platys.webui.url: http://${PUBLIC_IP}:80
     ports:
       - 80:80
     volumes:
@@ -646,6 +641,7 @@ services:
     container_name: markdown-renderer
     hostname: markdown-renderer
     environment:
+      USE_PUBLIC_IP: 'True'
       PUBLIC_IP: ${PUBLIC_IP}
       DOCKER_HOST_IP: ${DOCKER_HOST_IP}
       DATAPLATFORM_HOME: ${DATAPLATFORM_HOME}
