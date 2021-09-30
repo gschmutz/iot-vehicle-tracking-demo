@@ -1,4 +1,4 @@
-\connect DBNAME
+\connect demodb
 
 CREATE SCHEMA IF NOT EXISTS logistics_db;
 
