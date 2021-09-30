@@ -1,19 +1,20 @@
-# IoT Vehicle Tracking Streaming Demo
+# IoT Vehicle Tracking End-to-End Streaming Demo
 
-This project shows how to setup and run the demo used in various talks, such as "Introduction into Stream Processing". 
+In this demo we will be ingesting IoT data into a Kafka topic from which it will be analyzed using Stream Analytics. To make it a bit more realistic, the data is not directly sent to Kafka from the IoT devices (vehicles) but first sent through an MQTT broker (IoT gateway). 
+
+The following diagram shows the setup of the data flow which will be implemented step by step. Of course we will not be using real-life data, but have a program simulating trucks and their driving behviour.
 
 ![Alt Image Text](./images/use-case-overview.png "Use Case Overview")
 
+We will see various technolgoies in action, such as **Kafka**, **MQTT**, **Kafka Connect**, **Kafka Streams** and **ksqlDB**.
+
 ## Preparation
 
-The platform where the demos can be run on, has been generated using the [`platys`](http://github.com/trivadispf/platys)  toolset using the [`platys-modern-data-platform`](http://github.com/trivadispf/platys-modern-data-platform) stack.
+The platform where the demos can be run on, has been generated using the [`platys`](http://github.com/trivadispf/platys) toolset using the [`platys-modern-data-platform`](http://github.com/trivadispf/platys-modern-data-platform) stack.
 
 The generated artefacts are available in the `./docker` folder.
 
-The prerequisites for running the platform are 
- 
- * Docker 
- * Docker Compose. 
+The prerequisites for running the platform are **Docker** and **Docker Compose**.
 
 The environment is completely based on docker containers. In order to easily start the multiple containers, we are going to use Docker Compose. You need to have at least 8 GB of RAM available, better is 12 GB or 16 GB.
 
@@ -63,16 +64,8 @@ If you have no rights for doing that, then you have to use your IP address inste
 
 ### Available Services 
 
-The following user interfaces are available:
-
- * Cluster Manager for Apache Kafka: <http://dataplatform:28104> 
- * Apache Kafka HQ: <http://dataplatform:28107>
- * Schema Registry UI: <http://dataplatform:28102>
- * Kafka Connect UI: <http://dataplatform:28103>
- * StreamSets Data Collector: <http://dataplatform:18630>
- * MQTT UI: <http://dataplatform:28136>
- * Cloudbeaver: <http://dataplatform:8978>
-
+For a list of available services, navigate to <http://dataplatform:80/services>.
+kcat
 ### Creating the necessary Kafka Topics
 
 The Kafka cluster is configured with `auto.topic.create.enable` set to `false`. Therefore we first have to create all the necessary topics, using the `kafka-topics` command line utility of Apache Kafka. 
@@ -215,10 +208,10 @@ The Confluent MQTT Connector was downloaded when running the Compose stack. You 
 curl -XGET http://dataplatform:8083/connector-plugins | jq
 ```
 
-Before we start the connector, let's use a Kafka console listener to consume from the target topic `vehicle_tracking_sysA`. We can use the `kafkacat` utility, which you can either install locally or use the one provided with the Compose stack: 
+Before we start the connector, let's use a Kafka console listener to consume from the target topic `vehicle_tracking_sysA`. We can use the [`kcat`](https://github.com/edenhill/kcat) utility (formerly kcat`kcat`), which you can either install locally or use the one provided with the Compose stack: 
 
 ```bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysA -f "%k - %s\n"
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_sysA -f "%k - %s\n"
 ```
 
 Now let's start the connector:
@@ -246,7 +239,7 @@ curl -X "POST" "$DOCKER_HOST_IP:8083/connectors" \
   }'
 ```
 
-The truck position messages are sent to the `vehicle_tracking_sysA` topic and should show up on the kafkacat consumer immediately. 
+The truck position messages are sent to the `vehicle_tracking_sysA` topic and should show up on the kcat consumer immediately. 
 
 To stop the connector, you can again use the REST API:
 
@@ -399,10 +392,10 @@ PARTITION BY truckId
 EMIT CHANGES;
 ```
 
-To check that the refined topic does in fact hold Avro formatted data, let's just do a normal kafkacat on the `truck_position_refined` topic
+To check that the refined topic does in fact hold Avro formatted data, let's just do a normal kcat on the `truck_position_refined` topic
 
 ``` bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_refined
+docker exec -ti kcat -s value=avro -b kafka-1 -t vehicle_tracking_refined
 ```
 
 we can see that it is serialized as Avro 
@@ -426,7 +419,7 @@ WX�$343671958179690963
 we can use the `-s` and `-r` option to specify the Avro Serde and the URL of the schema registry and the output is readable:
 
 ``` bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_refined -s avro -r http://schema-registry-1:8081
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined -s value=avro -r http://schema-registry-1:8081
 ```
 
 You can use the Schema Registry UI on <http://dataplatform:28102> to view the Avro Schema created by ksqlDB.
@@ -452,7 +445,7 @@ You can import that data flow from `./streamsets/File_to_Kafka.json` if you don'
 Now let's listen on the new topic
 
 ```bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysB -f "%k - %s\n" -q
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_sysB -f "%k - %s\n" -q
 ```
 
 and then start the flow in StreamSets. You should see the data from the file arriving as a stream of vehicle tracking data. 
@@ -652,7 +645,7 @@ EMIT CHANGES;
 We can also see the same information by directly getting the data from the underlaying kafka topic `problematic_driving`:
 
 ``` bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t problematic_driving -s avro -r http://schema-registry-1:8081
+docker exec -ti kcat kcat -b kafka-1 -t problematic_driving -s value=avro -r http://schema-registry-1:8081
 ```
 
 ## Demo 7 - Materialize Driver Information ("static information")
@@ -710,7 +703,7 @@ CREATE SOURCE CONNECTOR jdbc_logistics_sc WITH (
 we can see that all the drivers from the `driver` table have been produced into the `logisticsdb_driver` topic:
 
 ```bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t logisticsdb_driver -o beginning
+docker exec -ti kcat kcat -b kafka-1 -t logisticsdb_driver -o beginning
 ```
 
 ``` sql
@@ -771,10 +764,10 @@ LEFT JOIN driver_t 				d
 ON pd.driverId  = d.id;
 ```
 
-we can use `kafkacat` to show the data stream in the newly created Kafka topic `problematic_driving_and_driver_ksql` to show the enrichment in action:
+we can use `kcat` to show the data stream in the newly created Kafka topic `problematic_driving_and_driver_ksql` to show the enrichment in action:
 
 ``` bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t problematic_driving_and_driver -s avro -r http://schema-registry-1:8081
+docker exec -ti kcat kcat -b kafka-1 -t problematic_driving_and_driver -s value=avro -r http://schema-registry-1:8081
 ```
 
 
