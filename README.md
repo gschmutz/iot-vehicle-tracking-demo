@@ -91,7 +91,7 @@ If you don't like to work with the CLI, you can also create the Kafka topics usi
 The necessary tables are created automatically when running the stack using Docker Compose. Use the following command in a terminal window, to show the content of the `driver` table:
 
 ``` bash
-docker exec -ti postgresql psql -d demodb -U demo -c "SELECT * FROM driver"
+docker exec -ti postgresql psql -d demodb -U demo -c "SELECT * FROM logistics_db.driver"
 ``` 
 
 ### Setup Shipment MySQL Database
@@ -403,7 +403,7 @@ EMIT CHANGES;
 To check that the refined topic does in fact hold Avro formatted data, let's just do a normal kcat on the `truck_position_refined` topic
 
 ``` bash
-docker exec -ti kcat -s value=avro -b kafka-1 -t vehicle_tracking_refined
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined
 ```
 
 we can see that it is serialized as Avro 
@@ -777,6 +777,101 @@ Now you can run the Kafka Streams application and you should see the problematic
 docker exec -ti kcat kcat -b kafka-1 -t problematic_driving-kstreams -s value=avro -r http://schema-registry-1:8081 -o end -q
 ```
 
+### Alternative using Fust
+
+The same logic can also be implemented using Faust. In the folder `python` you will find the Faust project `faust-vehicle-tracking` with the implementation. The value we have availabke from the `vehicle_tracking_refined` topic is serialized as Avro. Avro is supported by Faut, but the current implementation works on Json. Therefore we first convert the Avro messges into Json using ksqlDB.
+
+```sql
+CREATE STREAM vehicle_tracking_refined_json_s
+  WITH (kafka_topic='vehicle_tracking_refined_json',
+        value_format='JSON', 
+        partitions=8, replicas=3)
+AS 
+SELECT * 
+FROM vehicle_tracking_refined_s
+EMIT CHANGES;        
+```
+
+You can install Faust either via the Python Package Index (PyPI) or from source.
+
+```
+pip install -U faust
+```
+
+Faust also defines a group of setuptools extensions that can be used to install Faust and the dependencies for a given feature. Fine more about it [here](https://faust.readthedocs.io/en/latest/userguide/installation.html).
+
+In your home directory, create a folder `faust-vehicle-tracking` and navigate into the folder
+
+```
+cd
+mkdir -p faust-vehicle-tracking/src
+cd faust-vehicle-tracking/src
+```
+
+Create a file `__main__.py` and add the following code
+
+```python
+from src.app import app
+
+app.main()
+```
+
+Create a file `app.py` and add the following code
+
+```python
+import faust
+
+kafka_brokers = ['dataplatform:29092']
+
+# convenience func for launching the app
+def main() -> None:
+    app.main()
+
+app = faust.App('vehicle-tracking-app', broker=kafka_brokers)
+
+# GameEvent Schema
+class VehiclePosition(faust.Record, validation=True, serializer='json'):
+    TIMESTAMP: str
+    VEHICLEID: str
+    DRIVERID: int
+    ROUTEID: int
+    EVENTTYPE: str
+    LATITUDE: float
+    LONGITUDE: float
+
+
+rawVehiclePositionTopic = app.topic('vehicle_tracking_refined_json', value_type= VehiclePosition)
+problematicDrivingTopic = app.topic('problematic_driving_faust', value_type= VehiclePosition)
+
+
+@app.agent(rawVehiclePositionTopic)
+async def process(positions):
+    async for position in positions:
+        print(f'Position for {position. VEHICLEID}')
+        
+        if position.EVENTTYPE != 'Normal': 
+            await problematicDrivingTopic.send(value=position)   
+```
+
+Create the new topic `problematic_driving_faust ` where the dangerous drving behaviour will be published to:
+
+```
+docker exec -ti kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic problematic_driving_faust --partitions 8 --replication-factor 3
+```
+
+Now you can run the Faust application the application. From the `src` folder run
+
+```bash
+cd ..
+python3 -m src worker -l info
+```
+
+and you should see the problematic driving in the `problematic_driving-kstreams` topic
+
+``` bash
+docker exec -ti kcat kcat -b kafka-1 -t problematic_driving_faust -o end -q
+```
+
 ## Demo 7 - Materialize Driver Information ("static information")
 
 In this part of the demo, we are integrating the `driver` information from the Dispatching system into a Kafka topic, so it is available for enrichments of data streams. 
@@ -928,8 +1023,6 @@ FROM problematic_driving_s
 WINDOW HOPPING (SIZE 60 minutes, ADVANCE BY 30 minutes)
 GROUP BY eventType;
 ```
-
-
 
 ```
 SELECT TIMESTAMPTOSTRING(WINDOWSTART,'yyyy-MM-dd HH:mm:SS','CET') wsf
