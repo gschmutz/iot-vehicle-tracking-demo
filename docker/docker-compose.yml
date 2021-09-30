@@ -1,13 +1,12 @@
 # =======================================================================
-# Platform Name            iot-vehicle-tracking-demo
+# Platform Name            iot-vehicle-tracking-platform
 # Platform Stack:          trivadis/platys-modern-data-platform
 # Platform Stack Version:  1.13.0-preview
 # =======================================================================
 version: '3.5'
 networks:
   default:
-    name: iot-vehicle-tracking-demo
-# enforce some dependencies
+    name: iot-vehicle-tracking-platform
 # enforce some dependencies
 # enforce some dependencies
 # Enable PostgreSQL or MySQL for MLflow server
@@ -370,6 +369,19 @@ services:
       - ./data-transfer:/data-transfer
     entrypoint: /bin/sh
     tty: true
+  #  ================================== kcat (used to be kafkacat)  ========================================== #
+  kcat:
+    image: edenhill/kcat:1.7.0
+    container_name: kcat
+    hostname: kcat
+    volumes:
+      - ./data-transfer:/data-transfer
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while [ 1 -eq 1 ];do sleep 60;done
+    restart: unless-stopped
   #  ================================== Schema Registry UI ========================================== #
   schema-registry-ui:
     image: landoop/schema-registry-ui:latest
@@ -405,6 +417,21 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./conf/resolv.conf:/etc/resolv.conf:ro
+    restart: unless-stopped
+  #  ================================== Kafka Connect UI ========================================== #
+  debezium-ui:
+    image: debezium/debezium-ui:latest
+    container_name: debezium-ui
+    hostname: debezium-ui
+    labels:
+      com.platys.webui.title: Debezium UI
+      com.platys.webui.url: http://${PUBLIC_IP}:28227
+    ports:
+      - 28227:8080
+    environment:
+      KAFKA_CONNECT_URI: http://${PUBLIC_IP}:8083/,http://${PUBLIC_IP}:8084/
+    volumes:
+      - ./data-transfer:/data-transfer
     restart: unless-stopped
   #  ================================== Cluster Manager for Apache Kafka (CMAK) ========================================== #
   cmak:
@@ -458,6 +485,29 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
+  #  ================================== Kafka UI ========================================== #
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    hostname: kafka-ui
+    labels:
+      com.platys.webui.title: Kafka UI
+      com.platys.webui.url: http://${PUBLIC_IP}:28179
+    ports:
+      - 28179:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper-1:2181
+      KAFKA_CLUSTERS_0_KSQLDBSERVER: ksqldb-server-1
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry-1:8081
+      KAFKA_CLUSTERS_0_JMXPORT: '9992'
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: kafka-connect
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect-1:8083
+      KAFKA_CLUSTERS_0_READONLY: 'False'
+    volumes:
+      - ./data-transfer:/data-transfer
+    restart: unless-stopped
   #  ================================== StreamSets DataCollector ========================================== #
   streamsets-1:
     image: streamsets/datacollector:3.22.2
@@ -478,6 +528,7 @@ services:
       SDC_JAVA8_OPTS: -XX:+UseG1GC
       SDC_CONF_MONITOR_MEMORY: 'true'
       SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
+      SDC_CONF_http_authentication: form
     volumes:
       - ./data-transfer:/data-transfer
       - ./conf/streamsets/pre-docker-entrypoint.sh:/pre-docker-entrypoint.sh
@@ -493,52 +544,6 @@ services:
       - -verbose
     entrypoint:
       - /pre-docker-entrypoint.sh
-    restart: unless-stopped
-  #  ================================== Smashing ========================================== #
-  smashing:
-    image: trivadis/smashing:1.3.0
-    hostname: smashing
-    container_name: smashing
-    ports:
-      - 28171:3030
-    environment:
-      WIDGETS:
-      GEMS:
-    volumes:
-      - ./data-transfer:/data-transfer
-    restart: unless-stopped
-  #  ================================== Tiboard Dashboard ========================================== #
-  tipboard:
-    image: trivadis/tipboard:latest
-    hostname: tipboard
-    container_name: tipboard
-    ports:
-      - 28172:7272
-    environment:
-      TIPBOARD_redis_host: "'redis-1'"
-      TIPBOARD_redis_port: 6379
-      TIPBOARD_redis_password: None
-      TIPBOARD_redis_db: 4
-      TIPBOARD_debug: "'False'"
-      TIPBOARD_api_key: "'e2c3275d0e1a4bc0da360dd225d74a43'"
-      TIPBOARD_host: "'localhost'"
-      TIPBOARD_port: 7272
-      TIPBOARD_project_name: "'sample'"
-      TIPBOARD_flipboard_interval: 0
-    volumes:
-      - ./data-transfer:/data-transfer
-      - ./scripts/tipboard:/dashboards
-      - ./plugins/tipboard:/root/.tipboard/custom_tiles
-    restart: unless-stopped
-  #  ================================== Tiboard Dashboard ========================================== #
-  chartboard:
-    image: trivadis/chartboard:latest
-    hostname: chartboard
-    container_name: chartboard
-    ports:
-      - 28173:8080
-    volumes:
-      - ./data-transfer:/data-transfer
     restart: unless-stopped
   #  ================================== Redis ========================================== #
   redis-1:
@@ -580,8 +585,8 @@ services:
       - 5432:5432
     environment:
       - POSTGRES_PASSWORD=abc123!
-      - POSTGRES_USER=demo
-      - POSTGRES_DB=demodb
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
       - POSTGRES_MULTIPLE_DATABASES=demodb
       - POSTGRES_MULTIPLE_USERS=demo
       - POSTGRES_MULTIPLE_PASSWORDS=abc123!
@@ -590,6 +595,19 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./init/postgresql:/docker-entrypoint-initdb.d/
+    restart: unless-stopped
+  #  ================================== Adminer ========================================== #
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    hostname: adminer
+    labels:
+      com.platys.webui.title: Adminer UI
+      com.platys.webui.url: http://${PUBLIC_IP}:28131
+    ports:
+      - 28131:8080
+    volumes:
+      - ./data-transfer:/data-transfer
     restart: unless-stopped
   #  ================================== Cloudbeaver ========================================== #
   cloudbeaver:
