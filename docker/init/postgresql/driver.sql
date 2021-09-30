@@ -1,3 +1,5 @@
+\connect DBNAME
+
 CREATE SCHEMA IF NOT EXISTS logistics_db;
 
 SET search_path TO logistics_db;
