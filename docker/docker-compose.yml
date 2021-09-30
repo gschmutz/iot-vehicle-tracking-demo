@@ -418,7 +418,7 @@ services:
       - ./data-transfer:/data-transfer
       - ./conf/resolv.conf:/etc/resolv.conf:ro
     restart: unless-stopped
-  #  ================================== Kafka Connect UI ========================================== #
+  #  ================================== Debezium UI ========================================== #
   debezium-ui:
     image: debezium/debezium-ui:latest
     container_name: debezium-ui
