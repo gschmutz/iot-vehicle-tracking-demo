@@ -1,7 +1,8 @@
 package com.trivadis.kafkastreams;
-import java.util.Properties;
 
 import com.trivadis.avro.VehicleTrackingRefined;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.commons.cli.*;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
@@ -10,60 +11,21 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import java.util.Properties;
 
-public class KafkaStreamsExample {
+public class DetectProblematicDriving {
 
 	static final String VEHICLE_TRACKING_REFINED_STREAM = "vehicle_tracking_refined";
-	static final String PROBLEMATIC_DRIVING_STREAM = "problematic_driving_kstreams";
+	static final String PROBLEMATIC_DRIVING_STREAM = "problematic_driving-kstreams";
 
 	public static void main(final String[] args) {
-		String applicationId = "test";
-		String clientId = "test";
-		String bootstrapServer = "localhost:9092";
-		String schemaRegistryUrl = "http://localhost:8081";
-		boolean cleanup = false;
+		final String applicationId = "test";
+		final String clientId = "test";
+		final String bootstrapServer = "dataplatform:9092";
+		final String schemaRegistryUrl = "http://dataplatform:8081";
+		final boolean cleanup = false;
+		final String stateDirPath = "C:\\tmp\\kafka-streams";
 
-		// create the command line parser
-		CommandLineParser parser = new DefaultParser();
-
-		// create the Options
-		Options options = new Options();
-		options.addOption( "ai", "application-id", true, "REQUIRED: The application id." );
-		options.addOption( "ci", "client-id", true, "The client id. Defaults to the application id + the prefix '-client'" );
-		options.addOption( "b", "bootstrap-server", true, "The server(s) to connect to, default to " + bootstrapServer);
-		options.addOption( "sr", "schemaRegistryUrl", true, "The schema registry to connect to for the Avro schemas, defaults to " + schemaRegistryUrl );
-		options.addOption( "cl", "cleanup", false, "Should a cleanup be performed before staring. Defaults to false" );
-
-		try {
-			// parse the command line arguments
-			CommandLine line = parser.parse( options, args );
-
-			if( line.hasOption( "application-id" ) ) {
-				applicationId = line.getOptionValue("application-id");
-			}
-			if( line.hasOption( "client-id" ) ) {
-				clientId = line.getOptionValue("client-id");
-			} else {
-				clientId = applicationId + "-client";
-			}
-
-			if( line.hasOption( "bootstrap-server" ) ) {
-				bootstrapServer = line.getOptionValue("bootstrap-server");
-			}
-			if( line.hasOption( "schemaRegistryUrl" ) ) {
-				schemaRegistryUrl = line.getOptionValue("schemaRegistryUrl");
-			}
-			if( line.hasOption( "cleanup" ) ) {
-				cleanup = true;
-			}
-		}
-		catch( ParseException exp ) {
-			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp( "kafka-passthrough", exp.getMessage(), options,null, true);
-		}
-		String stateDirPath = "C:\\tmp\\kafka-streams";
 		final KafkaStreams streams = buildFeed(applicationId, clientId, bootstrapServer, schemaRegistryUrl, stateDirPath);
 
 		if (cleanup) {
@@ -118,11 +80,16 @@ public class KafkaStreamsExample {
 		// read the source stream (keyed by objectId)
 		final KStream<String, VehicleTrackingRefined> vehicleTracking = builder.stream(VEHICLE_TRACKING_REFINED_STREAM);
 
+		vehicleTracking.peek((k, v) -> System.out.println("vehicleTracking.peek(...) : " + k + " : " + v));
+
+		// filter out all events where eventType equals "Normal"
+		final KStream<String, VehicleTrackingRefined> vehicleTrackingFiltered = vehicleTracking.filterNot((k, v) -> "Normal".equals(v.getEVENTTYPE().toString()));
+
+		// Send the Matches to the Kafka Topic
+		vehicleTrackingFiltered.to(PROBLEMATIC_DRIVING_STREAM);
 
 		// read the driver
 		//final KTable<String, Driver> driver = builder.table(DRIVER_STREAM);
-
-		vehicleTracking.peek((k,v) -> System.out.println("vehicleTracking.peek(...) : " + k + " : " + v));
 
 		// Left Join Positions Mecomo Raw with Barge to get the barge id
 		//KStream<String, PositionMecomo> positionsMecomo  =  positionsMecomoRaw.leftJoin(barge,
@@ -130,13 +97,6 @@ public class KafkaStreamsExample {
 		//		Joined.<String, PositionMecomoRaw, Barge>keySerde(Serdes.String())
 		//);
 
-		final KStream<String, VehicleTrackingRefined> vehicleTrackingFiltered = vehicleTracking.filter((k,v) -> v.getEVENTTYPE() != "Normal");
-
-		// Send the Matches to the Kafka Topic
-		vehicleTrackingFiltered.to(PROBLEMATIC_DRIVING_STREAM);
-
 		return new KafkaStreams(builder.build(), streamsConfiguration);
 	}
-
-
 }
