@@ -14,9 +14,9 @@ The platform where the demos can be run on, has been generated using the [`platy
 
 The generated artefacts are available in the `./docker` folder.
 
-The prerequisites for running the platform are **Docker** and **Docker Compose**.
+The prerequisites for running the platform are [**Docker**](https://www.docker.com/) and [**Docker Compose**](https://docs.docker.com/compose/).
 
-The environment is completely based on docker containers. In order to easily start the multiple containers, we are going to use Docker Compose. You need to have at least 8 GB of RAM available, better is 12 GB or 16 GB.
+The environment is completely based on docker containers. In order to easily start the multiple containers, we are going to use Docker Compose. You need to have at least 12 GB of RAM available, but better is 16 GB.
 
 ### Start the platform using Docker Compose
 
@@ -47,9 +47,14 @@ docker-compose logs -f
 
 To show only the logs for some of the containers, for example `kafka-connect-1` and `kafka-connect-2`, use
 
-
 ``` bash
 docker-compose logs -f kafka-connect-1 kafka-connect-2
+```
+
+If you want to stop the platform (all containers), run
+
+``` bash
+docker-compose down
 ```
 
 Some services in the `docker-compose.yml` are optional and can be removed, if you don't have enough resources to start them. 
@@ -65,12 +70,14 @@ If you have no rights for doing that, then you have to use your IP address inste
 ### Available Services 
 
 For a list of available services, navigate to <http://dataplatform:80/services>.
-kcat
+
+When a terminal is needed, you can use the Web Terminal available at <http://dataplatform:3001/>.
+
 ### Creating the necessary Kafka Topics
 
 The Kafka cluster is configured with `auto.topic.create.enable` set to `false`. Therefore we first have to create all the necessary topics, using the `kafka-topics` command line utility of Apache Kafka. 
 
-Using the `kafka-topics` CLI inside the `kafka-1` docker container to create the topics `vehicle_tracking_` and `logisticsdb_driver `.
+From a terminal window, use the `kafka-topics` CLI inside the `kafka-1` docker container to create the topics `vehicle_tracking_` and `logisticsdb_driver `.
 
 ``` bash
 docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic vehicle_tracking_sysA --partitions 8 --replication-factor 3
@@ -84,7 +91,7 @@ If you don't like to work with the CLI, you can also create the Kafka topics usi
 The necessary tables are created automatically when running the stack using Docker Compose. Use the following command in a terminal window, to show the content of the `driver` table:
 
 ``` bash
-docker exec -ti postgresql psql -d demodb -U demo -c "SELECT * FROM logistics_db.driver"
+docker exec -ti postgresql psql -d demodb -U demo -c "SELECT * FROM driver"
 ``` 
 
 ### Setup Shipment MySQL Database
@@ -178,7 +185,7 @@ The consumed messages will show up in the terminal.
 
 #### Using HiveMQ Web UI  
 
-To start consuming using the MQTT UI ([HiveMQ Web UI](https://www.hivemq.com/docs/3.4/web-ui/introduction.html)), navigate to <http://dataplatform:28136> and connect using `dataplatform` for the **Host** field, `9001` for the **Port** field and then click on **Connect**: 
+To start consuming using the MQTT UI ([HiveMQ Web UI](https://www.hivemq.com/docs/3.4/web-ui/introduction.html)), navigate to <http://dataplatform:28136> and connect using `dataplatform` for the **Host** field, `9101` for the **Port** field and then click on **Connect**: 
 
 ![Alt Image Text](./images/mqtt-ui-connect.png "MQTT UI Connect")
 	
@@ -190,7 +197,7 @@ As soon as messages are produced to MQTT, you should see them either on the CLI 
 
 ![Alt Image Text](./images/mqtt-ui-messages.png "MQTT UI Connect")
 
-Alternatively you can also use the [MQTT.fx](https://mqttfx.jensd.de/) or the [MQTT Explorer](https://mqtt-explorer.com/) applications to browse for the messages on the MQTT broker. They are both available for installation on Mac or Windows. 
+Alternatively you can also use the [MQTT.fx](https://mqttfx.jensd.de/), [MQTT Explorer](https://mqtt-explorer.com/) or [MQTTLens](https://chrome.google.com/webstore/detail/mqttlens/hemojaaeigabkbcookmlgmdigohjobjm?hl=de) applications to browse for the messages on the MQTT broker. They are all available for installation on Mac or Windows. 
 
 ### Setup Kafka Connect to bridge between MQTT and Kafka
 
@@ -241,7 +248,7 @@ curl -X "POST" "$DOCKER_HOST_IP:8083/connectors" \
 
 The truck position messages are sent to the `vehicle_tracking_sysA` topic and should show up on the kcat consumer immediately. 
 
-To stop the connector, you can again use the REST API:
+If you want to stop the connector, you can again use the REST API:
 
 ```bash
 curl -X "DELETE" "$DOCKER_HOST_IP:8083/connectors/mqtt-vehicle-position-source"
@@ -249,7 +256,7 @@ curl -X "DELETE" "$DOCKER_HOST_IP:8083/connectors/mqtt-vehicle-position-source"
 
 ### Monitor connector in Kafka Connect UI
 
-Navigate to the [Kafka Connect UI](http://dataplatform:28003) to view the connector in a graphical window.
+Navigate to the [Kafka Connect UI](http://dataplatform:28103) to view the connector in a graphical window.
 
 ## Step 2 - Using KSQL to Refine the data
 
@@ -266,6 +273,7 @@ ksqlDB is an event streaming database purpose-built to help developers create st
 [_Source: Confluent_](https://docs.ksqldb.io/en/latest/)
 
 ### Connect to ksqlDB engine
+
 Let's connect to the ksqlDB shell
 
 ``` bash
@@ -606,7 +614,7 @@ SELECT * FROM vehicle_tracking_refined_t WHERE vehicleId = 42;
 
 ## Step 6 - Investigate Driving behaviour
 
-In this part we will be using ksqlDB and as an alternative solution Kafka Streams to analyse the data in the refined topic `vehicle_tracking_refined`.
+In this part we will be using ksqlDB and as an alternative solution Kafka Streams or Faust to analyse the data in the refined topic `vehicle_tracking_refined`.
 
 ![Alt Image Text](./images/use-case-step-6.png "Demo 1 - KsqlDB")
 
@@ -646,6 +654,127 @@ We can also see the same information by directly getting the data from the under
 
 ``` bash
 docker exec -ti kcat kcat -b kafka-1 -t problematic_driving -s value=avro -r http://schema-registry-1:8081
+```
+
+### Alternative using Kafka Streams
+
+The same logic can also be implemented using Kafka Streams. In the folder `java` you will find the Kafka Streams project `kafka-streams-vehicle-tracking` with the implementation. The value we consume from the `vehicle_tracking_refined` topic is serialized as Avro. Therefore we configure Kafka Streams to use the `SpecificAvroSerde`.
+
+```java
+package com.trivadis.kafkastreams;
+
+import com.trivadis.avro.VehicleTrackingRefined;
+import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import org.apache.commons.cli.*;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.KStream;
+
+import java.util.Properties;
+
+public class DetectProblematicDriving {
+
+	static final String VEHICLE_TRACKING_REFINED_STREAM = "vehicle_tracking_refined";
+	static final String PROBLEMATIC_DRIVING_STREAM = "problematic_driving-kstreams";
+
+	public static void main(final String[] args) {
+		final String applicationId = "test";
+		final String clientId = "test";
+		final String bootstrapServer = "dataplatform:9092";
+		final String schemaRegistryUrl = "http://dataplatform:8081";
+		final boolean cleanup = false;
+		final String stateDirPath = "C:\\tmp\\kafka-streams";
+
+		final KafkaStreams streams = buildFeed(applicationId, clientId, bootstrapServer, schemaRegistryUrl, stateDirPath);
+
+		if (cleanup) {
+			streams.cleanUp();
+		}
+		streams.start();
+
+		// Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				streams.close();
+			}
+		}));
+	}
+
+	private static KafkaStreams buildFeed(final String applicationId, final String clientId, final String bootstrapServers, final String schemaRegistryUrl,
+										  final String stateDir) {
+
+		final Properties streamsConfiguration = new Properties();
+
+		// Give the Streams application a unique name. The name must be unique in the
+		// Kafka cluster
+		// against which the application is run.
+		streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId);
+		streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, clientId);
+
+		// Where to find Kafka broker(s).
+		streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+
+		// Where to find the Confluent schema registry instance(s)
+		streamsConfiguration.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+
+		// Specify default (de)serializers for record keys and for record values.
+		streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+		streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, SpecificAvroSerde.class);
+		streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, stateDir);
+		streamsConfiguration.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+		// Records should be flushed every 10 seconds. This is less than the default
+		// in order to keep this example interactive.
+		streamsConfiguration.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10 * 1000);
+
+		// If Confluent monitoring interceptors are on the classpath,
+		// then the producer and consumer interceptors are added to the
+		// streams application.
+		// MonitoringInterceptorUtils.maybeConfigureInterceptorsStreams(streamsConfiguration);
+
+
+		final StreamsBuilder builder = new StreamsBuilder();
+
+		// read the source stream (keyed by objectId)
+		final KStream<String, VehicleTrackingRefined> vehicleTracking = builder.stream(VEHICLE_TRACKING_REFINED_STREAM);
+
+		vehicleTracking.peek((k,v) -> System.out.println("vehicleTracking.peek(...) : " + k + " : " + v));
+
+		// filter out all events where eventType equals "Normal"
+		final KStream<String, VehicleTrackingRefined> vehicleTrackingFiltered = vehicleTracking.filterNot((k,v) -> "Normal".equals (v.getEVENTTYPE().toString()));
+
+		// Send the Matches to the Kafka Topic
+		vehicleTrackingFiltered.to(PROBLEMATIC_DRIVING_STREAM);
+
+		// read the driver
+		//final KTable<String, Driver> driver = builder.table(DRIVER_STREAM);
+
+		// Left Join Positions Mecomo Raw with Barge to get the barge id
+		//KStream<String, PositionMecomo> positionsMecomo  =  positionsMecomoRaw.leftJoin(barge,
+		//		(leftValue, rightValue) -> createFrom(leftValue, (rightValue != null ? rightValue.getId() : -1) ),
+		//		Joined.<String, PositionMecomoRaw, Barge>keySerde(Serdes.String())
+		//);
+
+		return new KafkaStreams(builder.build(), streamsConfiguration);
+	}
+}
+```
+
+To not give any conflicts with the ksqlDB version, the Kafka Streams implementation publishes to its own topic `problematic_driving-kstreams`. So let's create that first
+
+``` bash
+docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic problematic_driving-kstreams --partitions 8 --replication-factor 3
+```
+
+Now you can run the Kafka Streams application and you should see the problematic driving in the `problematic_driving-kstreams` topic
+
+``` bash
+docker exec -ti kcat kcat -b kafka-1 -t problematic_driving-kstreams -s value=avro -r http://schema-registry-1:8081 -o end -q
 ```
 
 ## Demo 7 - Materialize Driver Information ("static information")
@@ -769,7 +898,6 @@ we can use `kcat` to show the data stream in the newly created Kafka topic `prob
 ``` bash
 docker exec -ti kcat kcat -b kafka-1 -t problematic_driving_and_driver -s value=avro -r http://schema-registry-1:8081
 ```
-
 
 ## Demo 9 - Aggregate Driving Behaviour
 
