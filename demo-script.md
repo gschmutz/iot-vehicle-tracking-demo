@@ -47,7 +47,7 @@ docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --top
 
 
 ```bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysA
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_sysA
 ```
 
 ```bash
@@ -165,11 +165,11 @@ EMIT CHANGES;
 ```
 
 ``` bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_refined
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined
 ```
 
 ``` bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_refined -s avro -r http://schema-registry-1:8081
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined -s value=avro -r http://schema-registry-1:8081
 ```
 
 ## Demo 3 - Integrate System B
@@ -202,7 +202,7 @@ docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --top
 
 
 ```bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_sysB -f "%k - %s\n" -q
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_sysB -f "%k - %s\n" -q
 ```
 
 ## Demo 4 - Refinement of data from System B into same topic as above
@@ -262,7 +262,7 @@ EMIT CHANGES;
 ```
 
 ``` bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t vehicle_tracking_refined -s avro -r http://schema-registry-1:8081
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined -s value=avro -r http://schema-registry-1:8081
 ```
 
 ## Demo 5 - Pull Query on Vehicle Tracking Info ("Device Shadow/Device Twin")
@@ -337,7 +337,7 @@ EMIT CHANGES;
 ```
 
 ``` bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t problematic_driving -s avro -r http://schema-registry-1:8081
+docker exec -ti kcat kcat -b kafka-1 -t problematic_driving -s value=avro -r http://schema-registry-1:8081
 ```
 
 ### Alternative with Kafka Streams
@@ -405,7 +405,7 @@ CREATE TABLE IF NOT EXISTS driver_t (id BIGINT PRIMARY KEY,
 ```
 
 ```bash
-docker exec -ti kafkacat kafkacat -b kafka-1 -t logisticsdb_driver -o beginning
+docker exec -ti kcat kcat -b kafka-1 -t logisticsdb_driver -o beginning
 ```
 
 ```sql
