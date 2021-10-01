@@ -777,7 +777,7 @@ Now you can run the Kafka Streams application and you should see the problematic
 docker exec -ti kcat kcat -b kafka-1 -t problematic_driving-kstreams -s value=avro -r http://schema-registry-1:8081 -o end -q
 ```
 
-### Alternative using Fust
+### Alternative using Faust
 
 The same logic can also be implemented using Faust. In the folder `python` you will find the Faust project `faust-vehicle-tracking` with the implementation. The value we have availabke from the `vehicle_tracking_refined` topic is serialized as Avro. Avro is supported by Faut, but the current implementation works on Json. Therefore we first convert the Avro messges into Json using ksqlDB.
 
@@ -874,19 +874,21 @@ docker exec -ti kcat kcat -b kafka-1 -t problematic_driving_faust -o end -q
 
 ## Demo 7 - Materialize Driver Information ("static information")
 
-In this part of the demo, we are integrating the `driver` information from the Dispatching system into a Kafka topic, so it is available for enrichments of data streams. 
-
-, which we created and populated in the [Preparation](0-Preparation.md) section.
-
-
+In this part of the workshop, we are integrating the `driver` information from the Dispatching system into a Kafka topic, so it is available for enrichments of data streams.  
 
 ![Alt Image Text](./images/use-case-step-7.png "Demo 1 - KsqlDB")
 
-First let's register the Kafka topic `logisticsdb_driver`. 
+We will use the Kafka Connect [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) for periodically retrieving the data from the database table and publish it to the Kafka topic `logisticsdb_driver`. The connector is pre-installed as part of the dataplatform.
+
+Instead of configuring the connector through the REST API, as we have seen before with the MQTT connector, we will use the ksqlDB integration with the [CREATE CONNECTOR](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-connector/) command.
+
+First let's create the Kafka topic `logisticsdb_driver`.
 
 ```bash
 docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic logisticsdb_driver --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
 ```
+
+Now in the ksqlDB shell configure the following settings
 
 ``` sql
 set 'commit.interval.ms'='5000';
@@ -894,7 +896,7 @@ set 'cache.max.bytes.buffering'='10000000';
 set 'auto.offset.reset'='earliest';
 ```
 
-[CREATE CONNECTOR](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-connector/)
+and create the connector ([CREATE CONNECTOR](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-connector/))
 
 ``` sql
 DROP CONNECTOR jdbc_logistics_sc;
@@ -924,11 +926,19 @@ CREATE SOURCE CONNECTOR jdbc_logistics_sc WITH (
     );
 ```
 
-we can see that all the drivers from the `driver` table have been produced into the `logisticsdb_driver` topic:
+we can see that all the drivers from the `driver` table have been produced into the `logisticsdb_driver` topic by using `kcat`:
 
 ```bash
 docker exec -ti kcat kcat -b kafka-1 -t logisticsdb_driver -o beginning
 ```
+
+you can also use the `print` command from ksqlDB instead
+
+```sql
+print logisticsdb_driver
+```
+
+back in the ksqlDB console, create a ksqlDB table on the topic
 
 ``` sql
 DROP TABLE IF EXISTS driver_t;
@@ -954,6 +964,7 @@ docker exec -ti postgresql psql -d demodb -U demo -c "UPDATE logistics_db.driver
 
 ## Demo 8 - Join with Driver ("static information")
 
+In this part of the workshop, we are joining the `driver` ksqlDB table with the `problematic_driving_s` ksqlDB stream to enrich it with valuable information.
 
 ![Alt Image Text](./images/use-case-step-8.png "Demo 1 - KsqlDB")
 
@@ -967,7 +978,7 @@ ON pd.driverId  = d.id
 EMIT CHANGES;
 ```
 
-We can see the enriched stream live in the CLI.
+We can see that the join looks like it has been taken from an RDMBS-based system. The enriched stream can be seen appearing in live on the ksqlDB CLI.
 
 How can we make that enriched dataset (data stream) available in a more permanent fashion? We do that by creating a new Stream based on the SELECT statement just issued. Stop the query by entering `CTRL-C` and execute the following statement:
 
@@ -996,7 +1007,11 @@ docker exec -ti kcat kcat -b kafka-1 -t problematic_driving_and_driver -s value=
 
 ## Demo 9 - Aggregate Driving Behaviour
 
+In this part of the workshop, we are using the aggregate operators `count` to perform aggregations over time windows.
+
 ![Alt Image Text](./images/use-case-step-9.png "Demo 1 - KsqlDB")
+
+The first one is a tumbling window of 1 hour
 
 ``` sql
 DROP TABLE IF EXISTS event_type_by_1hour_tumbl_t DELETE TOPIC;
@@ -1013,6 +1028,8 @@ WINDOW TUMBLING (SIZE 60 minutes)
 GROUP BY eventType;
 ```
 
+The second one is a tumbling window of 1 hour with a slide of 30 minutes.
+
 ``` sql
 CREATE TABLE event_type_by_1hour_hopp_t AS
 SELECT windowstart AS winstart
@@ -1023,6 +1040,8 @@ FROM problematic_driving_s
 WINDOW HOPPING (SIZE 60 minutes, ADVANCE BY 30 minutes)
 GROUP BY eventType;
 ```
+
+If you are doing a select on the table, you can format the time elements of the time window as shown below
 
 ```
 SELECT TIMESTAMPTOSTRING(WINDOWSTART,'yyyy-MM-dd HH:mm:SS','CET') wsf
@@ -1039,60 +1058,27 @@ EMIT CHANGES;
 
 ## Demo 10 - Materialize Shipment Information ("static information")
 
+In this part of the workshop we are integrating the `shipment` information from the Shipment system into a Kafka topic, so it is available for anayltics. 
+
 ![Alt Image Text](./images/use-case-step-10.png "Demo 1 - KsqlDB")
 
-Create the MySQL table with shipment information:
+We will use the Kafka Connect [Debezium MySQL CDC Source Connector](https://www.confluent.io/hub/debezium/debezium-connector-mysql) to monitor and record all row-level changes in on the `shipment` database table and publish it to the Kafka topic `sample.sample.shipment` (implementation of the log-based change data capture). The connector is pre-installed as part of the dataplatform.
+
+We are again using the [CREATE CONNECTOR](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-connector/) command for configuring the connector instead of the REST API.
+
+First let's create the new Kafka topic
 
 ``` bash
-≈
+docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic sample.sample.shipment --partitions 8 --replication-factor 3
 ```
 
-```sql
-CREATE USER 'debezium'@'%' IDENTIFIED WITH mysql_native_password BY 'dbz';
-CREATE USER 'replicator'@'%' IDENTIFIED BY 'replpass';
-GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT  ON *.* TO 'debezium';
-GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'replicator';
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON sample.* TO sample;
-
-USE sample;
-
-DROP TABLE shipment;
-
-CREATE TABLE shipment (
-                id INT PRIMARY KEY,
-                vehicle_id INT,
-                target_wkt VARCHAR(2000),
-                create_ts timestamp DEFAULT CURRENT_TIMESTAMP,
-                update_ts timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-                
-INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (1,11, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))');     
-
-INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (2, 42, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))');         
-
-INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (3, 12, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))'); 
-                
-INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (4, 13, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))'); 
-
-INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (5, 14, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
-
-INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (6, 15, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
-
-INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (7, 32, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
-
-INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (8, 48, 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))'); 
-```
-
-```sql
-UPDATE shipment SET target_wkt = 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))', update_ts = CURRENT_TIMESTAMP;
-```
-
+alternatively I could also be created as a compacted log topic
 
 ```bash
 docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic sample.sample.shipment --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
 ```
 
+Now we can create the connector
 
 ```sql
 DROP CONNECTOR debz_shipment_sc;
@@ -1120,6 +1106,7 @@ CREATE SOURCE CONNECTOR debz_shipment_sc WITH (
     );
 ```
 
+Now let's create the corresponding ksqlDB table
 
 ``` sql
 DROP TABLE IF EXISTS shipment_t;
@@ -1131,13 +1118,29 @@ CREATE TABLE IF NOT EXISTS shipment_t (id VARCHAR PRIMARY KEY,
         value_format='AVRO');
 ```
 
+And use a select to test that it is working
+
 ```sql
 SELECT * FROM shipment_t EMIT CHANGES;
 ```
 
-## Demo 11 - Geo-Fencing for "near" destination
+If you perform an update in MySQL, you should see a change immediately
+
+```sql
+UPDATE shipment SET target_wkt = 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))', update_ts = CURRENT_TIMESTAMP;
+```
+
+## Demo 11 - Geo-Fencing for "near" destination (to be finished)
+
+In this part of the workshop we are using the `shipment` information to detect when a vehicle is near the destination of the shipment. 
 
 ![Alt Image Text](./images/use-case-step-11.png "Demo 1 - KsqlDB")
+
+For that we have implemented some additional user defined functions (UDFs) which can be sue din the same way as the built-in funcitons of ksqlDB.
+
+```sql
+show functions;
+```
 
 ```sql
 DROP TABLE IF EXISTS shipment_by_vehicle_t;
@@ -1147,7 +1150,6 @@ AS SELECT vehicle_id, collect_list(target_wkt) AS target_wkts
 FROM shipment_t
 GROUP BY vehicle_id;
 ```
-
 
 ```sql
 SELECT vtr.vehicleId
@@ -1176,12 +1178,11 @@ EMIT CHANGES;
 ```
 
 
-
 ```sql
 SELECT vehicleId, geo_fence(array_lag(collect_list(geo_fence(latitude, longitude, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))')),1), array_lag(collect_list(geo_fence(latitude, longitude, 'POLYGON ((-90.626220703125 38.80118939192329, -90.62347412109375 38.460041065720446, -90.06866455078125 38.436379603, -90.04669189453125 38.792626957868904, -90.626220703125 38.80118939192329))')),0)) status FROM vehicle_tracking_refined_s group by vehicleId EMIT CHANGES;
 ```
 
-## Demo 12 - Dashboard Integration (wip)
+## Demo 12 - Dashboard Integration (to be finished)
 
 First let's create a stream backed by the `dashboard` topic, which will be the channel to the Tipboard dashboard solution. 
 
