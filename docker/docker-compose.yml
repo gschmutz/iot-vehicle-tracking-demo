@@ -1,7 +1,7 @@
 # =======================================================================
 # Platform Name            iot-vehicle-tracking-platform
 # Platform Stack:          trivadis/platys-modern-data-platform
-# Platform Stack Version:  1.15.0
+# Platform Stack Version:  1.16.0-preview
 # =======================================================================
 version: '3.5'
 networks:
@@ -306,7 +306,7 @@ services:
       KSQL_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       KSQL_RESPONSE_HTTP_HEADERS_CONFIG: ''
-      KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083,http://kafka-connect-2:8084
+      KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083
       KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
       KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: 1
       KSQL_KSQL_SINK_REPLICAS: 1
@@ -359,7 +359,7 @@ services:
       KSQL_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       KSQL_RESPONSE_HTTP_HEADERS_CONFIG: ''
-      KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083,http://kafka-connect-2:8084
+      KSQL_KSQL_CONNECT_URL: http://kafka-connect-1:8083
       KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
       KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: 1
       KSQL_KSQL_SINK_REPLICAS: 1
@@ -423,6 +423,23 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/opentelemetry/agents:/otel
+    restart: unless-stopped
+  #  ================================== Schema Registry UI ========================================== #
+  schema-registry-ui:
+    image: landoop/schema-registry-ui:latest
+    container_name: schema-registry-ui
+    hostname: schema-registry-ui
+    labels:
+      com.platys.name: schema-registry-ui
+      com.platys.webui.title: Confluent Schema Registry UI
+      com.platys.webui.url: http://${PUBLIC_IP}:28102
+    ports:
+      - 28102:8000
+    environment:
+      SCHEMAREGISTRY_URL: http://${PUBLIC_IP}:8081
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./conf/resolv.conf:/etc/resolv.conf:ro
     restart: unless-stopped
   #  ================================== kcat (used to be kafkacat)  ========================================== #
   kcat:
@@ -562,7 +579,7 @@ services:
       - 18630:18630
     environment:
       SDC_OFFSET_DIRECTORY: /data/custom-offset-el
-      SDC_INSTALL_STAGES: ''
+      SDC_INSTALL_STAGES: streamsets-datacollector-apache-kafka_2_6-lib
       SDC_INSTALL_ENTERPRISE_STAGES: ''
       SDC_JAVA_OPTS: -Xmx2g -Xms2g -Dlog4j2.formatMsgNoLookups=true
       SDC_JAVA8_OPTS: -XX:+UseG1GC
@@ -637,6 +654,7 @@ services:
       - POSTGRES_MULTIPLE_DATABASES=demodb
       - POSTGRES_MULTIPLE_USERS=demo
       - POSTGRES_MULTIPLE_PASSWORDS=abc123!
+      - POSTGRES_MULTIPLE_ADDL_ROLES=
       - PGDATA=/var/lib/postgresql/data/pgdata
       - DB_SCHEMA=demo
     volumes:
@@ -748,7 +766,7 @@ services:
       DATAPLATFORM_HOME: ${DATAPLATFORM_HOME}
       PLATYS_PLATFORM_NAME: iot-vehicle-tracking-platform
       PLATYS_PLATFORM_STACK: trivadis/platys-modern-data-platform
-      PLATYS_PLATFORM_STACK_VERSION: 1.15.0
+      PLATYS_PLATFORM_STACK_VERSION: 1.16.0-preview
       PLATYS_COPY_COOKBOOK_DATA: 'True'
     volumes:
       - ./artefacts/templates:/templates

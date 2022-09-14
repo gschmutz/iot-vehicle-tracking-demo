@@ -2,6 +2,46 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack) for how to upgrade to newer version.
 
+## What's new in 1.16.0
+
+The Modern Data Platform version 1.16.0 contains the following bug fixes and enhancements:
+
+### New Services
+
+ * Kong API Gateway
+ * Kong decK
+ * Tyk API Gateway
+ * Tyk Dashboard
+ * Tyk Pump
+
+### New Cookbook Recipes
+
+ *
+
+### New Tutorial
+
+ * [IoT Vehicle Tracking](../tutorials/iot-vehicle-tracking/README)
+
+### Version upgrades
+
+ * Update `DataHub` to `v0.8.44`
+ * Update `Trino` to `395`
+ * Update `Starburst Enterprise` to `393-e.1`
+ * Update `Jikkou` to `0.12.2`
+ * Update `Hasura` to `v2.11.1`
+
+### Breaking Changes
+
+ * if markdown viewer cannot run on port 80 (`MARKDOWN_VIEWER_use_port_80` is set to `false`), port 8008 is used and no longer port 8000
+ 
+### Enhancements
+
+ * make `spark.sql.warehouse.dir` configurable in `config.yml`
+ * added first tutorials showing more complete walk-through of using Playts
+ * allow to add roles when specifying multiple databases and users with PostgreSQL
+ * allow to specify that the Starburstdata license file should be mapped into the containers, when `TRINO_edition` is set to `starburstdata`. This enables the additional security features, more connectors, a cost-based query optimizer and much more.
+ * added catalog for `iceberg`, `delta-lake`, `elasticsearch`, `mongo`, `mysql`, `sqlserver`, `pinot` and `druid` to trino/starburst
+ 
 ## What's new in 1.15.0
 
 The Modern Data Platform version 1.15.0 contains the following bug fixes and enhancements:

@@ -91,7 +91,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6381 | 6379 | redis-replica-1 |
 6382 | 6379 | redis-replica-1 |
 6385 | 6379 | redash-redis |
+6386 | 6379 | tyk-redis |
 6831 | 6831 | jaeger (udp) |
+6749 | 6749 | curity |
 6832 | 6832 | jaeger (udp) |
 6875 | 6875 | materialize-1 |
 7000 | 7000 | yb-master |
@@ -110,7 +112,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7687 | 7687 | neo4j-1 |
 7688 | 7687 | neo4j-2 |
 7689 | 7687 | neo4j-3 |
-8000 | 80 | markdown-viewer |
+8000 | 8000 | kong (proxy) |
+8001 | 8001 | kong (admin api) |
+8002 | 8002 | kong (admin gui) |
+8008 | 80 | markdown-viewer |
 8024 | 8024 | axon-server |
 8047 | 8047 | drill |
 8048 | 8048 | kafka-eagle |
@@ -130,6 +135,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
 8200 | 8200 | vault |
+8443 | 8443 | kong (proxy ssl) |
+8444 | 8444 | kong (admin api ssl) |
+8446 | 8443 | curity |
 8787 | 8787 | r-studio |
 8812 | 8812 | questdb |
 8888 | 8888 | hue |
@@ -256,6 +264,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 27017 | 27017 | mongodb-1 |
 27018 | 27017 | mongodb-2 |
 27019 | 27017 | mongodb-3 |
+27020 | 27017 | mongodb-3 |
 28080 | 8080 | zeppelin |
 28081 | 8080 | presto-1 |
 28082 | 8080 | trino-1 |
@@ -441,6 +450,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28277 | 8080 | zilla |
 28278 | 9090 | zilla |
 28279 | 80 | azure-storage-explorer |
+28280 | 8080 | tyk-gateway |
+28281 | 3000 | tyk-dashboard |
 
 ## Ports > 28500
 
