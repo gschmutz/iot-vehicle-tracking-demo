@@ -4,7 +4,7 @@
       platys:
           platform-name: 'iot-vehicle-tracking-platform'
           platform-stack: 'trivadis/platys-modern-data-platform'
-          platform-stack-version: '1.13.0-preview'
+          platform-stack-version: '1.15.0'
           structure: 'flat'
       # ========================================================================
       # Global configuration, valid for all or a group of services
@@ -163,7 +163,7 @@
       KAFKA_CONNECT_UI_map_resolv_conf: true
       #
       # ===== Debezium UI ========
-      #      
+      #
       DEBEZIUM_UI_enable: true
       #
       # ===== Cluster Manager for Apache Kafka ========
@@ -406,7 +406,7 @@
       # ===== Shiny Server ========
       #
       SHINY_SERVER_enable: false
-      # one of: 'base' or 'verse' 
+      # one of: 'base' or 'verse'
       SHINY_SERVER_edition: base
       SHINY_SERVER_volume_map_apps: false
       #
@@ -644,7 +644,7 @@
       POSTGRESQL_password: abc123!
       POSTGRESQL_schema: demo
       #POSTGRESQL_anon_role: appuser
-      
+
       #
       # ===== Posgrest ========
       #
@@ -896,4 +896,3 @@
       PYTHON_enable: false
       PYTHON_script_folder: ''
       PYTHON_script: ''
-      
