@@ -193,7 +193,7 @@ tail -f $DATAPLATFORM_HOME/data-transfer/logs/TruckData.dat
 docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_sysB --partitions 8 --replication-factor 3
 ```
 
-<http://http://dataplatform:18630/>
+<http://dataplatform:18630/>
 
 * File to Tail / Path: ```/data-transfer/logs/TruckData.dat```
 * Data Parser: ```/text```, ```/parsed``` with DataFormat ```Delimited```
@@ -288,12 +288,12 @@ DROP TABLE IF EXISTS vehicle_tracking_refined_t DELETE TOPIC;
 CREATE TABLE IF NOT EXISTS vehicle_tracking_refined_t
 WITH (kafka_topic = 'vehicle_tracking_refined_t')
 AS
-SELECT CAST(vehicleId AS BIGINT)			vehicleId
-       , latest_by_offset(driverId)	   driverId
-		, latest_by_offset(source)			source
-		, latest_by_offset(eventType)		eventType
-		, latest_by_offset(latitude)		latitude
-		, latest_by_offset(longitude)		longitude
+SELECT CAST(vehicleId AS BIGINT)       vehicleId
+       , latest_by_offset(driverId)    driverId
+       , latest_by_offset(source)      source
+       , latest_by_offset(eventType)   eventType
+       , latest_by_offset(latitude)    latitude
+       , latest_by_offset(longitude)   longitude
 FROM vehicle_tracking_refined_s
 GROUP BY CAST(vehicleId AS BIGINT)
 EMIT CHANGES;
@@ -344,7 +344,7 @@ docker exec -ti kcat kcat -b kafka-1 -t problematic_driving -s value=avro -r htt
 
 
 ``` bash
-docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic problematic_driving_kstreams --partitions 8 --replication-factor 3
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic problematic_driving_kstreams --partitions 8 --replication-factor 3
 ```
 
 ## Demo 7 - Materialise Driver Information ("static information")
@@ -352,7 +352,7 @@ docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --top
 ![Alt Image Text](./images/use-case-step-7.png "Demo 1 - KsqlDB")
 
 ```bash
-docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic logisticsdb_driver --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic logisticsdb_driver --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
 ```
 
 [Kafka Connect JDBC Connector](https://docs.confluent.io/current/connect/kafka-connect-jdbc/index.html#connect-jdbc)

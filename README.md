@@ -453,7 +453,7 @@ To check that the refined topic does in fact hold Avro formatted data, let's jus
 docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined
 ```
 
-we can see that it is serialized as Avro 
+we can see that it is serialised as Avro 
 
 ```
                             Normal���Q�B@ףp=
@@ -815,7 +815,7 @@ public class DetectProblematicDriving {
 To not give any conflicts with the ksqlDB version, the Kafka Streams implementation publishes to its own topic `problematic_driving-kstreams`. So let's create that first
 
 ``` bash
-docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic problematic_driving-kstreams --partitions 8 --replication-factor 3
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic problematic_driving-kstreams --partitions 8 --replication-factor 3
 ```
 
 Now you can run the Kafka Streams application and you should see the problematic driving in the `problematic_driving-kstreams` topic
@@ -903,7 +903,7 @@ async def process(positions):
 Create the new topic `problematic_driving_faust ` where the dangerous drving behaviour will be published to:
 
 ```
-docker exec -ti kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic problematic_driving_faust --partitions 8 --replication-factor 3
+docker exec -ti kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic problematic_driving_faust --partitions 8 --replication-factor 3
 ```
 
 Now you can run the Faust application the application. From the `src` folder run
@@ -932,7 +932,7 @@ Instead of configuring the connector through the REST API, as we have seen befor
 First let's create the Kafka topic `logisticsdb_driver`.
 
 ```bash
-docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic logisticsdb_driver --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic logisticsdb_driver --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
 ```
 
 Now in the ksqlDB shell configure the following settings
@@ -1116,13 +1116,13 @@ We are again using the [CREATE CONNECTOR](https://docs.ksqldb.io/en/latest/devel
 First let's create the new Kafka topic
 
 ``` bash
-docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic sample.sample.shipment --partitions 8 --replication-factor 3
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic sample.sample.shipment --partitions 8 --replication-factor 3
 ```
 
 alternatively I could also be created as a compacted log topic
 
 ```bash
-docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic sample.sample.shipment --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic sample.sample.shipment --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
 ```
 
 Now we can create the connector
