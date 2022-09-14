@@ -42,7 +42,7 @@ curl -XGET http://dataplatform:8083/connector-plugins | jq
 <http://dataplatform:8083/connector-plugins>
 
 ```bash
-docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic vehicle_tracking_sysA --partitions 8 --replication-factor 3
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_sysA --partitions 8 --replication-factor 3
 ```
 
 
@@ -140,7 +140,7 @@ SELECT * FROM vehicle_tracking_sysA_s EMIT CHANGES;
 DROP STREAM IF EXISTS vehicle_tracking_refined_s;
 ```
 
-* [Schema Registry](http://analyticsplatform:28102/#/)
+* [Schema Registry](http://dataplatform:28102/#/)
 * [Apache Avro](http://avro.apache.org)
 
 
@@ -190,7 +190,7 @@ tail -f $DATAPLATFORM_HOME/data-transfer/logs/TruckData.dat
 ```
 
 ``` bash
-docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic vehicle_tracking_sysB --partitions 8 --replication-factor 3
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_sysB --partitions 8 --replication-factor 3
 ```
 
 <http://http://dataplatform:18630/>

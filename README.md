@@ -1,12 +1,12 @@
 # IoT Vehicle Tracking End-to-End Streaming Demo
 
-In this demo we will be ingesting IoT data into a Kafka topic from which it will be analyzed using Stream Analytics. To make it a bit more realistic, the data is not directly sent to Kafka from the IoT devices (vehicles) but first sent through an MQTT broker (IoT gateway). 
+In this demo we will be ingesting IoT data into a Kafka topic from which it will be analysed using Stream Analytics. To make it a bit more realistic, the data is not directly sent to Kafka from the IoT devices (vehicles) but first sent through an MQTT broker (IoT gateway). 
 
-The following diagram shows the setup of the data flow which will be implemented step by step. Of course we will not be using real-life data, but have a program simulating trucks and their driving behviour.
+The following diagram shows the setup of the data flow which will be implemented step by step. Of course we will not be using real-life data, but have a program simulating trucks and their driving behaviour.
 
 ![Alt Image Text](./images/use-case-overview.png "Use Case Overview")
 
-We will see various technolgoies in action, such as **Kafka**, **MQTT**, **Kafka Connect**, **Kafka Streams** and **ksqlDB**.
+We will see various technologies in action, such as **Kafka**, **MQTT**, **Kafka Connect**, **Kafka Streams** and **ksqlDB**.
 
 ## Preparation
 
@@ -80,8 +80,8 @@ The Kafka cluster is configured with `auto.topic.create.enable` set to `false`. 
 From a terminal window, use the `kafka-topics` CLI inside the `kafka-1` docker container to create the topics `vehicle_tracking_` and `logisticsdb_driver `.
 
 ``` bash
-docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic vehicle_tracking_sysA --partitions 8 --replication-factor 3
-docker exec -it kafka-1 kafka-topics --zookeeper zookeeper-1:2181 --create --topic vehicle_tracking_sysB --partitions 8 --replication-factor 3
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_sysA --partitions 8 --replication-factor 3
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_sysB --partitions 8 --replication-factor 3
 ```
 
 If you don't like to work with the CLI, you can also create the Kafka topics using the graphical user interfaces [Cluster Manager for Kafka (CMAK)](http://dataplatform:28104) or the [Apache Kafka HQ (AKHQ)](http://dataplatform:28107). 
@@ -99,7 +99,7 @@ docker exec -ti postgresql psql -d demodb -U demo -c "SELECT * FROM logistics_db
 The `driver` table holds the information of the drivers working for us. Let's connect to the postgresql database running as part of the dataplatform and create the table
 
 ```bash
-docker exec -ti postgresql psql -d shipment -U mio
+docker exec -ti postgresql psql -d demodb -U demo
 ``` 
 
 If the table is not available, this is the code to run 
