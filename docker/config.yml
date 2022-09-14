@@ -107,7 +107,7 @@
       # ===== Kafka Connect ========
       #
       KAFKA_CONNECT_enable: true
-      KAFKA_CONNECT_nodes: 2
+      KAFKA_CONNECT_nodes: 1
       KAFKA_CONNECT_connectors: confluentinc/kafka-connect-jdbc:10.0.0,confluentinc/kafka-connect-mqtt:1.3.0,debezium/debezium-connector-mysql:1.1.0
       KAFKA_CONNECT_config_providers: 'file'
       KAFKA_CONNECT_config_providers_classes: 'org.apache.kafka.common.config.provider.FileConfigProvider'
