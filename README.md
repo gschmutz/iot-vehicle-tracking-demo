@@ -81,6 +81,7 @@ From a terminal window, use the `kafka-topics` CLI inside the `kafka-1` docker c
 
 ``` bash
 docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_sysA --partitions 8 --replication-factor 3
+
 docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_sysB --partitions 8 --replication-factor 3
 ```
 
@@ -414,6 +415,11 @@ Get info on the stream using the `DESCRIBE` command
 
 ```sql
 DESCRIBE vehicle_tracking_sysA_s;
+```
+
+or with the additional `EXTENDED` option
+
+```sql
 DESCRIBE EXTENDED vehicle_tracking_sysA_s;
 ```
 
@@ -523,7 +529,9 @@ Firs lets create the Stream on the raw data topic:
 
 ```sql
 DROP STREAM IF EXISTS vehicle_tracking_sysB_s;
+```
 
+```sql
 CREATE STREAM IF NOT EXISTS vehicle_tracking_sysB_s 
   (ROWKEY VARCHAR KEY,
    system VARCHAR,
