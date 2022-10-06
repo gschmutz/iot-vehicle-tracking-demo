@@ -212,10 +212,8 @@ platys list_services --stack trivadis/platys-modern-data-platform --stack-versio
 Now we are ready to generate the platform. In the `platys-demo-platform` folder, run the following command:
 
 ```
-platys gen -c ${PWD}/config.yml
+platys gen
 ```
-
-**Note:** Usage of `-c ${PWD}/config.yml` is only necessary with Platys CLI Version 2.4.1 and will be fixed with this issue: https://github.com/TrivadisPF/platys/issues/52
 
 and you should see an output similar to this
 
@@ -287,11 +285,9 @@ Now the Platform is ready to be started. Before doing that, you have to create s
 * `DOCKER_HOST_IP` - the IP address of the network interface of the Docker Host
 * `PUBLIC_IP` - the IP address of the public network interface of the Docker Host (different to `DOCKER_HOST_IP` if in a public cloud environment
 
-You can set these environment variables persistently on the machine (`/etc/environment`) or user (`~/.pam_environment` or `~/.profile`) level. 
+See [here](./setup-environment-variables) for how to setup these variables.
 
-Another option is to use the `.env` file in the folder where the `docker-compose.yml` file is located. All environment variables set in there are used when the docker compose environment is started. 
-
-Now let's start the platform. In a terminal window, execute 
+Having the environment variables in place, let's start the platform. In a terminal window, execute 
 
 ```
 docker-compose up -d

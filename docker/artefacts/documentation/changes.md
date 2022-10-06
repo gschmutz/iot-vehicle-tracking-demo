@@ -10,13 +10,22 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
  * Kong API Gateway
  * Kong decK
+ * Konga
+ * Kong Map
+ * Kong Admin UI
  * Tyk API Gateway
  * Tyk Dashboard
  * Tyk Pump
+ * Kafka Connector Board
+ * Kaskade
+ * kpow
+ * JupyterHub
+ * Conduktor Platform
 
 ### New Cookbook Recipes
 
- *
+ * [Handle Serialization Errors in ksqlDB](../cookbooks/recipes/ksqldb-handle-deserializaion-error/README) 
+ * [Using Jupyter notebook with Spark and Avro](../cookbooks/recipes/jupyter-spark/README)
 
 ### New Tutorial
 
@@ -24,11 +33,17 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
 ### Version upgrades
 
- * Update `DataHub` to `v0.8.44`
- * Update `Trino` to `395`
- * Update `Starburst Enterprise` to `393-e.1`
+ * Update `DataHub` to `v0.8.45`
+ * Update `Trino` to `398`
+ * Update `Starburst Enterprise` to `397-e`
  * Update `Jikkou` to `0.12.2`
  * Update `Hasura` to `v2.11.1`
+ * Update `Confluent Platform` to `7.2.2`
+ * Update `ksqldb` to `0.28.2`
+
+### Bug Fixes
+
+ * ksqlDB processing log now also works with the open source edition (`      KAFKA_KSQLDB_edition: 'oss'`).
 
 ### Breaking Changes
 

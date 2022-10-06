@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.15.0
+# `modern-data-platform` - Port Mappings - 1.16.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -8,6 +8,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 --------------------|------------------|-----------------------|
 21 | 21 | ftp |
 80 | 80 | markdown-viewer or firefox |
+1337 | 1337 | konga | 
 1433 | 1433 | sqlserver |
 1521 | 1521 | oracledb-ee |
 1522 | 1521 | oracledb-xe |
@@ -132,6 +133,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8088 | 8088 | ksqldb-server-1 |
 8089 | 8088 | ksqldb-server-2 |
 8090 | 8088 | ksqldb-server-3 |
+8100 | 8100 | kong-map |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
 8200 | 8200 | vault |
@@ -213,6 +215,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 13133 | 13133 | otel-collector |
 14250 | 14250 | jaeger (model.proto port)
 14271 | 14271 | jaeger (admin port) |
+14040 | 4040 | jupyter (spark ui) |
+14041 | 4041 | jupyter (spark ui) |
+14042 | 4042 | jupyter (spark ui) |
+14043 | 4043 | jupyter (spark ui) |
+14044 | 4044 | jupyter (spark ui) |
 15433 | 5433| yb-tserver-1 |
 15672 | 15672 | rabbitmq (ui) |
 16379 | 6379| yb-tserver-1 |
@@ -452,6 +459,11 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28279 | 80 | azure-storage-explorer |
 28280 | 8080 | tyk-gateway |
 28281 | 3000 | tyk-dashboard |
+28282 | 80 | kafka-connector-board |
+28283 | 3000 | kpow |
+28284 | 8000 | jupyterhub |
+28285 | 80 | conduktor-platform |
+28286 | 80 | kong-admin-ui |
 
 ## Ports > 28500
 

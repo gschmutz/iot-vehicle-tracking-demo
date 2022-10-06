@@ -15,7 +15,7 @@ networks:
 services:
   #  ================================== Zookeeper ========================================== #
   zookeeper-1:
-    image: confluentinc/cp-zookeeper:7.1.2
+    image: confluentinc/cp-zookeeper:7.2.2
     container_name: zookeeper-1
     hostname: zookeeper-1
     labels:
@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
 #  ================================== Kafka ========================================== #
   kafka-1:
-    image: confluentinc/cp-kafka:7.1.2
+    image: confluentinc/cp-kafka:7.2.2
     container_name: kafka-1
     hostname: kafka-1
     labels:
@@ -71,7 +71,7 @@ services:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
   kafka-2:
-    image: confluentinc/cp-kafka:7.1.2
+    image: confluentinc/cp-kafka:7.2.2
     container_name: kafka-2
     hostname: kafka-2
     labels:
@@ -109,7 +109,7 @@ services:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
   kafka-3:
-    image: confluentinc/cp-kafka:7.1.2
+    image: confluentinc/cp-kafka:7.2.2
     container_name: kafka-3
     hostname: kafka-3
     labels:
@@ -148,7 +148,7 @@ services:
     restart: unless-stopped
   #  ================================== Kafka Connect ========================================== #
   kafka-connect-1:
-    image: confluentinc/cp-kafka-connect:7.1.2
+    image: confluentinc/cp-kafka-connect:7.2.2
     container_name: kafka-connect-1
     hostname: kafka-connect-1
     labels:
@@ -170,6 +170,9 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
       CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
+      CONNECT_ACCESS_CONTROL_ALLOW_METHODS: GET,POST,PUT,DELETE
+      CONNECT_ACCESS_CONTROL_ALLOW_HEADERS: origin,content-type,accept,authorization
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
@@ -211,7 +214,7 @@ services:
         sleep infinity
     restart: unless-stopped
   kafka-connect-2:
-    image: confluentinc/cp-kafka-connect:7.1.2
+    image: confluentinc/cp-kafka-connect:7.2.2
     container_name: kafka-connect-2
     hostname: kafka-connect-2
     labels:
@@ -233,6 +236,9 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
       CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
+      CONNECT_ACCESS_CONTROL_ALLOW_METHODS: GET,POST,PUT,DELETE
+      CONNECT_ACCESS_CONTROL_ALLOW_HEADERS: origin,content-type,accept,authorization
       CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
@@ -275,7 +281,7 @@ services:
     restart: unless-stopped
   #  ================================== ksqlDB ========================================== #
   ksqldb-server-1:
-    image: confluentinc/ksqldb-server:0.27.1
+    image: confluentinc/ksqldb-server:0.28.2
     hostname: ksqldb-server-1
     container_name: ksqldb-server-1
     labels:
@@ -286,10 +292,10 @@ services:
       - 8088:8088
       - 1095:1095
     environment:
-      #KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j-rolling.properties"
+      KSQL_LOG4J_OPTS: -Dlog4j.configuration=file:/opt/app/log4j/log4j.properties
       KSQL_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
-      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092,kafka-2:19093,kafka-3:19094
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: ksql_processing_log
+      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092,kafka-2:19093,kafka-3:19094
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: ksql_processing_log
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
       KSQL_KSQL_LOGGING_PROCESSING_ROWS_INCLUDE: 'true'
@@ -322,13 +328,13 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/ksqldb:/etc/ksqldb/ext
-#      - ./conf/ksqldb/etc/log4j.properties:/etc/ksqldb/log4j.properties
+      - ./conf/ksqldb/etc/log4j.properties:/opt/app/log4j/log4j.properties
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
       - ./plugins/kafka-connect/jars:/etc/kafka-connect/jars
       - ./plugins/opentelemetry/agents:/otel
     restart: unless-stopped
   ksqldb-server-2:
-    image: confluentinc/ksqldb-server:0.27.1
+    image: confluentinc/ksqldb-server:0.28.2
     hostname: ksqldb-server-2
     container_name: ksqldb-server-2
     labels:
@@ -339,10 +345,10 @@ services:
       - 8089:8088
       - 1096:1095
     environment:
-      #KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/ksqldb/log4j-rolling.properties"
+      KSQL_LOG4J_OPTS: -Dlog4j.configuration=file:/opt/app/log4j/log4j.properties
       KSQL_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
-      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092,kafka-2:19093,kafka-3:19094
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: ksql_processing_log
+      KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092,kafka-2:19093,kafka-3:19094
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: ksql_processing_log
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
       KSQL_KSQL_LOGGING_PROCESSING_ROWS_INCLUDE: 'true'
@@ -375,7 +381,7 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/ksqldb:/etc/ksqldb/ext
-#      - ./conf/ksqldb/etc/log4j.properties:/etc/ksqldb/log4j.properties
+      - ./conf/ksqldb/etc/log4j.properties:/opt/app/log4j/log4j.properties
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
       - ./plugins/kafka-connect/jars:/etc/kafka-connect/jars
       - ./plugins/opentelemetry/agents:/otel
@@ -383,7 +389,7 @@ services:
   # Access the cli by running:
   # > docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
   ksqldb-cli:
-    image: confluentinc/ksqldb-cli:0.27.1
+    image: confluentinc/ksqldb-cli:0.28.2
     container_name: ksqldb-cli
     hostname: ksqldb-cli
     labels:
@@ -397,7 +403,7 @@ services:
     restart: unless-stopped
   #  ================================== Confluent Schema Registry ========================================== #
   schema-registry-1:
-    image: confluentinc/cp-schema-registry:7.1.2
+    image: confluentinc/cp-schema-registry:7.2.2
     hostname: schema-registry-1
     container_name: schema-registry-1
     labels:
