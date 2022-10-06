@@ -564,7 +564,7 @@ SELECT ROWKEY
 	, driverId
 	, routeId
 	, eventType
-	, cast(split(latLong,':')[1] as DOUBLE) as latitude
+	, CAST(split(latLong,':')[1] as DOUBLE) as latitude
 	, CAST(split(latLong,':')[2] AS DOUBLE) as longitude
 	, correlationId
 FROM vehicle_tracking_sysB_s
@@ -586,14 +586,55 @@ In ksqlDB suche queries are called *pull queries*, in contrast to the streaming 
 So let's do a `SELECT` on the stream, restricting on the `vehicleId` without an `EMIT CHANGES`
 
 ``` sql
-SELECT * FROM vehicle_tracking_refined_s WHERE vehicleId = 42;
+SELECT * FROM vehicle_tracking_refined_s WHERE vehicleId = '42';
 ```
 
-We get the following error from ksqlDB: `Pull queries are not supported on streams.`. 
+This query will return all the messages collected so far for vehicle `42`.
 
-Pull queries only work on Materialized Views, which are the `Table`s and not the `Stream`s. So can we create a table which delivers the information?
+```
+ksql> SELECT * FROM vehicle_tracking_refined_s WHERE vehicleId = '42'
+>;
++---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+
+|ROWKEY   |SOURCE   |TIMESTAMP|VEHICLEID|DRIVERID |ROUTEID  |EVENTTYPE|LATITUDE |LONGITUDE|CORRELATI|
+|         |         |         |         |         |         |         |         |         |ONID     |
++---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+
+|42       |Tracking_|166508600|42       |11       |196226178|Normal   |38.65    |-90.2    |-60501605|
+|         |SysA     |2589     |         |         |5        |         |         |         |965346141|
+|         |         |         |         |         |         |         |         |         |45       |
+|42       |Tracking_|166508600|42       |11       |196226178|Normal   |39.1     |-89.74   |-60501605|
+|         |SysA     |5857     |         |         |5        |         |         |         |965346141|
+|         |         |         |         |         |         |         |         |         |45       |
+|42       |Tracking_|166508600|42       |11       |196226178|Normal   |39.84    |-89.63   |-60501605|
+|         |SysA     |9608     |         |         |5        |         |         |         |965346141|
+|         |         |         |         |         |         |         |         |         |45       |
+|42       |Tracking_|166508601|42       |11       |196226178|Normal   |40.38    |-89.17   |-60501605|
+|         |SysA     |3558     |         |         |5        |         |         |         |965346141|
+|         |         |         |         |         |         |         |         |         |45       |
+|42       |Tracking_|166508601|42       |11       |196226178|Normal   |40.76    |-88.77   |-60501605|
+|         |SysA     |6637     |         |         |5        |         |         |         |965346141|
+|         |         |         |         |         |         |         |         |         |45       |
+|42       |Tracking_|166508601|42       |11       |196226178|Normal   |41.11    |-88.42   |-60501605|
+|         |SysA     |9778     |         |         |5        |         |         |         |965346141|
+|         |         |         |         |         |         |         |         |         |45       |
+|42       |Tracking_|166508602|42       |11       |196226178|Normal   |41.48    |-88.07   |-60501605|
+|         |SysA     |2997     |         |         |5        |         |         |         |965346141|
+|         |         |         |         |         |         |         |         |         |45       |
+|42       |Tracking_|166508602|42       |11       |196226178|Normal   |41.87    |-87.67   |-60501605|
+|         |SysA     |6737     |         |         |5        |         |         |         |965346141|
+|         |         |         |         |         |         |         |         |         |45       |
+|42       |Tracking_|166508603|42       |11       |196226178|Normal   |41.87    |-87.67   |-60501605|
+|         |SysA     |0128     |         |         |5        |         |         |         |965346141|
+|         |         |         |         |         |         |         |         |         |45       |
+Query Completed
+Query terminated
+```
 
-Of course! Here is the necessary statement:
+Note that the query terminates because of it being a pull query (similar to database query, ending at the end of the set). 
+
+Could we also use a query to just return the latest data point per vehicle?
+
+For that we can use a `GROUP BY` on `vehicleId` and using `latest_by_offset` on each field. 
+
 
 ``` sql
 DROP TABLE IF EXISTS vehicle_tracking_refined_t DELETE TOPIC;
@@ -612,7 +653,7 @@ GROUP BY vehicleId
 EMIT CHANGES;
 ```
 
-This table uses the vehicleId as the primary key (due to the GROUP BY) and materializes all values as the latest one from the aggregation. 
+This table uses the `vehicleId` as the primary key (due to the GROUP BY) and materialises all values as the latest one from the aggregation. 
 
 ``` sql
 DESCRIBE vehicle_tracking_refined_t;
@@ -943,15 +984,7 @@ First let's create the Kafka topic `logisticsdb_driver`.
 docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic logisticsdb_driver --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
 ```
 
-Now in the ksqlDB shell configure the following settings
-
-``` sql
-set 'commit.interval.ms'='5000';
-set 'cache.max.bytes.buffering'='10000000';
-set 'auto.offset.reset'='earliest';
-```
-
-and create the connector ([CREATE CONNECTOR](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-connector/))
+Now in the ksqlDB create the connector ([CREATE CONNECTOR](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-connector/))
 
 ``` sql
 DROP CONNECTOR jdbc_logistics_sc;
@@ -987,10 +1020,10 @@ we can see that all the drivers from the `driver` table have been produced into 
 docker exec -ti kcat kcat -b kafka-1 -t logisticsdb_driver -o beginning
 ```
 
-you can also use the `print` command from ksqlDB instead
+you can also use the `PRINT` command from ksqlDB instead
 
 ```sql
-print logisticsdb_driver
+PRINT logisticsdb_driver FROM BEGINNING;
 ```
 
 back in the ksqlDB console, create a ksqlDB table on the topic
