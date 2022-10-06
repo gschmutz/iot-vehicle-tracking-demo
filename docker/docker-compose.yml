@@ -609,7 +609,7 @@ services:
       - 18630:18630
     environment:
       SDC_OFFSET_DIRECTORY: /data/custom-offset-el
-      SDC_INSTALL_STAGES: streamsets-datacollector-apache-kafka_2_6-lib
+      SDC_INSTALL_STAGES: streamsets-datacollector-apache-kafka_2_7-lib
       SDC_INSTALL_ENTERPRISE_STAGES: ''
       SDC_JAVA_OPTS: -Xmx2g -Xms2g -Dlog4j2.formatMsgNoLookups=true
       SDC_JAVA8_OPTS: -XX:+UseG1GC
