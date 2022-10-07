@@ -277,30 +277,32 @@ docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined -s value=avro -
 Pull query on Stream does not work
 
 ``` sql
-SELECT * FROM vehicle_tracking_refined_s WHERE vehicleId = 42;
+SELECT * FROM vehicle_tracking_refined_s WHERE vehicleId = '42';
+```
+
+``` sql
+DESCRIBE vehicle_tracking_refined_t;
 ```
 
 ``` sql
 DROP TABLE IF EXISTS vehicle_tracking_refined_t DELETE TOPIC;
-```
 
-``` sql
 CREATE TABLE IF NOT EXISTS vehicle_tracking_refined_t
 WITH (kafka_topic = 'vehicle_tracking_refined_t')
 AS
-SELECT CAST(vehicleId AS BIGINT)       vehicleId
-       , latest_by_offset(driverId)    driverId
-       , latest_by_offset(source)      source
-       , latest_by_offset(eventType)   eventType
-       , latest_by_offset(latitude)    latitude
-       , latest_by_offset(longitude)   longitude
+SELECT vehicleId
+       , latest_by_offset(driverId)	   driverId
+		, latest_by_offset(source)			source
+		, latest_by_offset(eventType)		eventType
+		, latest_by_offset(latitude)		latitude
+		, latest_by_offset(longitude)		longitude
 FROM vehicle_tracking_refined_s
-GROUP BY CAST(vehicleId AS BIGINT)
+GROUP BY vehicleId
 EMIT CHANGES;
 ```
 
 ``` sql
-SELECT * FROM vehicle_tracking_refined_t WHERE vehicleId = 42;
+SELECT * FROM vehicle_tracking_refined_t WHERE vehicleId = '42';
 ```
 
 ## Demo 6 - Investigate Driving behaviour

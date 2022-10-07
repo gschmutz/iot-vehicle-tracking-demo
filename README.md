@@ -1113,7 +1113,8 @@ SELECT windowstart AS winstart
 	, count(*) 	AS nof 
 FROM problematic_driving_s 
 WINDOW TUMBLING (SIZE 60 minutes)
-GROUP BY eventType;
+GROUP BY eventType
+EMIT CHANGES;
 ```
 
 The second one is a tumbling window of 1 hour with a slide of 30 minutes.
@@ -1134,15 +1135,13 @@ If you are doing a select on the table, you can format the time elements of the 
 ```
 SELECT TIMESTAMPTOSTRING(WINDOWSTART,'yyyy-MM-dd HH:mm:SS','CET') wsf
 , TIMESTAMPTOSTRING(WINDOWEND,'yyyy-MM-dd HH:mm:SS','CET') wef
-, ws
-, we
+, WINDOWSTART
+, WINDOWEND
 , eventType
 , nof
 FROM event_type_by_1hour_tumbl_t
-WHERE ws > UNIX_TIMESTAMP()-300001 and ws < UNIX_TIMESTAMP()- 240001
 EMIT CHANGES;
 ```
-
 
 ## Demo 10 - Materialize Shipment Information ("static information")
 
@@ -1206,16 +1205,24 @@ CREATE TABLE IF NOT EXISTS shipment_t (id VARCHAR PRIMARY KEY,
         value_format='AVRO');
 ```
 
+Check with MySQL that CDC works
+
+``` bash
+docker exec -it mysql bash -c 'mysql -u root -pmanager'
+```
+
 And use a select to test that it is working
 
 ```sql
 SELECT * FROM shipment_t EMIT CHANGES;
 ```
 
-If you perform an update in MySQL, you should see a change immediately
+If you perform an INSERT in MySQL, you should see a change immediately
 
 ```sql
-UPDATE shipment SET target_wkt = 'POLYGON ((-91.0986328125 38.839707613545144, -90.87890625 38.238180119798635, -90.263671875 38.09998264736481, -89.75830078125 38.34165619279595, -89.36279296875 38.66835610151506, -89.5166015625 38.95940879245423, -89.93408203124999 39.11301365149975, -90.52734374999999 39.18117526158749, -91.0986328125 38.839707613545144))', update_ts = CURRENT_TIMESTAMP;
+USE sample;
+
+INSERT INTO shipment (id, vehicle_id, target_wkt)  VALUES (9, 49, 'POLYGON ((-91.29638671875 39.04478604850143, -91.4501953125 38.46219172306828, -90.98876953125 37.94419750075404, -89.912109375 37.78808138412046, -88.9892578125 38.37611542403604, -88.92333984375 38.77121637244273, -89.71435546875 39.470125122358176, -90.19775390625 39.825413103424786, -91.29638671875 39.04478604850143))'); 
 ```
 
 ## Demo 11 - Geo-Fencing for "near" destination (to be finished)
