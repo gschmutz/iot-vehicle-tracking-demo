@@ -9,7 +9,7 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 
-		<kafka.version>2.8.0</kafka.version>
+		<kafka.version>5.3.0-ccs</kafka.version>
 		<confluent.version>6.2.0</confluent.version>
 		<avro.version>1.10.0</avro.version>
 		<slf4j.version>1.7.32</slf4j.version>
