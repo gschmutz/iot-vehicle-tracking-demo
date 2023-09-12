@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://:28178> and login with the default user `admin` and password `admin`. 
+Navigate to <http://dataplatform:28178> and login with the default user `admin` and password `admin`. 

@@ -16,23 +16,23 @@ platys gen
 Show active consumers
 
 ```bash
-curl http://:28256/consumers
+curl http://dataplatform:28256/consumers
 ```
 
 Show specific consumer group information
 
 ```bash
-curl http://:28256/consumers/<consumer-group-id>
+curl http://dataplatform:28256/consumers/<consumer-group-id>
 ```
 
 Show health
 
 ```bash
-curl http://:28256/health
+curl http://dataplatform:28256/health
 ```
 
 Metrics
 
 ```bash
-curl http://:28256/metrics
+curl http://dataplatform:28256/metrics
 ```

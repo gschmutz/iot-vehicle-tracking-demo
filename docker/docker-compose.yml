@@ -201,7 +201,7 @@ services:
       - |
         echo "Installing Connectors"
         mkdir -p /etc/kafka-connect/cflthub-plugins
-        for i in $$(echo "confluentinc/kafka-connect-jdbc:10.6.3,debezium/debezium-connector-postgresql:2.2.1,debezium/debezium-connector-mysql:2.2.1" | sed "s/,/ /g")
+        for i in $$(echo "confluentinc/kafka-connect-jdbc:10.6.3,debezium/debezium-connector-postgresql:2.2.1,debezium/debezium-connector-mysql:2.2.1,confluentinc/kafka-connect-s3:10.5.1" | sed "s/,/ /g")
         do
           confluent-hub install --no-prompt --component-dir /etc/kafka-connect/cflthub-plugins --verbose "$$i"
         done
@@ -267,7 +267,7 @@ services:
       - |
         echo "Installing Connectors"
         mkdir -p /etc/kafka-connect/cflthub-plugins
-        for i in $$(echo "confluentinc/kafka-connect-jdbc:10.6.3,debezium/debezium-connector-postgresql:2.2.1,debezium/debezium-connector-mysql:2.2.1" | sed "s/,/ /g")
+        for i in $$(echo "confluentinc/kafka-connect-jdbc:10.6.3,debezium/debezium-connector-postgresql:2.2.1,debezium/debezium-connector-mysql:2.2.1,confluentinc/kafka-connect-s3:10.5.1" | sed "s/,/ /g")
         do
           confluent-hub install --no-prompt --component-dir /etc/kafka-connect/cflthub-plugins --verbose "$$i"
         done
@@ -651,6 +651,11 @@ services:
       TRUSTSTORE_PASSWORD: PkhvPAirou5R/K9HQxVk99uT+hehM7SRURyFSbxTlTQ
       NIFI_SECURITY_USER_AUTHORIZER: single-user-authorizer
       NIFI_SECURITY_USER_LOGIN_IDENTITY_PROVIDER: single-user-provider
+      S3_ENDPOINT: http://minio-1:9000
+      S3_PATH_STYLE_ACCESS: 'true'
+      S3_REGION: us-east-1
+      PLATYS_AWS_ACCESS_KEY: V42FCGRVMK24JJ8DHUYG
+      PLATYS_AWS_SECRET_ACCESS_KEY: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
       NIFI_REMOTE_INPUT_SOCKET_PORT: '10005'
       NIFI_REMOTE_INPUT_HOST: nifi-1
       NIFI_SENSITIVE_PROPS_KEY: 12345678901234567890A
@@ -663,11 +668,13 @@ services:
       - ./plugins/nifi/nars/:/opt/nifi/nifi-current/extensions
       - ./security/nifi/keystore.jks:/opt/certs/keystore.jks
       - ./security/nifi/truststore.jks:/opt/certs/truststore.jks
+      - ./security/nifi/s3-credentials.properties:/tmp/s3-credentials.properties.templ
     entrypoint:
       # We override the entrypoint from the docker image and therefore have to run ../scripts/start.sh from the NiFi docker image
       - bash
       - -c
       - |
+        eval "echo \"$(cat /tmp/s3-credentials.properties.templ)\"" >> s3-credentials.properties
         ../scripts/start.sh
     restart: unless-stopped
   #  ================================== Redis ========================================== #
@@ -760,6 +767,53 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./conf/cloudbeaver/data-sources.json:/opt/cloudbeaver/workspace/GlobalConfiguration/.dbeaver/data-sources.json
+    restart: unless-stopped
+  #  ================================== Minio ========================================== #
+  minio-1:
+    image: minio/minio:RELEASE.2023-08-16T20-17-30Z
+    container_name: minio-1
+    hostname: minio-1
+    labels:
+      com.platys.name: minio
+      com.platys.webui.title: MinIO UI
+      com.platys.webui.url: http://dataplatform:9000
+    ports:
+      - 9000:9000
+      - 9010:9010
+    environment:
+      MINIO_ROOT_USER: V42FCGRVMK24JJ8DHUYG
+      MINIO_ROOT_PASSWORD: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+      MINIO_REGION_NAME: us-east-1
+      MINIO_DOMAIN: minio
+      MINIO_SERVER_URL: http://dataplatform:9000
+    volumes:
+      - ./data-transfer:/data-transfer
+    command: server /data --console-address ":9010"
+    restart: unless-stopped
+  #  ================================== Minio MC ========================================== #
+  minio-mc:
+    image: minio/mc:latest
+    container_name: minio-mc
+    hostname: minio-mc
+    labels:
+      com.platys.name: minio
+    volumes:
+      - ./data-transfer:/data-transfer
+#      - ./conf/minio/config.json:/root/.mc/config.json
+      - ./scripts/docker/wait-for-it.sh:/usr/src/app/wait-for-it.sh
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        /usr/src/app/wait-for-it.sh -t 180 minio-1:9000
+        mc alias set minio-1 http://minio-1:9000 V42FCGRVMK24JJ8DHUYG bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
+        mc mb --ignore-existing minio-1/admin-bucket
+           for i in $$(echo "" | sed "s/,/ /g")
+        do
+          mc mb --ignore-existing minio-1/$$i
+        done
+        #
+        while [ 1 -eq 1 ];do sleep 60;done
     restart: unless-stopped
   #  ================================== Mosquitto ========================================== #
   mosquitto-1:

@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://:28082>
+Navigate to <http://dataplatform:28082>
 
 To connect over the CLI, use:
 

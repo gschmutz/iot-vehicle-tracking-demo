@@ -120,7 +120,7 @@
       #
       KAFKA_CONNECT_enable: true
       KAFKA_CONNECT_nodes: 2
-      KAFKA_CONNECT_connectors: confluentinc/kafka-connect-jdbc:10.6.3,debezium/debezium-connector-postgresql:2.2.1,debezium/debezium-connector-mysql:2.2.1
+      KAFKA_CONNECT_connectors: confluentinc/kafka-connect-jdbc:10.6.3,debezium/debezium-connector-postgresql:2.2.1,debezium/debezium-connector-mysql:2.2.1,confluentinc/kafka-connect-s3:10.5.1
       KAFKA_CONNECT_config_providers: 'file'
       KAFKA_CONNECT_config_providers_classes: 'org.apache.kafka.common.config.provider.FileConfigProvider'
       KAFKA_CONNECT_map_settings_file: false
@@ -816,7 +816,7 @@
       #
       #=====  MinIO Object Storage ========
       #
-      MINIO_enable: false
+      MINIO_enable: true
       MINIO_volume_map_data: false
       MINIO_datacenters: 1
       # "single" or "cluster"

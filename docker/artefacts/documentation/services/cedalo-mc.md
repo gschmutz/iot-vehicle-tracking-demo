@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://:28175> and login as user `cedalo` with password `abc123!`.
+Navigate to <http://dataplatform:28175> and login as user `cedalo` with password `abc123!`.

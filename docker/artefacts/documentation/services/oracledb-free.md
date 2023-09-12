@@ -55,5 +55,5 @@ docker exec -ti oracledb-free sqlplus "user1/abc123!"@//localhost/FREEPDB1
 
 ### Connect through JDBC
 
-* **JDBC Url:**  	`jdbc:oracle:thin:@:1523/FREEPDB1`
+* **JDBC Url:**  	`jdbc:oracle:thin:@dataplatform:1523/FREEPDB1`
 * **JDBC Driver Class Name:** 	`oracle.jdbc.driver.OracleDriver`

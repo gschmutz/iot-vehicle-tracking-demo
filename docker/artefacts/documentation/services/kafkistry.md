@@ -17,4 +17,4 @@ platys gen
 
 ## How to use?
 
-Navigate to <http://:28303> to show the Kafkistry UI.
+Navigate to <http://dataplatform:28303> to show the Kafkistry UI.

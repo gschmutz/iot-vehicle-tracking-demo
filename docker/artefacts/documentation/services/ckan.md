@@ -11,7 +11,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://:28294>.
+Navigate to <http://dataplatform:28294>.
 
 ### Using CLI
 

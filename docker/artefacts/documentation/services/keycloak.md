@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://:28204>
+Navigate to <http://dataplatform:28204>
 
 ## How to export data from a realm
 

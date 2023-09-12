@@ -77,6 +77,10 @@ kcat -b dataplatform -t vehicle_tracking_sysA -f "%k - %s\n" -q
 ```
 
 ```bash
+curl -XGET http://dataplatform:8083/connector-plugins | jq
+```
+
+```bash
 curl -X PUT \
   http://${DOCKER_HOST_IP}:8083/connectors/mqtt-source/config \
   -H 'Content-Type: application/json' \
