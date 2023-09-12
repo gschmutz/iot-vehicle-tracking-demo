@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28263/camunda-welcome/index.html>.
+Navigate to <http://:28263/camunda-welcome/index.html>.
 
 User: demo, Password: demo
 

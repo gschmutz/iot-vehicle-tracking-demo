@@ -1,4 +1,4 @@
-# `modern-data-platform` - Port Mappings - 1.16.0
+# `modern-data-platform` - Port Mappings - 1.17.0
 
 This table reserves the external ports for the various services. Not all services have to be used in the platform at a given time. But by reserving, we can assure that there are no conflicts if a service is added at a later time.
 
@@ -12,6 +12,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 1433 | 1433 | sqlserver |
 1521 | 1521 | oracledb-ee |
 1522 | 1521 | oracledb-xe |
+1523 | 1521 | oracledb-free |
 1095 | 1095 | ksqldb-server-1 (jmx) |
 1096 | 1096 | ksqldb-server-2 (jmx) |
 1097 | 1097 | ksqldb-server-3 (jmx) |
@@ -34,6 +35,12 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 2184 | 2184 | zookeeper-4 |
 2185 | 2185 | zookeeper-5 |
 2186 | 2186 | zookeeper-6 |
+2222 | 22 | sftp |
+2424 | 2424 | arcadedb |
+2480 | 5432 | arcadedb (postgresql port) |
+2481 | 6379 | arcadedb (redis port) |
+2482 | 2480 | arcadedb (mongodb port) |
+2483 | 27017 | arcadedb |
 3000 | 3000 | grafana |
 3001 | 3000 | wetty (dc1) |
 3002 | 3000 | wetty (dc2 |
@@ -58,12 +65,16 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4052 | 4052 | zeppelin (spark ui) |
 4053 | 4053 | zeppelin (spark ui) |
 4054 | 4054 | zeppelin (spark ui) |
+4195 | 4195 | benthos-1 |
+4196 | 4196 | benthos-server |
 4317 | 4317 | otel-collector |
+4466 | 4466 | curity |
 5000 | 5000 | amundsenfrontend |
 5001 | 5000 | amundsensearch |
 5002 | 5000 | amundsenmetadata |
 5010 | 5000 | marquez |
 5011 | 5001 | marquez |
+5020 | 5000 | docker-registry |
 5050 | 5050 | zeppelin |
 5500 | 5500 | oracledb-ee |
 5501 | 5500 | oracledb-xe |
@@ -72,6 +83,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5432 | 5432 | postgresql |
 5433 | 5432 | timescaledb |
 5434 | 5432 | marquez-db |
+5555 | 5555 | airflow-flower |
 5601 | 5601 | kibana |
 5602 | 5601 | datahub-kibana |
 5603 | 5601 | opensearch-dashboards |
@@ -93,6 +105,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 6382 | 6379 | redis-replica-1 |
 6385 | 6379 | redash-redis |
 6386 | 6379 | tyk-redis |
+6570 | 6570 | hserver-1 |
 6831 | 6831 | jaeger (udp) |
 6749 | 6749 | curity |
 6832 | 6832 | jaeger (udp) |
@@ -106,6 +119,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7201 | 7199 | cassandra-3 |
 7202 | 7199 | cassandra-4 |
 7203 | 7199 | cassandra-5 |
+7444 | 7444 | memgraph-platform |
 7474 | 7474 | neo4j-1 |
 7475 | 7474 | neo4j-2 |
 7476 | 7474 | neo4j-3 |
@@ -113,6 +127,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 7687 | 7687 | neo4j-1 |
 7688 | 7687 | neo4j-2 |
 7689 | 7687 | neo4j-3 |
+7690 | 7687 | memgraph-platform |
 8000 | 8000 | kong (proxy) |
 8001 | 8001 | kong (admin api) |
 8002 | 8002 | kong (admin gui) |
@@ -122,6 +137,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8048 | 8048 | kafka-eagle |
 8050 | 8050 | kudu-tserver-1 |
 8051 | 8051 | kudo-master-1 |
+8055 | 8055 | directus |
 8070 | 8070 | nuclio |
 8080 | 8080 | spark-master |
 8081 | 8081 / 8080 | schema-registry-1 / apicurio-registry-1    |
@@ -136,6 +152,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8100 | 8100 | kong-map |
 8124 | 8124 | axon-server |
 8161 | 8161 | activemq |
+8182 | 8182 | janusgraph |
 8200 | 8200 | vault |
 8443 | 8443 | kong (proxy ssl) |
 8444 | 8444 | kong (admin api ssl) |
@@ -262,6 +279,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19097 | 19097 | kafka-6 (docker-host)   |
 19098 | 19098 | kafka-7 (docker-host)   |
 19099 | 19099 | kafka-8 (docker-host)   |
+19120 | 19120 | nessie |
 19630 | 19630 | streamsets-transformer-1 |
 19631 | 19630 | streamsets-transformer-1 |
 19632 | 19630 | streamsets-transformer-1 |
@@ -275,8 +293,10 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28080 | 8080 | zeppelin |
 28081 | 8080 | presto-1 |
 28082 | 8080 | trino-1 |
+28083 | 8443 | trino-1 (tls) |
 28085 | 8080 | azkarra-worker-1 |
 28888 | 8888 | jupyter |
+28889 | 8888 | anaconda |
 29042 | 9042 | cassandra-1 |
 29043 | 9042 | cassandra-2 |
 29044 | 9042 | cassandra-3 |
@@ -376,7 +396,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28175 | 8088 | cedalo-management-center |
 28176 | 8080 | s3manager |
 28177 | 8080 | hasura |
-28178 | 80 | filebrowser |
+28178 | 8080 | file-browser |
 28179 | 8080 | kafka-ui |
 28180 | 8080 | dgraph-1 |
 28181 | 9080 | dgraph-1 |
@@ -400,6 +420,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28210 | 9000 | pinot-controller |
 28211 | 8099 | pinot-broker-1 |
 28212 | 8098 | pinot-server-1 |
+28213 | 8098 | pinot-server-2 |
+28214 | 8098 | pinot-server-3 |
 28220 | 8000 | lakefs |
 28221 | 8081 | emqx-1 |
 28222 | 8083 | emqx-1 |
@@ -409,16 +431,16 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28226 | 9000 | questdb |
 28227 | 8080 | debezium-ui |
 28228 | 9998 | tikka-server |
-28229 | 5000 | mlflow-server |
-28230 | 8080 | optuna-dashboard |
-28231 | 80 | excalidraw |
+28229 | 5000 | mlflow-tracking-server |
+28230 | 8080 | mlflow-artifacts-server |
+28231 | 8080 | optuna-dashboard |
 28232 | 8080 | reaper (app UI) |
 28233 | 8081 | reaper (admin UI) |
 28234 | 8080 | kie-server (drools) |
 28235 | 8001 | business-central (drools) |
 28236 | 8080 | business-central (drools) |
 28237 | 8081 | flink-jobmanager |
-28238 | 8081 | nussknacker-designer |
+28238 | 8083 | flink-sqlgateway |
 28239 | 8080 | kowl |
 28240 | 8080 | ignite-1 |
 28241 | 8080 | ignite-2 |
@@ -464,6 +486,27 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28284 | 8000 | jupyterhub |
 28285 | 80 | conduktor-platform |
 28286 | 80 | kong-admin-ui |
+28287 | 8181 | iceberg-rest |
+28288 | 3000 | memgraph-platform |
+28289 | 8080 | redpanda-console |
+28290 | 80 | excalidraw |
+28291 | 8200 | invana-engine |
+28292 | 8300 | invana-studio |
+28293 | 8080 | spring-boot-admin |
+28294 | 5000 | ckan |
+28295 | 8800 | ckan-datapusher |
+28296 | 443 | phpldapadmin |
+28297 | 80 | ldap-user-manager |
+28298 | 4040 | spark-thriftserver (Spark UI) |
+28299 | 80 | baserow |
+28300 | 443 | baserow |
+28301 | 10001 | querybook |
+28302 | 8081 | nussknacker-designer |
+28303 | 8080 | kafkistry |
+28304 | 8080 | spark-master |
+28305 | 3000 | sqlchat |
+28306 | 8080 | minio-web |
+28307 | 80 | docker-registry-ui |
 
 ## Ports > 28500
 

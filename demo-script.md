@@ -22,16 +22,10 @@ docker run --network host --rm trivadis/iot-truck-simulator '-s' 'MQTT' '-h' $DO
 ```
 
 ``` bash
-docker run -it --rm --name mqttclient efrecon/mqtt-client sub -h $DOCKER_HOST_IP -t "truck/+/position" -v
+docker run -it --rm --name mqttclient efrecon/mqtt-client sub -h "$DOCKER_HOST_IP" -p 1883 -t "truck/+/position" -v
 ```
 
-to stop the MQTT CLI reader, either use ctrl-C or if it does not work, stop the container
-
-``` bash
-docker stop mqttclient 
-```
-
-![Alt Image Text](./images/kafka-connect-vs-streams.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/kafka-connect-vs-streams.png "Demo 1 - Kafka Connect")
 
 [Confluent Hub](https://www.confluent.io/hub/)
 
@@ -41,36 +35,68 @@ curl -XGET http://dataplatform:8083/connector-plugins | jq
 
 <http://dataplatform:8083/connector-plugins>
 
+adding MQTT Connector
+
+
+```bash
+cd $DATAPLATFORM_HOME/plugins/kafka-connect/connectors
+```
+
+```bash
+sudo wget https://github.com/lensesio/stream-reactor/releases/download/4.2.0/kafka-connect-mqtt-4.2.0.zip
+```
+
+```bash
+sudo unzip kafka-connect-mqtt-4.2.0.zip
+sudo rm kafka-connect-mqtt-4.2.0.zip
+```
+
+```bash
+cd $DATAPLATFORM_HOME
+docker compose restart kafka-connect-1 kafka-connect-2
+```
+
+```bash
+docker compose logs -f kafka-connect-1 kafka-connect-2
+```
+
+
+create the topic
+
 ```bash
 docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_sysA --partitions 8 --replication-factor 3
 ```
 
 
 ```bash
-docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_sysA
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_sysA -f "%k - %s\n" -q
 ```
 
 ```bash
-curl -X "POST" "$DOCKER_HOST_IP:8083/connectors" \
-     -H "Content-Type: application/json" \
-     --data '{
-  "name": "mqtt-vehicle-position-source",
-  "config": {
-    "connector.class": "io.confluent.connect.mqtt.MqttSourceConnector",
+kcat -b dataplatform -t vehicle_tracking_sysA -f "%k - %s\n" -q
+```
+
+```bash
+curl -X PUT \
+  http://${DOCKER_HOST_IP}:8083/connectors/mqtt-source/config \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{
+    "connector.class": "com.datamountaineer.streamreactor.connect.mqtt.source.MqttSourceConnector",
+    "connect.mqtt.connection.timeout": "1000",
     "tasks.max": "1",
-    "mqtt.server.uri": "tcp://mosquitto-1:1883",
-    "mqtt.topics": "truck/+/position",
-    "mqtt.clean.session.enabled":"true",
-    "mqtt.connect.timeout.seconds":"30",
-    "mqtt.keepalive.interval.seconds":"60",
-    "mqtt.qos":"0",
-    "kafka.topic":"vehicle_tracking_sysA",
-    "confluent.topic.bootstrap.servers": "kafka-1:19092,kafka-2:19093",
-    "confluent.topic.replication.factor": "3",
-    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-    "value.converter": "org.apache.kafka.connect.converters.ByteArrayConverter"
-    }
-  }'
+    "connect.mqtt.kcql": "INSERT INTO vehicle_tracking_sysA SELECT * FROM truck/+/position WITHCONVERTER=`com.datamountaineer.streamreactor.connect.converters.source.JsonSimpleConverter` WITHKEY(truckId)",
+    "connect.mqtt.connection.clean": "true",
+    "connect.mqtt.service.quality": "0",
+    "connect.mqtt.connection.keep.alive": "1000",
+    "connect.mqtt.client.id": "tm-mqtt-connect-01",
+    "connect.mqtt.converter.throw.on.error": "true",
+    "connect.mqtt.hosts": "tcp://mosquitto-1:1883",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+}'
 ```
 
 ## Demo 2 - Using KSQL to Refine the data
@@ -165,11 +191,11 @@ EMIT CHANGES;
 ```
 
 ``` bash
-docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined
+docker exec -ti kcat kcat -b kafka-1:19092 -t vehicle_tracking_refined
 ```
 
 ``` bash
-docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined -s value=avro -r http://schema-registry-1:8081
+docker exec -ti kcat kcat -b kafka-1:19092 -t vehicle_tracking_refined -s value=avro -r http://schema-registry-1:8081
 ```
 
 ## Demo 3 - Integrate System B
@@ -202,7 +228,7 @@ docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create -
 
 
 ```bash
-docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_sysB -f "%k - %s\n" -q
+docker exec -ti kcat kcat -b kafka-1:19092 -t vehicle_tracking_sysB -f "%k - %s\n" -q
 ```
 
 ## Demo 4 - Refinement of data from System B into same topic as above

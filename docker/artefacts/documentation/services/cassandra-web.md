@@ -7,10 +7,10 @@ A web interface for Apache Cassandra-
 ## How to enable?
 
 ```
-platys init --enable-services CASSANDRA
+platys init --enable-services CASSANDRA CASSANDRA_WEB
 platys gen
 ```
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28120>.
+Navigate to <http://:28120>.

@@ -23,4 +23,4 @@ TYK_DB_LICENSEKEY=
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28281>
+Navigate to <http://:28281>

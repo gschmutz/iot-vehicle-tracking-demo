@@ -1,5 +1,5 @@
 ---
-technoglogies:      jupyter,spark,avri
+technoglogies:      jupyter,spark,avro
 version:				1.16.0
 validated-at:			3.10.2022
 ---
@@ -60,7 +60,7 @@ total 57056
  
 ## Using Jupyter to read the Airports.avro file
 
-Navigate to Jupyter on <http://dataplatform:28888>. 
+Navigate to Jupyter on <http://:28888>. 
 
 Enter `abc123!` into the **Password or token** field and click on **Log in**:
 

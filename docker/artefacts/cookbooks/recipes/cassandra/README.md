@@ -10,7 +10,7 @@ This recipe will show how to use Casandra
 
 ## Initialise data platform
 
-First [initialise a platys-supported data platform](../documentation/getting-started) with the following services enabled
+First [initialise a platys-supported data platform](../../../documentation/getting-started) with the following services enabled
 
 ```bash
 platys init --enable-services CASSANDRA -s trivadis/platys-modern-data-platform -w 1.15.0
@@ -32,7 +32,7 @@ You can find the `cqlsh` command line utility inside the Cassandra docker contai
 docker exec -ti cassandra-1 cqlsh
 ```
 
-Alternatively you can also use the Cassandra Web UI on <http://dataplatform:28120/>.
+Alternatively you can also use the Cassandra Web UI on <http://:28120/>.
 
 Create a keyspace for the IoT data:
 

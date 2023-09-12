@@ -4,7 +4,7 @@
       platys:
           platform-name: 'iot-vehicle-tracking-platform'
           platform-stack: 'trivadis/platys-modern-data-platform'
-          platform-stack-version: '1.16.0-preview'
+          platform-stack-version: '1.17.0-preview'
           structure: 'flat'
       # ========================================================================
       # Global configuration, valid for all or a group of services
@@ -100,15 +100,27 @@
       CONFLUENT_SCHEMA_REGISTRY_debug: false
 
       # ===== Apicurio Schema Registry ========
-      # either "mem","sql","kafkasql"
+      # either "mem","sql","kafkasql"."mssql"
       APICURIO_SCHEMA_REGISTRY_storage: kafkasql
-
+      APICURIO_SCHEMA_REGISTRY_sql_storage_database: apicuriodb
+      APICURIO_SCHEMA_REGISTRY_sql_storage_user: apicurio
+      APICURIO_SCHEMA_REGISTRY_sql_storage_password: abc123!
+      APICURIO_auth_enabled: false
+      APICURIO_auth_anonymous_read_access_enabled: false
+      APICURIO_auth_import_default_users: false
+      APICURIO_basic_auth_enabled: false
+      APICURIO_eventsourcing_enabled: false
+      # either 'http' or 'kafka'
+      APICURIO_eventsourcing_protocol: 'kafka'
+      APICURIO_eventsourcing_kafka_topic: 'registry-events'
+      APICURIO_eventsourcing_http_endpoint: ''
+      
       #
       # ===== Kafka Connect ========
       #
       KAFKA_CONNECT_enable: true
       KAFKA_CONNECT_nodes: 2
-      KAFKA_CONNECT_connectors: confluentinc/kafka-connect-jdbc:10.0.0,confluentinc/kafka-connect-mqtt:1.3.0,debezium/debezium-connector-mysql:1.1.0
+      KAFKA_CONNECT_connectors: confluentinc/kafka-connect-jdbc:10.6.3,debezium/debezium-connector-postgresql:2.2.1,debezium/debezium-connector-mysql:2.2.1
       KAFKA_CONNECT_config_providers: 'file'
       KAFKA_CONNECT_config_providers_classes: 'org.apache.kafka.common.config.provider.FileConfigProvider'
       KAFKA_CONNECT_map_settings_file: false
@@ -126,6 +138,9 @@
       KAFKA_KSQLDB_response_http_headers_config: ''
       KAFKA_KSQLDB_use_embedded_connect: false
       KAFAK_KSQLDB_connect_connectors:
+      KAFKA_KSQLDB_persistence_default_format_key: 'KAFKA'
+      KAFKA_KSQLDB_persistence_default_format_value: ''
+      KAFKA_KSQLDB_log_topic: 'ksql_processing_log'
       #
       # ===== Materialize ========
       #
@@ -158,7 +173,7 @@
       #
       # ===== jikkou ========
       #
-      JIKKOU_enable: true
+      JIKKOU_enable: false
       JIKKOU_use_verbose_option: false
       JIKKOU_use_delete_config_orphans_option: false
       JIKKOU_use_delete_topic_orphans_option: false
@@ -189,30 +204,31 @@
       #
       # ===== Cluster Manager for Apache Kafka ========
       #
-      KAFKA_CMAK_enable: true
-      KAFKA_CMAK_auth_enabled: "'false'"
-      KAFKA_CMAK_username: admin
-      KAFKA_CMAK_password: abc123!
+      CMAK_enable: true
+      CMAK_auth_enabled: "'false'"
+      CMAK_username: admin
+      CMAK_password: abc123!
       #
       # ===== Kafdrop ========
       #
-      KAFKA_KAFDROP_enable: false
+      KAFDROP_enable: false
       #
       # ===== KAdmin ========
       #
-      KAFKA_KADMIN_enable: false
+      KADMIN_enable: false
       #
       # ===== Apache Kafka HQ ========
       #
-      KAFKA_AKHQ_enable: true
+      AKHQ_enable: true
+      AKHQ_read_only_mode: false
       #
       # ===== Kafka UI ========
       #
       KAFKA_UI_enable: true
       #
-      # ===== Kafka Eagle ========
+      # ===== EFAK (previously Kafka Eagle) ========
       #
-      KAFKA_EAGLE_enable: false
+      EFAK_enable: false
       #
       # ===== kowl ========
       #
@@ -361,7 +377,14 @@
       #
       # ===== Apache NiFi ========
       #
-      NIFI_enable: false
+      NIFI_enable: true
+      NIFI_run_secure: true
+      NIFI_username: nifi
+      # password must be 12 chars minimum, otherwise a random user and password is generated
+      NIFI_password: 1234567890ACD
+      NIFI_nodes: 1
+      NIFI_create_cluster: false
+      NIFI_election_max_wait: '1 min'
       NIFI_volume_map_data: false
       NIFI_volume_map_logs: false
       NIFI_jvm_heap_init:
@@ -664,6 +687,8 @@
       POSTGRESQL_user: postgres
       POSTGRESQL_password: abc123!
       POSTGRESQL_schema: demo
+      # one of the valid Postgresql wal_levels: "replica", "minimal", "logical". Use logical if you want to work with Debezium.
+      POSTGRESQL_wal_level: logical
       #POSTGRESQL_anon_role: appuser
 
       #

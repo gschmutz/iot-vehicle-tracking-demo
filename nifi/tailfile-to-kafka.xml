@@ -1,0 +1,1545 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<template encoding-version="1.3">
+    <description></description>
+    <groupId>f1d21537-0188-1000-76e9-4f9fe6a6c3e2</groupId>
+    <name>tailfile-to-kafka</name>
+    <snippet>
+        <connections>
+            <id>029fad7a-3e0e-3a66-0000-000000000000</id>
+            <parentGroupId>ba6867aa-dbfa-3f0b-0000-000000000000</parentGroupId>
+            <versionedComponentId>029fad7a-3e0e-3a66-bfc0-09bbc1ee7ca8</versionedComponentId>
+            <backPressureDataSizeThreshold>1 GB</backPressureDataSizeThreshold>
+            <backPressureObjectThreshold>10000</backPressureObjectThreshold>
+            <destination>
+                <groupId>ba6867aa-dbfa-3f0b-0000-000000000000</groupId>
+                <id>dfa5a8ec-1530-371d-0000-000000000000</id>
+                <type>PROCESSOR</type>
+                <versionedComponentId>dfa5a8ec-1530-371d-8c52-60c6a7c1520f</versionedComponentId>
+            </destination>
+            <flowFileExpiration>0 sec</flowFileExpiration>
+            <labelIndex>1</labelIndex>
+            <loadBalanceCompression>DO_NOT_COMPRESS</loadBalanceCompression>
+            <loadBalancePartitionAttribute></loadBalancePartitionAttribute>
+            <loadBalanceStatus>LOAD_BALANCE_NOT_CONFIGURED</loadBalanceStatus>
+            <loadBalanceStrategy>DO_NOT_LOAD_BALANCE</loadBalanceStrategy>
+            <name></name>
+            <selectedRelationships>matched</selectedRelationships>
+            <source>
+                <groupId>ba6867aa-dbfa-3f0b-0000-000000000000</groupId>
+                <id>7cc77aec-a4c9-30c2-0000-000000000000</id>
+                <type>PROCESSOR</type>
+                <versionedComponentId>7cc77aec-a4c9-30c2-815f-54c7aef0c046</versionedComponentId>
+            </source>
+            <zIndex>0</zIndex>
+        </connections>
+        <connections>
+            <id>3d06f526-f3bb-34f2-0000-000000000000</id>
+            <parentGroupId>ba6867aa-dbfa-3f0b-0000-000000000000</parentGroupId>
+            <versionedComponentId>3d06f526-f3bb-34f2-98e8-a4121303846c</versionedComponentId>
+            <backPressureDataSizeThreshold>1 GB</backPressureDataSizeThreshold>
+            <backPressureObjectThreshold>10000</backPressureObjectThreshold>
+            <destination>
+                <groupId>ba6867aa-dbfa-3f0b-0000-000000000000</groupId>
+                <id>7cc77aec-a4c9-30c2-0000-000000000000</id>
+                <type>PROCESSOR</type>
+                <versionedComponentId>7cc77aec-a4c9-30c2-815f-54c7aef0c046</versionedComponentId>
+            </destination>
+            <flowFileExpiration>0 sec</flowFileExpiration>
+            <labelIndex>1</labelIndex>
+            <loadBalanceCompression>DO_NOT_COMPRESS</loadBalanceCompression>
+            <loadBalancePartitionAttribute></loadBalancePartitionAttribute>
+            <loadBalanceStatus>LOAD_BALANCE_NOT_CONFIGURED</loadBalanceStatus>
+            <loadBalanceStrategy>DO_NOT_LOAD_BALANCE</loadBalanceStrategy>
+            <name></name>
+            <selectedRelationships>splits</selectedRelationships>
+            <source>
+                <groupId>ba6867aa-dbfa-3f0b-0000-000000000000</groupId>
+                <id>75d5f7b5-4b56-3de4-0000-000000000000</id>
+                <type>PROCESSOR</type>
+                <versionedComponentId>75d5f7b5-4b56-3de4-a852-24aa180a37e9</versionedComponentId>
+            </source>
+            <zIndex>0</zIndex>
+        </connections>
+        <connections>
+            <id>70f97034-b90a-3872-0000-000000000000</id>
+            <parentGroupId>ba6867aa-dbfa-3f0b-0000-000000000000</parentGroupId>
+            <versionedComponentId>70f97034-b90a-3872-a5a2-e353850bb21e</versionedComponentId>
+            <backPressureDataSizeThreshold>1 GB</backPressureDataSizeThreshold>
+            <backPressureObjectThreshold>10000</backPressureObjectThreshold>
+            <destination>
+                <groupId>ba6867aa-dbfa-3f0b-0000-000000000000</groupId>
+                <id>75d5f7b5-4b56-3de4-0000-000000000000</id>
+                <type>PROCESSOR</type>
+                <versionedComponentId>75d5f7b5-4b56-3de4-a852-24aa180a37e9</versionedComponentId>
+            </destination>
+            <flowFileExpiration>0 sec</flowFileExpiration>
+            <labelIndex>1</labelIndex>
+            <loadBalanceCompression>DO_NOT_COMPRESS</loadBalanceCompression>
+            <loadBalancePartitionAttribute></loadBalancePartitionAttribute>
+            <loadBalanceStatus>LOAD_BALANCE_NOT_CONFIGURED</loadBalanceStatus>
+            <loadBalanceStrategy>DO_NOT_LOAD_BALANCE</loadBalanceStrategy>
+            <name></name>
+            <selectedRelationships>success</selectedRelationships>
+            <source>
+                <groupId>ba6867aa-dbfa-3f0b-0000-000000000000</groupId>
+                <id>6a497c27-d00a-3a00-0000-000000000000</id>
+                <type>PROCESSOR</type>
+                <versionedComponentId>6a497c27-d00a-3a00-8630-54ad6af93c86</versionedComponentId>
+            </source>
+            <zIndex>0</zIndex>
+        </connections>
+        <controllerServices>
+            <id>591d8886-dc95-3edc-0000-000000000000</id>
+            <parentGroupId>ba6867aa-dbfa-3f0b-0000-000000000000</parentGroupId>
+            <versionedComponentId>591d8886-dc95-3edc-94c6-a3450062a0ae</versionedComponentId>
+            <bulletinLevel>WARN</bulletinLevel>
+            <bundle>
+                <artifact>nifi-record-serialization-services-nar</artifact>
+                <group>org.apache.nifi</group>
+                <version>1.21.0</version>
+            </bundle>
+            <comments></comments>
+            <descriptors>
+                <entry>
+                    <key>Schema Write Strategy</key>
+                    <value>
+                        <name>Schema Write Strategy</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-cache</key>
+                    <value>
+                        <identifiesControllerService>org.apache.nifi.serialization.RecordSchemaCacheService</identifiesControllerService>
+                        <name>schema-cache</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-protocol-version</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>hwx-schema-ref-attributes</dependentValues>
+                            <dependentValues>hwx-content-encoded-schema</dependentValues>
+                            <propertyName>Schema Write Strategy</propertyName>
+                        </dependencies>
+                        <name>schema-protocol-version</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-access-strategy</key>
+                    <value>
+                        <name>schema-access-strategy</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-registry</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>confluent-encoded</dependentValues>
+                            <dependentValues>schema-name</dependentValues>
+                            <dependentValues>hwx-schema-ref-attributes</dependentValues>
+                            <dependentValues>hwx-content-encoded-schema</dependentValues>
+                            <propertyName>schema-access-strategy</propertyName>
+                        </dependencies>
+                        <identifiesControllerService>org.apache.nifi.schemaregistry.services.SchemaRegistry</identifiesControllerService>
+                        <name>schema-registry</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-name</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>schema-name</dependentValues>
+                            <propertyName>schema-access-strategy</propertyName>
+                        </dependencies>
+                        <name>schema-name</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-version</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>schema-name</dependentValues>
+                            <propertyName>schema-access-strategy</propertyName>
+                        </dependencies>
+                        <name>schema-version</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-branch</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>schema-name</dependentValues>
+                            <propertyName>schema-access-strategy</propertyName>
+                        </dependencies>
+                        <name>schema-branch</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-text</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>schema-text-property</dependentValues>
+                            <propertyName>schema-access-strategy</propertyName>
+                        </dependencies>
+                        <name>schema-text</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Date Format</key>
+                    <value>
+                        <name>Date Format</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Time Format</key>
+                    <value>
+                        <name>Time Format</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Timestamp Format</key>
+                    <value>
+                        <name>Timestamp Format</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>CSV Format</key>
+                    <value>
+                        <name>CSV Format</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Value Separator</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Value Separator</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Include Header Line</key>
+                    <value>
+                        <name>Include Header Line</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Quote Character</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Quote Character</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Escape Character</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Escape Character</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Comment Marker</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Comment Marker</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Null String</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Null String</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Trim Fields</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Trim Fields</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Quote Mode</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Quote Mode</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Record Separator</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Record Separator</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Include Trailing Delimiter</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Include Trailing Delimiter</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>csvutils-character-set</key>
+                    <value>
+                        <name>csvutils-character-set</name>
+                    </value>
+                </entry>
+            </descriptors>
+            <name>CSVRecordSetWriter</name>
+            <persistsState>false</persistsState>
+            <properties>
+                <entry>
+                    <key>Schema Write Strategy</key>
+                    <value>no-schema</value>
+                </entry>
+                <entry>
+                    <key>schema-cache</key>
+                </entry>
+                <entry>
+                    <key>schema-protocol-version</key>
+                    <value>1</value>
+                </entry>
+                <entry>
+                    <key>schema-access-strategy</key>
+                    <value>inherit-record-schema</value>
+                </entry>
+                <entry>
+                    <key>schema-registry</key>
+                </entry>
+                <entry>
+                    <key>schema-name</key>
+                    <value>${schema.name}</value>
+                </entry>
+                <entry>
+                    <key>schema-version</key>
+                </entry>
+                <entry>
+                    <key>schema-branch</key>
+                </entry>
+                <entry>
+                    <key>schema-text</key>
+                    <value>${avro.schema}</value>
+                </entry>
+                <entry>
+                    <key>Date Format</key>
+                </entry>
+                <entry>
+                    <key>Time Format</key>
+                </entry>
+                <entry>
+                    <key>Timestamp Format</key>
+                </entry>
+                <entry>
+                    <key>CSV Format</key>
+                    <value>custom</value>
+                </entry>
+                <entry>
+                    <key>Value Separator</key>
+                    <value>,</value>
+                </entry>
+                <entry>
+                    <key>Include Header Line</key>
+                    <value>false</value>
+                </entry>
+                <entry>
+                    <key>Quote Character</key>
+                    <value>"</value>
+                </entry>
+                <entry>
+                    <key>Escape Character</key>
+                    <value>\</value>
+                </entry>
+                <entry>
+                    <key>Comment Marker</key>
+                </entry>
+                <entry>
+                    <key>Null String</key>
+                </entry>
+                <entry>
+                    <key>Trim Fields</key>
+                    <value>true</value>
+                </entry>
+                <entry>
+                    <key>Quote Mode</key>
+                    <value>MINIMAL</value>
+                </entry>
+                <entry>
+                    <key>Record Separator</key>
+                    <value>\n</value>
+                </entry>
+                <entry>
+                    <key>Include Trailing Delimiter</key>
+                    <value>false</value>
+                </entry>
+                <entry>
+                    <key>csvutils-character-set</key>
+                    <value>UTF-8</value>
+                </entry>
+            </properties>
+            <state>ENABLED</state>
+            <type>org.apache.nifi.csv.CSVRecordSetWriter</type>
+        </controllerServices>
+        <controllerServices>
+            <id>e6c79e95-1532-3067-0000-000000000000</id>
+            <parentGroupId>ba6867aa-dbfa-3f0b-0000-000000000000</parentGroupId>
+            <versionedComponentId>e6c79e95-1532-3067-baf5-657fabdb6330</versionedComponentId>
+            <bulletinLevel>WARN</bulletinLevel>
+            <bundle>
+                <artifact>nifi-record-serialization-services-nar</artifact>
+                <group>org.apache.nifi</group>
+                <version>1.21.0</version>
+            </bundle>
+            <comments></comments>
+            <descriptors>
+                <entry>
+                    <key>schema-access-strategy</key>
+                    <value>
+                        <name>schema-access-strategy</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-registry</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>confluent-encoded</dependentValues>
+                            <dependentValues>schema-name</dependentValues>
+                            <dependentValues>hwx-schema-ref-attributes</dependentValues>
+                            <dependentValues>hwx-content-encoded-schema</dependentValues>
+                            <propertyName>schema-access-strategy</propertyName>
+                        </dependencies>
+                        <identifiesControllerService>org.apache.nifi.schemaregistry.services.SchemaRegistry</identifiesControllerService>
+                        <name>schema-registry</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-name</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>schema-name</dependentValues>
+                            <propertyName>schema-access-strategy</propertyName>
+                        </dependencies>
+                        <name>schema-name</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-version</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>schema-name</dependentValues>
+                            <propertyName>schema-access-strategy</propertyName>
+                        </dependencies>
+                        <name>schema-version</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-branch</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>schema-name</dependentValues>
+                            <propertyName>schema-access-strategy</propertyName>
+                        </dependencies>
+                        <name>schema-branch</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>schema-text</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>schema-text-property</dependentValues>
+                            <propertyName>schema-access-strategy</propertyName>
+                        </dependencies>
+                        <name>schema-text</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>csv-reader-csv-parser</key>
+                    <value>
+                        <name>csv-reader-csv-parser</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Date Format</key>
+                    <value>
+                        <name>Date Format</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Time Format</key>
+                    <value>
+                        <name>Time Format</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Timestamp Format</key>
+                    <value>
+                        <name>Timestamp Format</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>CSV Format</key>
+                    <value>
+                        <name>CSV Format</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Value Separator</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Value Separator</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Record Separator</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Record Separator</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Skip Header Line</key>
+                    <value>
+                        <name>Skip Header Line</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>ignore-csv-header</key>
+                    <value>
+                        <name>ignore-csv-header</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Quote Character</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Quote Character</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Escape Character</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Escape Character</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Comment Marker</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Comment Marker</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Null String</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Null String</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Trim Fields</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Trim Fields</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>csvutils-character-set</key>
+                    <value>
+                        <name>csvutils-character-set</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>csvutils-allow-duplicate-header-names</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>custom</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>csvutils-allow-duplicate-header-names</name>
+                    </value>
+                </entry>
+                <entry>
+                    <key>Trim double quote</key>
+                    <value>
+                        <dependencies>
+                            <dependentValues>rfc-4180</dependentValues>
+                            <propertyName>CSV Format</propertyName>
+                        </dependencies>
+                        <name>Trim double quote</name>
+                    </value>
+                </entry>
+            </descriptors>
+            <name>CSVReader</name>
+            <persistsState>false</persistsState>
+            <properties>
+                <entry>
+                    <key>schema-access-strategy</key>
+                    <value>infer-schema</value>
+                </entry>
+                <entry>
+                    <key>schema-registry</key>
+                </entry>
+                <entry>
+                    <key>schema-name</key>
+                    <value>${schema.name}</value>
+                </entry>
+                <entry>
+                    <key>schema-version</key>
+                </entry>
+                <entry>
+                    <key>schema-branch</key>
+                </entry>
+                <entry>
+                    <key>schema-text</key>
+                    <value>${avro.schema}</value>
+                </entry>
+                <entry>
+                    <key>csv-reader-csv-parser</key>
+                    <value>commons-csv</value>
+                </entry>
+                <entry>
+                    <key>Date Format</key>
+                </entry>
+                <entry>
+                    <key>Time Format</key>
+                </entry>
+                <entry>
+                    <key>Timestamp Format</key>
+                </entry>
+                <entry>
+                    <key>CSV Format</key>
+                    <value>custom</value>
+                </entry>
+                <entry>
+                    <key>Value Separator</key>
+                    <value>,</value>
+                </entry>
+                <entry>
+                    <key>Record Separator</key>
+                    <value>\n</value>
+                </entry>
+                <entry>
+                    <key>Skip Header Line</key>
+                    <value>false</value>
+                </entry>
+                <entry>
+                    <key>ignore-csv-header</key>
+                    <value>false</value>
+                </entry>
+                <entry>
+                    <key>Quote Character</key>
+                    <value>"</value>
+                </entry>
+                <entry>
+                    <key>Escape Character</key>
+                    <value>\</value>
+                </entry>
+                <entry>
+                    <key>Comment Marker</key>
+                </entry>
+                <entry>
+                    <key>Null String</key>
+                </entry>
+                <entry>
+                    <key>Trim Fields</key>
+                    <value>true</value>
+                </entry>
+                <entry>
+                    <key>csvutils-character-set</key>
+                    <value>UTF-8</value>
+                </entry>
+                <entry>
+                    <key>csvutils-allow-duplicate-header-names</key>
+                    <value>true</value>
+                </entry>
+                <entry>
+                    <key>Trim double quote</key>
+                    <value>true</value>
+                </entry>
+            </properties>
+            <state>ENABLED</state>
+            <type>org.apache.nifi.csv.CSVReader</type>
+        </controllerServices>
+        <processors>
+            <id>6a497c27-d00a-3a00-0000-000000000000</id>
+            <parentGroupId>ba6867aa-dbfa-3f0b-0000-000000000000</parentGroupId>
+            <position>
+                <x>0.0</x>
+                <y>0.0</y>
+            </position>
+            <versionedComponentId>6a497c27-d00a-3a00-8630-54ad6af93c86</versionedComponentId>
+            <bundle>
+                <artifact>nifi-standard-nar</artifact>
+                <group>org.apache.nifi</group>
+                <version>1.21.0</version>
+            </bundle>
+            <config>
+                <backoffMechanism>PENALIZE_FLOWFILE</backoffMechanism>
+                <bulletinLevel>WARN</bulletinLevel>
+                <comments></comments>
+                <concurrentlySchedulableTaskCount>1</concurrentlySchedulableTaskCount>
+                <descriptors>
+                    <entry>
+                        <key>tail-mode</key>
+                        <value>
+                            <name>tail-mode</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>File to Tail</key>
+                        <value>
+                            <name>File to Tail</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Rolling Filename Pattern</key>
+                        <value>
+                            <name>Rolling Filename Pattern</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Post-Rollover Tail Period</key>
+                        <value>
+                            <name>Post-Rollover Tail Period</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>tail-base-directory</key>
+                        <value>
+                            <name>tail-base-directory</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Initial Start Position</key>
+                        <value>
+                            <name>Initial Start Position</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>File Location</key>
+                        <value>
+                            <name>File Location</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>tailfile-recursive-lookup</key>
+                        <value>
+                            <name>tailfile-recursive-lookup</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>tailfile-lookup-frequency</key>
+                        <value>
+                            <name>tailfile-lookup-frequency</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>tailfile-maximum-age</key>
+                        <value>
+                            <name>tailfile-maximum-age</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>reread-on-nul</key>
+                        <value>
+                            <name>reread-on-nul</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Line Start Pattern</key>
+                        <value>
+                            <dependencies>
+<dependentValues>Single file</dependentValues>
+<propertyName>tail-mode</propertyName>
+                            </dependencies>
+                            <name>Line Start Pattern</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>pre-allocated-buffer-size</key>
+                        <value>
+                            <name>pre-allocated-buffer-size</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Max Buffer Size</key>
+                        <value>
+                            <dependencies>
+<propertyName>Line Start Pattern</propertyName>
+                            </dependencies>
+                            <name>Max Buffer Size</name>
+                        </value>
+                    </entry>
+                </descriptors>
+                <executionNode>ALL</executionNode>
+                <lossTolerant>false</lossTolerant>
+                <maxBackoffPeriod>10 mins</maxBackoffPeriod>
+                <penaltyDuration>30 sec</penaltyDuration>
+                <properties>
+                    <entry>
+                        <key>tail-mode</key>
+                        <value>Single file</value>
+                    </entry>
+                    <entry>
+                        <key>File to Tail</key>
+                        <value>/data-transfer/logs/TruckData.dat</value>
+                    </entry>
+                    <entry>
+                        <key>Rolling Filename Pattern</key>
+                    </entry>
+                    <entry>
+                        <key>Post-Rollover Tail Period</key>
+                        <value>0 sec</value>
+                    </entry>
+                    <entry>
+                        <key>tail-base-directory</key>
+                        <value>/data-transfer/logs</value>
+                    </entry>
+                    <entry>
+                        <key>Initial Start Position</key>
+                        <value>Beginning of File</value>
+                    </entry>
+                    <entry>
+                        <key>File Location</key>
+                        <value>Local</value>
+                    </entry>
+                    <entry>
+                        <key>tailfile-recursive-lookup</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>tailfile-lookup-frequency</key>
+                        <value>10 minutes</value>
+                    </entry>
+                    <entry>
+                        <key>tailfile-maximum-age</key>
+                        <value>24 hours</value>
+                    </entry>
+                    <entry>
+                        <key>reread-on-nul</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>Line Start Pattern</key>
+                    </entry>
+                    <entry>
+                        <key>pre-allocated-buffer-size</key>
+                        <value>65536 B</value>
+                    </entry>
+                    <entry>
+                        <key>Max Buffer Size</key>
+                        <value>64 KB</value>
+                    </entry>
+                </properties>
+                <retryCount>10</retryCount>
+                <runDurationMillis>0</runDurationMillis>
+                <schedulingPeriod>5 sec</schedulingPeriod>
+                <schedulingStrategy>TIMER_DRIVEN</schedulingStrategy>
+                <yieldDuration>1 sec</yieldDuration>
+            </config>
+            <executionNodeRestricted>false</executionNodeRestricted>
+            <name>TailFile</name>
+            <relationships>
+                <autoTerminate>false</autoTerminate>
+                <name>success</name>
+                <retry>false</retry>
+            </relationships>
+            <state>RUNNING</state>
+            <style/>
+            <type>org.apache.nifi.processors.standard.TailFile</type>
+        </processors>
+        <processors>
+            <id>75d5f7b5-4b56-3de4-0000-000000000000</id>
+            <parentGroupId>ba6867aa-dbfa-3f0b-0000-000000000000</parentGroupId>
+            <position>
+                <x>0.0</x>
+                <y>216.0</y>
+            </position>
+            <versionedComponentId>75d5f7b5-4b56-3de4-a852-24aa180a37e9</versionedComponentId>
+            <bundle>
+                <artifact>nifi-standard-nar</artifact>
+                <group>org.apache.nifi</group>
+                <version>1.21.0</version>
+            </bundle>
+            <config>
+                <backoffMechanism>PENALIZE_FLOWFILE</backoffMechanism>
+                <bulletinLevel>WARN</bulletinLevel>
+                <comments></comments>
+                <concurrentlySchedulableTaskCount>1</concurrentlySchedulableTaskCount>
+                <descriptors>
+                    <entry>
+                        <key>Record Reader</key>
+                        <value>
+                            <identifiesControllerService>org.apache.nifi.serialization.RecordReaderFactory</identifiesControllerService>
+                            <name>Record Reader</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Record Writer</key>
+                        <value>
+                            <identifiesControllerService>org.apache.nifi.serialization.RecordSetWriterFactory</identifiesControllerService>
+                            <name>Record Writer</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Records Per Split</key>
+                        <value>
+                            <name>Records Per Split</name>
+                        </value>
+                    </entry>
+                </descriptors>
+                <executionNode>ALL</executionNode>
+                <lossTolerant>false</lossTolerant>
+                <maxBackoffPeriod>10 mins</maxBackoffPeriod>
+                <penaltyDuration>30 sec</penaltyDuration>
+                <properties>
+                    <entry>
+                        <key>Record Reader</key>
+                        <value>e6c79e95-1532-3067-0000-000000000000</value>
+                    </entry>
+                    <entry>
+                        <key>Record Writer</key>
+                        <value>591d8886-dc95-3edc-0000-000000000000</value>
+                    </entry>
+                    <entry>
+                        <key>Records Per Split</key>
+                        <value>1</value>
+                    </entry>
+                </properties>
+                <retryCount>10</retryCount>
+                <runDurationMillis>0</runDurationMillis>
+                <schedulingPeriod>0 sec</schedulingPeriod>
+                <schedulingStrategy>TIMER_DRIVEN</schedulingStrategy>
+                <yieldDuration>1 sec</yieldDuration>
+            </config>
+            <executionNodeRestricted>false</executionNodeRestricted>
+            <name>SplitRecord</name>
+            <relationships>
+                <autoTerminate>true</autoTerminate>
+                <name>failure</name>
+                <retry>false</retry>
+            </relationships>
+            <relationships>
+                <autoTerminate>true</autoTerminate>
+                <name>original</name>
+                <retry>false</retry>
+            </relationships>
+            <relationships>
+                <autoTerminate>false</autoTerminate>
+                <name>splits</name>
+                <retry>false</retry>
+            </relationships>
+            <state>RUNNING</state>
+            <style/>
+            <type>org.apache.nifi.processors.standard.SplitRecord</type>
+        </processors>
+        <processors>
+            <id>7cc77aec-a4c9-30c2-0000-000000000000</id>
+            <parentGroupId>ba6867aa-dbfa-3f0b-0000-000000000000</parentGroupId>
+            <position>
+                <x>0.0</x>
+                <y>424.0</y>
+            </position>
+            <versionedComponentId>7cc77aec-a4c9-30c2-815f-54c7aef0c046</versionedComponentId>
+            <bundle>
+                <artifact>nifi-standard-nar</artifact>
+                <group>org.apache.nifi</group>
+                <version>1.21.0</version>
+            </bundle>
+            <config>
+                <backoffMechanism>PENALIZE_FLOWFILE</backoffMechanism>
+                <bulletinLevel>WARN</bulletinLevel>
+                <comments></comments>
+                <concurrentlySchedulableTaskCount>1</concurrentlySchedulableTaskCount>
+                <descriptors>
+                    <entry>
+                        <key>Character Set</key>
+                        <value>
+                            <name>Character Set</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Maximum Buffer Size</key>
+                        <value>
+                            <name>Maximum Buffer Size</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Maximum Capture Group Length</key>
+                        <value>
+                            <name>Maximum Capture Group Length</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Enable Canonical Equivalence</key>
+                        <value>
+                            <name>Enable Canonical Equivalence</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Enable Case-insensitive Matching</key>
+                        <value>
+                            <name>Enable Case-insensitive Matching</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Permit Whitespace and Comments in Pattern</key>
+                        <value>
+                            <name>Permit Whitespace and Comments in Pattern</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Enable DOTALL Mode</key>
+                        <value>
+                            <name>Enable DOTALL Mode</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Enable Literal Parsing of the Pattern</key>
+                        <value>
+                            <name>Enable Literal Parsing of the Pattern</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Enable Multiline Mode</key>
+                        <value>
+                            <name>Enable Multiline Mode</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Enable Unicode-aware Case Folding</key>
+                        <value>
+                            <name>Enable Unicode-aware Case Folding</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Enable Unicode Predefined Character Classes</key>
+                        <value>
+                            <name>Enable Unicode Predefined Character Classes</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Enable Unix Lines Mode</key>
+                        <value>
+                            <name>Enable Unix Lines Mode</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Include Capture Group 0</key>
+                        <value>
+                            <name>Include Capture Group 0</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>extract-text-enable-repeating-capture-group</key>
+                        <value>
+                            <name>extract-text-enable-repeating-capture-group</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>extract-text-enable-named-groups</key>
+                        <value>
+                            <name>extract-text-enable-named-groups</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>kafka.key</key>
+                        <value>
+                            <name>kafka.key</name>
+                        </value>
+                    </entry>
+                </descriptors>
+                <executionNode>ALL</executionNode>
+                <lossTolerant>false</lossTolerant>
+                <maxBackoffPeriod>10 mins</maxBackoffPeriod>
+                <penaltyDuration>30 sec</penaltyDuration>
+                <properties>
+                    <entry>
+                        <key>Character Set</key>
+                        <value>UTF-8</value>
+                    </entry>
+                    <entry>
+                        <key>Maximum Buffer Size</key>
+                        <value>1 MB</value>
+                    </entry>
+                    <entry>
+                        <key>Maximum Capture Group Length</key>
+                        <value>1024</value>
+                    </entry>
+                    <entry>
+                        <key>Enable Canonical Equivalence</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>Enable Case-insensitive Matching</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>Permit Whitespace and Comments in Pattern</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>Enable DOTALL Mode</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>Enable Literal Parsing of the Pattern</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>Enable Multiline Mode</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>Enable Unicode-aware Case Folding</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>Enable Unicode Predefined Character Classes</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>Enable Unix Lines Mode</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>Include Capture Group 0</key>
+                        <value>true</value>
+                    </entry>
+                    <entry>
+                        <key>extract-text-enable-repeating-capture-group</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>extract-text-enable-named-groups</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>kafka.key</key>
+                        <value>,.*?,(.*?),</value>
+                    </entry>
+                </properties>
+                <retryCount>10</retryCount>
+                <runDurationMillis>0</runDurationMillis>
+                <schedulingPeriod>0 sec</schedulingPeriod>
+                <schedulingStrategy>TIMER_DRIVEN</schedulingStrategy>
+                <yieldDuration>1 sec</yieldDuration>
+            </config>
+            <executionNodeRestricted>false</executionNodeRestricted>
+            <name>ExtractText</name>
+            <relationships>
+                <autoTerminate>false</autoTerminate>
+                <name>matched</name>
+                <retry>false</retry>
+            </relationships>
+            <relationships>
+                <autoTerminate>true</autoTerminate>
+                <name>unmatched</name>
+                <retry>false</retry>
+            </relationships>
+            <state>RUNNING</state>
+            <style/>
+            <type>org.apache.nifi.processors.standard.ExtractText</type>
+        </processors>
+        <processors>
+            <id>dfa5a8ec-1530-371d-0000-000000000000</id>
+            <parentGroupId>ba6867aa-dbfa-3f0b-0000-000000000000</parentGroupId>
+            <position>
+                <x>0.0</x>
+                <y>632.0</y>
+            </position>
+            <versionedComponentId>dfa5a8ec-1530-371d-8c52-60c6a7c1520f</versionedComponentId>
+            <bundle>
+                <artifact>nifi-kafka-2-6-nar</artifact>
+                <group>org.apache.nifi</group>
+                <version>1.21.0</version>
+            </bundle>
+            <config>
+                <backoffMechanism>PENALIZE_FLOWFILE</backoffMechanism>
+                <bulletinLevel>WARN</bulletinLevel>
+                <comments></comments>
+                <concurrentlySchedulableTaskCount>1</concurrentlySchedulableTaskCount>
+                <descriptors>
+                    <entry>
+                        <key>bootstrap.servers</key>
+                        <value>
+                            <name>bootstrap.servers</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>topic</key>
+                        <value>
+                            <name>topic</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>use-transactions</key>
+                        <value>
+                            <name>use-transactions</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>transactional-id-prefix</key>
+                        <value>
+                            <dependencies>
+<dependentValues>true</dependentValues>
+<propertyName>use-transactions</propertyName>
+                            </dependencies>
+                            <name>transactional-id-prefix</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>message-demarcator</key>
+                        <value>
+                            <name>message-demarcator</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>Failure Strategy</key>
+                        <value>
+                            <name>Failure Strategy</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>acks</key>
+                        <value>
+                            <name>acks</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>attribute-name-regex</key>
+                        <value>
+                            <name>attribute-name-regex</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>message-header-encoding</key>
+                        <value>
+                            <name>message-header-encoding</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>security.protocol</key>
+                        <value>
+                            <name>security.protocol</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>sasl.mechanism</key>
+                        <value>
+                            <name>sasl.mechanism</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>kerberos-credentials-service</key>
+                        <value>
+                            <identifiesControllerService>org.apache.nifi.kerberos.KerberosCredentialsService</identifiesControllerService>
+                            <name>kerberos-credentials-service</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>kerberos-user-service</key>
+                        <value>
+                            <identifiesControllerService>org.apache.nifi.kerberos.SelfContainedKerberosUserService</identifiesControllerService>
+                            <name>kerberos-user-service</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>sasl.kerberos.service.name</key>
+                        <value>
+                            <name>sasl.kerberos.service.name</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>sasl.kerberos.principal</key>
+                        <value>
+                            <name>sasl.kerberos.principal</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>sasl.kerberos.keytab</key>
+                        <value>
+                            <name>sasl.kerberos.keytab</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>sasl.username</key>
+                        <value>
+                            <dependencies>
+<dependentValues>PLAIN</dependentValues>
+<dependentValues>SCRAM-SHA-512</dependentValues>
+<dependentValues>SCRAM-SHA-256</dependentValues>
+<propertyName>sasl.mechanism</propertyName>
+                            </dependencies>
+                            <name>sasl.username</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>sasl.password</key>
+                        <value>
+                            <dependencies>
+<dependentValues>PLAIN</dependentValues>
+<dependentValues>SCRAM-SHA-512</dependentValues>
+<dependentValues>SCRAM-SHA-256</dependentValues>
+<propertyName>sasl.mechanism</propertyName>
+                            </dependencies>
+                            <name>sasl.password</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>aws.profile.name</key>
+                        <value>
+                            <dependencies>
+<dependentValues>AWS_MSK_IAM</dependentValues>
+<propertyName>sasl.mechanism</propertyName>
+                            </dependencies>
+                            <name>aws.profile.name</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>sasl.token.auth</key>
+                        <value>
+                            <dependencies>
+<dependentValues>SCRAM-SHA-512</dependentValues>
+<dependentValues>SCRAM-SHA-256</dependentValues>
+<propertyName>sasl.mechanism</propertyName>
+                            </dependencies>
+                            <name>sasl.token.auth</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>ssl.context.service</key>
+                        <value>
+                            <identifiesControllerService>org.apache.nifi.ssl.SSLContextService</identifiesControllerService>
+                            <name>ssl.context.service</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>kafka-key</key>
+                        <value>
+                            <name>kafka-key</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>key-attribute-encoding</key>
+                        <value>
+                            <name>key-attribute-encoding</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>max.request.size</key>
+                        <value>
+                            <name>max.request.size</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>ack.wait.time</key>
+                        <value>
+                            <name>ack.wait.time</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>max.block.ms</key>
+                        <value>
+                            <name>max.block.ms</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>partitioner.class</key>
+                        <value>
+                            <name>partitioner.class</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>partition</key>
+                        <value>
+                            <name>partition</name>
+                        </value>
+                    </entry>
+                    <entry>
+                        <key>compression.type</key>
+                        <value>
+                            <name>compression.type</name>
+                        </value>
+                    </entry>
+                </descriptors>
+                <executionNode>ALL</executionNode>
+                <lossTolerant>false</lossTolerant>
+                <maxBackoffPeriod>10 mins</maxBackoffPeriod>
+                <penaltyDuration>30 sec</penaltyDuration>
+                <properties>
+                    <entry>
+                        <key>bootstrap.servers</key>
+                        <value>kafka-1:19092</value>
+                    </entry>
+                    <entry>
+                        <key>topic</key>
+                        <value>vehicle_tracking_sysB</value>
+                    </entry>
+                    <entry>
+                        <key>use-transactions</key>
+                        <value>true</value>
+                    </entry>
+                    <entry>
+                        <key>transactional-id-prefix</key>
+                    </entry>
+                    <entry>
+                        <key>message-demarcator</key>
+                    </entry>
+                    <entry>
+                        <key>Failure Strategy</key>
+                        <value>Route to Failure</value>
+                    </entry>
+                    <entry>
+                        <key>acks</key>
+                        <value>all</value>
+                    </entry>
+                    <entry>
+                        <key>attribute-name-regex</key>
+                    </entry>
+                    <entry>
+                        <key>message-header-encoding</key>
+                        <value>UTF-8</value>
+                    </entry>
+                    <entry>
+                        <key>security.protocol</key>
+                        <value>PLAINTEXT</value>
+                    </entry>
+                    <entry>
+                        <key>sasl.mechanism</key>
+                        <value>GSSAPI</value>
+                    </entry>
+                    <entry>
+                        <key>kerberos-credentials-service</key>
+                    </entry>
+                    <entry>
+                        <key>kerberos-user-service</key>
+                    </entry>
+                    <entry>
+                        <key>sasl.kerberos.service.name</key>
+                    </entry>
+                    <entry>
+                        <key>sasl.kerberos.principal</key>
+                    </entry>
+                    <entry>
+                        <key>sasl.kerberos.keytab</key>
+                    </entry>
+                    <entry>
+                        <key>sasl.username</key>
+                    </entry>
+                    <entry>
+                        <key>sasl.password</key>
+                    </entry>
+                    <entry>
+                        <key>aws.profile.name</key>
+                    </entry>
+                    <entry>
+                        <key>sasl.token.auth</key>
+                        <value>false</value>
+                    </entry>
+                    <entry>
+                        <key>ssl.context.service</key>
+                    </entry>
+                    <entry>
+                        <key>kafka-key</key>
+                    </entry>
+                    <entry>
+                        <key>key-attribute-encoding</key>
+                        <value>utf-8</value>
+                    </entry>
+                    <entry>
+                        <key>max.request.size</key>
+                        <value>1 MB</value>
+                    </entry>
+                    <entry>
+                        <key>ack.wait.time</key>
+                        <value>5 secs</value>
+                    </entry>
+                    <entry>
+                        <key>max.block.ms</key>
+                        <value>5 sec</value>
+                    </entry>
+                    <entry>
+                        <key>partitioner.class</key>
+                        <value>org.apache.kafka.clients.producer.internals.DefaultPartitioner</value>
+                    </entry>
+                    <entry>
+                        <key>partition</key>
+                    </entry>
+                    <entry>
+                        <key>compression.type</key>
+                        <value>none</value>
+                    </entry>
+                </properties>
+                <retryCount>10</retryCount>
+                <runDurationMillis>0</runDurationMillis>
+                <schedulingPeriod>0 sec</schedulingPeriod>
+                <schedulingStrategy>TIMER_DRIVEN</schedulingStrategy>
+                <yieldDuration>1 sec</yieldDuration>
+            </config>
+            <executionNodeRestricted>false</executionNodeRestricted>
+            <name>PublishKafka_2_6</name>
+            <relationships>
+                <autoTerminate>true</autoTerminate>
+                <name>failure</name>
+                <retry>false</retry>
+            </relationships>
+            <relationships>
+                <autoTerminate>true</autoTerminate>
+                <name>success</name>
+                <retry>false</retry>
+            </relationships>
+            <state>RUNNING</state>
+            <style/>
+            <type>org.apache.nifi.processors.kafka.pubsub.PublishKafka_2_6</type>
+        </processors>
+    </snippet>
+    <timestamp>06/25/2023 21:16:24 UTC</timestamp>
+</template>

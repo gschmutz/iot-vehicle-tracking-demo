@@ -13,5 +13,5 @@ platys gen
 
 ### How to use it?
 
-Navigate to <http://dataplatform:3000> and login with user `admin` and password `abc123!`. 
+Navigate to <http://:3000> and login with user `admin` and password `abc123!`. 
 

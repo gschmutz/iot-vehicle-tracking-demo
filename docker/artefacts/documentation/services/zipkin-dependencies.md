@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:9411/dependency>
+Navigate to <http://:9411/dependency>

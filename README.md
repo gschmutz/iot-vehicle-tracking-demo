@@ -95,53 +95,6 @@ The necessary tables are created automatically when running the stack using Dock
 docker exec -ti postgresql psql -d demodb -U demo -c "SELECT * FROM logistics_db.driver"
 ``` 
 
-### Creating logistics_db Postgresql Database
-
-The `driver` table holds the information of the drivers working for us. Let's connect to the postgresql database running as part of the dataplatform and create the table
-
-```bash
-docker exec -ti postgresql psql -d demodb -U demo
-``` 
-
-If the table is not available, this is the code to run 
-
-```sql
-CREATE SCHEMA IF NOT EXISTS logistics_db;
-
-SET search_path TO logistics_db;
-
-DROP TABLE IF EXISTS driver;
-
-CREATE TABLE driver (id BIGINT, first_name CHARACTER VARYING(45), last_name CHARACTER VARYING(45), available CHARACTER VARYING(1), birthdate DATE, last_update TIMESTAMP);
-
-ALTER TABLE driver ADD CONSTRAINT driver_pk PRIMARY KEY (id);
-
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (10,'Diann', 'Butler', 'Y', '10-JUN-68', CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (11,'Micky', 'Isaacson', 'Y', '31-AUG-72' ,CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (12,'Laurence', 'Lindsey', 'Y', '19-MAY-78' ,CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (13,'Pam', 'Harrington', 'Y','10-JUN-68' ,CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (14,'Brooke', 'Ferguson', 'Y','10-DEC-66' ,CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (15,'Clint','Hudson', 'Y','5-JUN-75' ,CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (16,'Ben','Simpson', 'Y','11-SEP-74' ,CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (17,'Frank','Bishop', 'Y','3-OCT-60' ,CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (18,'Trevor','Hines', 'Y','23-FEB-78' ,CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (19,'Christy','Stephens', 'Y','11-JAN-73' ,CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (20,'Clarence','Lamb', 'Y','15-NOV-77' ,CURRENT_TIMESTAMP);
-
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (21,'Lila', 'Page', 'Y', '5-APR-77', CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (22,'Patricia', 'Coleman', 'Y', '11-AUG-80' ,CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (23,'Jeremy', 'Olson', 'Y', '13-JUN-82', CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (24,'Walter', 'Ward', 'Y', '24-JUL-85', CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (25,'Kristen', ' Patterson', 'Y', '14-JUN-73', CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (26,'Jacquelyn', 'Fletcher', 'Y', '24-AUG-85', CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (27,'Walter', '  Leonard', 'Y', '12-SEP-88', CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (28,'Della', ' Mcdonald', 'Y', '24-JUL-79', CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (29,'Leah', 'Sutton', 'Y', '12-JUL-75', CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (30,'Larry', 'Jensen', 'Y', '14-AUG-83', CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (31,'Rosemarie', 'Ruiz', 'Y', '22-SEP-80', CURRENT_TIMESTAMP);
-INSERT INTO "driver" ("id", "first_name", "last_name", "available", "birthdate", "last_update") VALUES (32,'Shaun', ' Marshall', 'Y', '22-JAN-85', CURRENT_TIMESTAMP);
-```
-
 ### Setup Shipment MySQL Database
 
 Create the MySQL table with shipment information:
@@ -226,7 +179,7 @@ There two options for consuming from MQTT
 To start consuming using through a command line, perform the following docker command:
 
 ``` bash
-docker run -it --rm efrecon/mqtt-client sub -h $DOCKER_HOST_IP -t "truck/+/position" -v
+docker run -it --rm --name mqttclient efrecon/mqtt-client sub -h "$DOCKER_HOST_IP" -p 1883 -t "truck/+/position" -v
 ```
 
 The consumed messages will show up in the terminal.
@@ -255,18 +208,77 @@ In order to get the messages from MQTT into Kafka, we will be using the Kafka Co
 
 Connectors are available from Confluent as well as other, 3rd party organisations. A good source for connectors is the [Confluent Hub](https://www.confluent.io/hub/), although it is not complete, some connectors can also be found on GitHub projects.
 
-There are multiple Kafka Connectors available for MQTT. We can either use the one provided by [Confluent Inc.](https://www.confluent.io/connector/kafka-connect-mqtt/) (in preview and available as evaluation license on Confluent Hub) or the one provided as part of the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) available on GitHub. Here we will use the one provided by Confluent. Just be aware that is part of Confluent Enterprise, but available for evaluation. 
+There are multiple Kafka Connectors available for MQTT. We can either use the one provided by [Confluent Inc.](https://www.confluent.io/connector/kafka-connect-mqtt/) (in preview and available as evaluation license on Confluent Hub) or the one provided as part of the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) available on GitHub. Here we will use the one provided by Landoop. 
 
-The Confluent MQTT Connector was downloaded when running the Compose stack. You can check that the connector is installed by calling the REST API of the Kafka Connector cluster:
+You can check the connector which are pre-installed by calling the REST API of the Kafka Connector cluster:
 
 ```bash
 curl -XGET http://dataplatform:8083/connector-plugins | jq
 ```
 
+we can see that there is no MQTT connector available yet
+
+### Adding the MQTT Kafka Connector 
+
+There are two instances of the Kafka Connect service instance running as part of the Modern Data Platform, `kafka-connect-1` and `kafka-connect-2`. 
+
+To add the connector implementations, without having to copy them into the docker container (or even create a dedicated docker image holding the jar), both connect services are configured to use additional connector implementations from the local folder `/etc/kafka-connect/custom-plugins` inside the docker container. This folder is mapped as a volume to the `plugins/kafka-connect` folder outside of the container on to the docker host. 
+
+So into this folder we have to copy the artefacts of the Kafka connectors we want to use. 
+
+Navigate into the `plugins/kafka-connect` folder (which is a sub-folder of the `docker` folder with the `docker-compose.yml` file.
+
+```
+cd $DATAPLATFORM_HOME/plugins/kafka-connect/connectors
+```
+
+and download the `4.2.0/kafka-connect-mqtt-4.2.0.zip` file from the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) project.
+
+```
+sudo wget https://github.com/lensesio/stream-reactor/releases/download/4.2.0/kafka-connect-mqtt-4.2.0.zip
+```
+
+Once it is successfully downloaded, uncompress it using this `tar` command and remove the file. 
+
+```
+sudo unzip kafka-connect-mqtt-4.2.0.zip
+sudo rm kafka-connect-mqtt-4.2.0.zip
+```
+
+Now let's restart Kafka connect in order to pick up the new connector (Make sure to navigate back to the docker folder first, either using `cd $DATAPLATFORM_HOME` or `cd ../..`)
+
+```
+cd $DATAPLATFORM_HOME
+docker-compose restart kafka-connect-1 kafka-connect-2
+```
+
+The connector should now be added to the Kafka cluster. You can confirm that by watching the log file of the two containers
+
+```
+docker-compose logs -f kafka-connect-1 kafka-connect-2
+```
+
+After a while you should see an output similar to the one below with a message that the MQTT connector was added and later that the connector finished starting ...
+
+```
+...
+kafka-connect-2             | [2019-06-08 18:01:02,590] INFO Registered loader: PluginClassLoader{pluginLocation=file:/etc/kafka-connect/custom-plugins/kafka-connect-mqtt-1.2.1-2.1.0-all/} (org.apache.kafka.connect.runtime.isolation.DelegatingClassLoader)
+kafka-connect-2             | [2019-06-08 18:01:02,591] INFO Added plugin 'com.datamountaineer.streamreactor.connect.mqtt.source.MqttSourceConnector' (org.apache.kafka.connect.runtime.isolation.DelegatingClassLoader)
+kafka-connect-2             | [2019-06-08 18:01:02,591] INFO Added plugin 'com.datamountaineer.streamreactor.connect.mqtt.sink.MqttSinkConnector' (org.apache.kafka.connect.runtime.isolation.DelegatingClassLoader)
+kafka-connect-2             | [2019-06-08 18:01:02,592] INFO Added plugin 'com.datamountaineer.streamreactor.connect.converters.source.JsonResilientConverter' (org.apache.kafka.connect.runtime.isolation.DelegatingClassLoader)
+kafka-connect-2             | [2019-06-08 18:01:02,592] INFO Added plugin 'com.landoop.connect.sql.Transformation' (org.apache.kafka.connect.runtime.isolation.DelegatingClassLoader)
+...
+kafka-connect-2             | [2019-06-08 18:01:11,520] INFO Starting connectors and tasks using config offset -1 (org.apache.kafka.connect.runtime.distributed.DistributedHerder)
+kafka-connect-2             | [2019-06-08 18:01:11,520] INFO Finished starting connectors and tasks (org.apache.kafka.connect.runtime.distributed.DistributedHerder)
+
+```
+
+### Configure the MQTT Connector 
+
 Before we start the connector, let's use a Kafka console listener to consume from the target topic `vehicle_tracking_sysA`. We can use the [`kcat`](https://github.com/edenhill/kcat) utility (formerly kcat`kcat`), which you can either install locally or use the one provided with the Compose stack: 
 
 ```bash
-docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_sysA -f "%k - %s\n"
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_sysA -f "%k - %s\n" -q
 ```
 
 Now let's start the connector:
@@ -997,7 +1009,7 @@ CREATE SOURCE CONNECTOR jdbc_logistics_sc WITH (
     "connection.url" = 'jdbc:postgresql://postgresql/demodb?user=demo&password=abc123!',
     "mode" = 'timestamp',
     "timestamp.column.name" = 'last_update',
-    "schema.pattern" = 'logistics_db',
+    "schema.pattern" = 'dispatching',
     "table.whitelist" = 'driver',
     "validate.non.null" = 'false',
     "topic.prefix" = 'logisticsdb_',
