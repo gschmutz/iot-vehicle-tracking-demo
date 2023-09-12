@@ -200,7 +200,7 @@ docker exec -ti kcat kcat -b kafka-1:19092 -t vehicle_tracking_refined -s value=
 
 ## Demo 3 - Integrate System B
 
-![Alt Image Text](./images/use-case-step-3.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/use-case-step-3.png "Demo 3 - KsqlDB")
 
 ```bash
 cd $DATAPLATFORM_HOME
@@ -219,12 +219,15 @@ tail -f $DATAPLATFORM_HOME/data-transfer/logs/TruckData.dat
 docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_sysB --partitions 8 --replication-factor 3
 ```
 
-<http://dataplatform:18630/>
+Upload the NiFi Template `nifi/tailfile-to-kafka.xml` into Apache NiFi. 
 
-* File to Tail / Path: ```/data-transfer/logs/TruckData.dat```
-* Data Parser: ```/text```, ```/parsed``` with DataFormat ```Delimited```
-* Kafka Topic: ```vehicle_tracking_sysB```
-* Expression Evaluator: ```kafkaMessageKey``` ```${record:value('/parsed/2')}```
+![](./images/nifi-upload-template.png)
+
+now import the template into the canvas
+
+![](./images/nifi-import-template.png)
+
+After the flow is loaded, enable all controller services by right-clicking on the canvas and select **Enable all controller services**. Now you can start the flow by selecting all processors and clicking the **start** icon. 
 
 
 ```bash
