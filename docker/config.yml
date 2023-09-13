@@ -200,7 +200,7 @@
       #
       # ===== Debezium UI ========
       #
-      DEBEZIUM_UI_enable: true
+      DEBEZIUM_UI_enable: false
       #
       # ===== Cluster Manager for Apache Kafka ========
       #
