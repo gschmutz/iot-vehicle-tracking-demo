@@ -338,9 +338,160 @@ EMIT CHANGES;
 SELECT * FROM vehicle_tracking_refined_t WHERE vehicleId = '42';
 ```
 
-## Demo 6 - Investigate Driving behaviour
+## Demo 6 - Using Kafka Connect to write data to Redis and Minio
 
 ![Alt Image Text](./images/use-case-step-6.png "Demo 1 - KsqlDB")
+
+#### Redis
+
+```bash
+curl -X PUT \
+  http://${DOCKER_HOST_IP}:8083/connectors/redis-sink/config \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{
+    "connector.class": "com.redis.kafka.connect.RedisSinkConnector",
+    "tasks.max": "1",
+    "redis.uri": "redis://redis-1:6379",
+    "redis.insecure": "true",
+    "redis.password": "abc123!",
+    "redis.command": "HSET",
+    "topics": "vehicle_tracking_refined",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url": "http://schema-registry-1:8081",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter"
+}'
+```
+
+```bash
+docker exec -ti redis-1 redis-cli
+```
+
+```bash
+AUTH abc123!
+KEYS *
+```
+
+```bash
+127.0.0.1:6379> KEYS *
+ 1) "vehicle_tracking_refined:\"46\""
+ 2) "vehicle_tracking_refined:\"18\""
+ 3) "vehicle_tracking_refined:\"25\""
+ 4) "vehicle_tracking_refined:80"
+ 5) "com.redis.kafka.connect.sink.offset.vehicle_tracking_refined.3"
+ 6) "vehicle_tracking_refined:\"11\""
+ 7) "vehicle_tracking_refined:\"16\""
+ 8) "vehicle_tracking_refined:\"29\""
+ 9) "vehicle_tracking_refined:\"45\""
+10) "vehicle_tracking_refined:\"38\""
+11) "com.redis.kafka.connect.sink.offset.vehicle_tracking_refined.7"
+12) "com.redis.kafka.connect.sink.offset.vehicle_tracking_refined.0"
+13) "com.redis.kafka.connect.sink.offset.vehicle_tracking_refined.4"
+14) "vehicle_tracking_refined:97"
+15) "vehicle_tracking_refined:69"
+16) "vehicle_tracking_refined:74"
+17) "vehicle_tracking_refined:\"30\""
+18) "com.redis.kafka.connect.sink.offset.vehicle_tracking_refined.1"
+19) "vehicle_tracking_refined:\"40\""
+20) "vehicle_tracking_refined:51"
+21) "vehicle_tracking_refined:\"14\""
+22) "vehicle_tracking_refined:\"43\""
+23) "vehicle_tracking_refined:90"
+24) "vehicle_tracking_refined:\"20\""
+25) "vehicle_tracking_refined:\"26\""
+26) "com.redis.kafka.connect.sink.offset.vehicle_tracking_refined.6"
+27) "com.redis.kafka.connect.sink.offset.vehicle_tracking_refined.5"
+28) "vehicle_tracking_refined:\"33\""
+29) "vehicle_tracking_refined:85"
+30) "vehicle_tracking_refined:\"10\""
+31) "vehicle_tracking_refined:60"
+32) "vehicle_tracking_refined:\"35\""
+33) "vehicle_tracking_refined:53"
+```
+
+```bash
+127.0.0.1:6379> HGETALL "vehicle_tracking_refined:53"
+ 1) "SOURCE"
+ 2) "Tracking_SysB"
+ 3) "TIMESTAMP"
+ 4) "1688321889262"
+ 5) "VEHICLEID"
+ 6) "53"
+ 7) "DRIVERID"
+ 8) "20"
+ 9) "ROUTEID"
+10) "1090292248"
+11) "EVENTTYPE"
+12) "Unsafe following distance"
+13) "LATITUDE"
+14) "40.7"
+15) "LONGITUDE"
+16) "-89.52"
+17) "CORRELATIONID"
+18) "5823429444287523"
+```
+
+#### Minio
+
+Create bucket
+
+```bash
+docker exec -ti minio-mc mc mb minio-1/logistics-bucket
+```
+
+```bash
+curl -X PUT \
+  http://${DOCKER_HOST_IP}:8083/connectors/s3-sink2/config \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{
+      "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+      "partition.duration.ms": "3600000",
+      "flush.size": "2000",
+      "topics": "vehicle_tracking_refined",
+      "tasks.max": "1",
+      "timezone": "Europe/Zurich",
+      "locale": "en",
+      "partitioner.class": "io.confluent.connect.storage.partitioner.HourlyPartitioner",
+      "timestamp.extractor":"RecordField",
+      "timestamp.field":"TIMESTAMP",
+      "schema.generator.class": "io.confluent.connect.storage.hive.schema.DefaultSchemaGenerator",
+      "storage.class": "io.confluent.connect.s3.storage.S3Storage",
+      "format.class": "io.confluent.connect.s3.format.avro.AvroFormat",
+      "s3.region": "us-east-1",
+      "s3.bucket.name": "logistics-bucket",
+      "s3.part.size": "5242880",
+      "store.url": "http://minio-1:9000",
+      "topics.dir": "refined",
+      "value.converter": "io.confluent.connect.avro.AvroConverter",
+      "value.converter.schema.registry.url": "http://schema-registry-1:8081",
+      "key.converter": "org.apache.kafka.connect.storage.StringConverter"
+  }
+}'
+```
+
+Navigate to Mino Browser: <http://dataplatform:
+
+The content of the object should be similar to the one shown below
+
+```
+Downloads % cat vehicle_tracking_refined+0+0000000000.avro
+Objavro.schema�
+               {"type":"record","name":"VehicleTrackingRefined","namespace":"com.trivadis.avro","fields":[{"name":"SOURCE","type":["null","string"],"default":null},{"name":"TIMESTAMP","type":["null","long"],"default":null},{"name":"VEHICLEID","type":["null","long"],"default":null},{"name":"DRIVERID","type":["null","long"],"default":null},{"name":"ROUTEID","type":["null","long"],"default":null},{"name":"EVENTTYPE","type":["null","string"],"default":null},{"name":"LATITUDE","type":["null","double"],"default":null},{"name":"LONGITUDE","type":["null","double"],"default":null},{"name":"CORRELATIONID","type":["null","string"],"default":null}],"connect.version":2,"connect.name":"com.trivadis.avro.VehicleTrackingRefined"}avro.codenull�O;O��f,Φ/[+���|Tracking_SysA����bP*����
+                                                       Normal�G�z�D@{�G�V�&6906439778495426077Tracking_SysA����bP*����
+                                                                                                                     Normal�z�GaD@�z�G1V�&6906439778495426077Tracking_SysA����bP*����
+Normalq=
+ף0D@{�G�JV�&6906439778495426077Tracking_SysA����bP*����
+                                                      Normal�Q���C@���QhV�&6906439778495426077Tracking_SysA����bP*����
+                                                                                                                     Normal����̌C@���(\oV�&6906439778495426077Tracking_SysA����bP*����
+Normal33333SC@����̌V�&6906439778495426077Tracking_SysA���bP*����
+ףp�D@�G�zV�&6906439778495426077Tracking_SysA�����bP*����
+...
+```
+
+## Demo 7 - Investigate Driving behaviour
+
+![Alt Image Text](./images/use-case-step-7.png "Demo 1 - KsqlDB")
 
 ``` sql
 SELECT * FROM vehicle_tracking_refined_s 
@@ -382,9 +533,9 @@ docker exec -ti kcat kcat -b kafka-1 -t problematic_driving -s value=avro -r htt
 docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic problematic_driving_kstreams --partitions 8 --replication-factor 3
 ```
 
-## Demo 7 - Materialise Driver Information ("static information")
+## Demo 8 - Materialise Driver Information ("static information")
 
-![Alt Image Text](./images/use-case-step-7.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/use-case-step-8.png "Demo 1 - KsqlDB")
 
 ```bash
 docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic logisticsdb_driver --partitions 8 --replication-factor 3 --config cleanup.policy=compact --config segment.ms=100 --config delete.retention.ms=100 --config min.cleanable.dirty.ratio=0.001
@@ -447,9 +598,9 @@ docker exec -ti kcat kcat -b kafka-1 -t logisticsdb_driver -o beginning
 SELECT * FROM driver_t EMIT CHANGES;
 ```
 
-## Demo 8 - Join with Driver ("static information")
+## Demo 9 - Join with Driver ("static information")
 
-![Alt Image Text](./images/use-case-step-8.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/use-case-step-9.png "Demo 1 - KsqlDB")
 
 
 ``` bash
@@ -488,9 +639,9 @@ docker exec -ti postgresql psql -d demodb -U demo
 ```sql
 UPDATE logistics_db.driver SET available = 'Y', last_update = CURRENT_TIMESTAMP  WHERE id = 12;
 ```
-## Demo 9 - Aggregate Driving Behaviour
+## Demo 10 - Aggregate Driving Behaviour
 
-![Alt Image Text](./images/use-case-step-9.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/use-case-step-10.png "Demo 1 - KsqlDB")
 
 ### What is a Windowed Aggregation?
 
@@ -542,9 +693,9 @@ FROM event_type_by_1hour_tumbl_t
 EMIT CHANGES;
 ```
 
-## Demo 10 - Materialize Shipment Information ("static information")
+## Demo 11 - Materialize Shipment Information ("static information")
 
-![Alt Image Text](./images/use-case-step-10.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/use-case-step-11.png "Demo 1 - KsqlDB")
 
 ``` bash
 docker exec -it mysql bash -c 'mysql -u root -pmanager'
@@ -656,9 +807,9 @@ Destination is St. Louis: <http://geojson.io/>
 POLYGON ((-91.29638671875 39.04478604850143, -91.4501953125 38.46219172306828, -90.98876953125 37.94419750075404, -89.912109375 37.78808138412046, -88.9892578125 38.37611542403604, -88.92333984375 38.77121637244273, -89.71435546875 39.470125122358176, -90.19775390625 39.825413103424786, -91.29638671875 39.04478604850143))
 ```
 
-## Demo 11 - Geo-Fencing for "near" destination
+## Demo 12 - Geo-Fencing for "near" destination
 
-![Alt Image Text](./images/use-case-step-11.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/use-case-step-12.png "Demo 1 - KsqlDB")
 
 ### What is Geo Fencing?
 
@@ -701,9 +852,9 @@ EMIT CHANGES;
 
 
 
-## Demo 12 - Dashboard
+## Demo 13 - Dashboard
 
-![Alt Image Text](./images/use-case-step-12.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/use-case-step-13.png "Demo 1 - KsqlDB")
 
 
 ``` sql
