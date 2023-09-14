@@ -9,7 +9,7 @@ export DATAPLATFORM_HOME=/home/docker/iot-vehicle-tracking-demo/docker
 ## Demo 0 - Write Vehicle Tracking message directly to Kafka
 
 ``` bash
-docker run trivadis/iot-truck-simulator '-s' 'KAFKA' '-h' $DOCKER_HOST_IP '-p' '9092' '-f' 'JSON' '-vf' '1-49'
+docker run --network host trivadis/iot-truck-simulator '-s' 'KAFKA' '-h' $DOCKER_HOST_IP '-p' '9092' '-f' 'JSON' '-vf' '1-49'
 ```
 
 ## Demo 1 - Consume Vehicle Tracking messages from MQTT and send to Kafka
