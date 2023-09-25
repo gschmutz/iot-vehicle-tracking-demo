@@ -1,4 +1,4 @@
-# Kafkistry
+# FluentD
 
 Registry service for Apache Kafka which keeps track of topics, consumer-groups, acls, quotas and their configuration/state/metadata across multiple kafka-clusters.
 
@@ -6,17 +6,14 @@ It allows performing administrative operations such as inspecting/creating/delet
 
 It also provides various analytical tools such as: SQL querying metadata; viewing topic records; analyzing json record structures; re-balancing cluster tools; etc.
 
-**[Website](https://github.com/infobip/kafkistry)** | **[Documentation](https://github.com/infobip/kafkistry/blob/master/DOCUMENTATION)** | **[GitHub](https://github.com/infobip/kafkistry/tree/master)**
+**[Website](https://www.fluentd.org/)** | **[Documentation](https://docs.fluentd.org/)** | **[GitHub](https://github.com/fluent/fluentd)**
 
 ## How to enable?
 
 ```
-platys init --enable-services KAFKISTRY
+platys init --enable-services FLUENTD
 platys gen
 ```
 
 ## How to use?
 
-Navigate to <http://dataplatform:28303> to show the Kafkistry UI.
-
-Login as the **Admin User**: User `admin` and Password `abc123!`.

@@ -285,6 +285,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 19632 | 19630 | streamsets-transformer-1 |
 19999 | 9999 | influxdb2 |
 21000 | 21000 | atlas |
+24224 | 24224 | fluentd |
 26500 | 26500 | zeebe-1 |
 27017 | 27017 | mongodb-1 |
 27018 | 27017 | mongodb-2 |
@@ -507,6 +508,13 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28305 | 3000 | sqlchat |
 28306 | 8080 | minio-web |
 28307 | 80 | docker-registry-ui |
+28308 | 8000 | splunk |
+28309 | 9097 | klaw-core |
+28310 | 9343 | klaw-cluster-api |
+28311 | 3000 | raneto |
+28312 | 3000 | markdown-madness |
+28313 | 80 | kadeck |
+28314 | 8080 | watchtower |
 
 ## Ports > 28500
 
