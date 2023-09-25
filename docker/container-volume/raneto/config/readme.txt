@@ -1,1 +1,0 @@
-Contains the config of Raneto service, if flag RANETO_volume_map_data is set to true.

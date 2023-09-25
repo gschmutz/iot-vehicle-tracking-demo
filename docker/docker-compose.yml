@@ -610,7 +610,7 @@ services:
     restart: unless-stopped
   #  ================================== NiFi ========================================== #
   nifi-1:
-    image: apache/nifi:1.23.2
+    image: apache/nifi:1.23.0
     container_name: nifi-1
     hostname: nifi-1
     labels:
@@ -850,7 +850,7 @@ services:
     restart: unless-stopped
   #  ================================== markdown-viewer ========================================== #
   markdown-viewer:
-    image: dannyben/madness:latest
+    image: trivadis/markdown-web:latest
     container_name: markdown-viewer
     hostname: markdown-viewer
     labels:
@@ -858,12 +858,10 @@ services:
       com.platys.webui.title: Markdown Viewer UI
       com.platys.webui.url: http://dataplatform:80
     ports:
-      - 80:3000
+      - 80:80
     volumes:
-      - ./artefacts:/docs
-      - ./conf/markdown-viewer/markdown-madness.yml:/docs/.madness.yml
+      - ./artefacts:/home/python/markdown
       - ./data-transfer:/data-transfer
-    command: server
     restart: unless-stopped
   markdown-renderer:
     image: trivadis/jinja2-renderer:latest
