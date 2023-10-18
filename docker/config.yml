@@ -127,20 +127,23 @@
       #
       # ===== Confluent ksqlDB ========
       #
-      KAFKA_KSQLDB_enable: true
-      KAFKA_KSQLDB_edition: 'oss'
-      KAFKA_KSQLDB_nodes: 2
-      KAFKA_KSQLDB_internal_replication_factor: 1
-      KAFKA_KSQLDB_suppress_enabled: false
-      KAFKA_KSQLDB_suppress_buffer_size_bytes: -1
-      KAFKA_KSQLDB_query_pull_table_scan_enabled: false
-      KAFKA_KSQLDB_queries_file: ''
-      KAFKA_KSQLDB_response_http_headers_config: ''
-      KAFKA_KSQLDB_use_embedded_connect: false
-      KAFAK_KSQLDB_connect_connectors:
-      KAFKA_KSQLDB_persistence_default_format_key: 'KAFKA'
-      KAFKA_KSQLDB_persistence_default_format_value: ''
-      KAFKA_KSQLDB_log_topic: 'ksql_processing_log'
+      KSQLDB_enable: true
+      # either 'cp' or 'oss'
+      KSQLDB_edition: 'oss'
+      KSQLDB_nodes: 2
+      KSQLDB_internal_replication_factor: 1
+      KSQLDB_suppress_enabled: false
+      KSQLDB_suppress_buffer_size_bytes: -1
+      KSQLDB_query_pull_table_scan_enabled: false
+      KSQLDB_queries_file: ''
+      KSQLDB_response_http_headers_config: ''
+      KSQLDB_use_embedded_connect: false
+      KSQLDB_connect_connectors: 
+      KSQLDB_persistence_default_format_key: 'KAFKA'
+      KSQLDB_persistence_default_format_value: ''
+      KSQLDB_log_topic: 'ksql_processing_log'
+      KSQLDB_kafka_username: 'ksqldb'
+      KSQLDB_kafka_password: 'ksqldb-secret'
       #
       # ===== Materialize ========
       #
@@ -220,7 +223,22 @@
       # ===== Apache Kafka HQ ========
       #
       AKHQ_enable: true
+      AKHQ_topic_page_size: 25
+      AKHQ_topic_data_size: 50
+      AKHQ_topic_data_poll_timeout: 1000
+      AKHQ_topic_data_kafka_max_message_length: 1000000
+      AKHQ_default_view: HIDE_INTERNAL
+      AKHQ_sort: OLDEST
+      AKHQ_show_consumer_groups: true
+      AKHQ_show_all_consumer_groups: true
+      AKHQ_show_last_record: false
       AKHQ_read_only_mode: false
+      AKHQ_auth_enable: false
+      # either 'basic'
+      AKHQ_auth_type: basic
+      AKHQ_username: admin
+      # this is sha256 for abc123! => https://emn178.github.io/online-tools/sha256.html
+      AKHQ_password: 033b83d92431548e13424903c235a9922af56dd34d53c9b72b37cf158489213e
       #
       # ===== Kafka UI ========
       #

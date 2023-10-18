@@ -47,11 +47,11 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_BROKER_RACK: rack1
-      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_LOCAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
-      KAFKA_LISTENERS: LISTENER_INTERNAL://kafka-1:19092,LISTENER_LOCAL://kafka-1:39092,LISTENER_DOCKERHOST://kafka-1:29092,LISTENER_EXTERNAL://kafka-1:9092
-      KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-1:19092,LISTENER_LOCAL://localhost:39092,LISTENER_DOCKERHOST://${DOCKER_HOST_IP:-127.0.0.1}:29092,LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: BROKER:PLAINTEXT,LOCAL:PLAINTEXT,DOCKERHOST:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: BROKER://kafka-1:19092,LOCAL://kafka-1:39092,DOCKERHOST://kafka-1:29092,EXTERNAL://kafka-1:9092
+      KAFKA_ADVERTISED_LISTENERS: BROKER://kafka-1:19092,LOCAL://localhost:39092,DOCKERHOST://${DOCKER_HOST_IP:-127.0.0.1}:29092,EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
@@ -85,11 +85,11 @@ services:
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_BROKER_RACK: rack1
-      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_LOCAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
-      KAFKA_LISTENERS: LISTENER_INTERNAL://kafka-2:19093,LISTENER_LOCAL://kafka-2:39093,LISTENER_DOCKERHOST://kafka-2:29093,LISTENER_EXTERNAL://kafka-2:9093
-      KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-2:19093,LISTENER_LOCAL://localhost:39093,LISTENER_DOCKERHOST://${DOCKER_HOST_IP:-127.0.0.1}:29093,LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: BROKER:PLAINTEXT,LOCAL:PLAINTEXT,DOCKERHOST:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: BROKER://kafka-2:19093,LOCAL://kafka-2:39093,DOCKERHOST://kafka-2:29093,EXTERNAL://kafka-2:9093
+      KAFKA_ADVERTISED_LISTENERS: BROKER://kafka-2:19093,LOCAL://localhost:39093,DOCKERHOST://${DOCKER_HOST_IP:-127.0.0.1}:29093,EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
@@ -123,11 +123,11 @@ services:
     environment:
       KAFKA_BROKER_ID: 3
       KAFKA_BROKER_RACK: rack1
-      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_INTERNAL
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
       KAFKA_ZOOKEEPER_CONNECT: zookeeper-1:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_INTERNAL:PLAINTEXT,LISTENER_LOCAL:PLAINTEXT,LISTENER_DOCKERHOST:PLAINTEXT,LISTENER_EXTERNAL:PLAINTEXT
-      KAFKA_LISTENERS: LISTENER_INTERNAL://kafka-3:19094,LISTENER_LOCAL://kafka-3:39094,LISTENER_DOCKERHOST://kafka-3:29094,LISTENER_EXTERNAL://kafka-3:9094
-      KAFKA_ADVERTISED_LISTENERS: LISTENER_INTERNAL://kafka-3:19094,LISTENER_LOCAL://localhost:39094,LISTENER_DOCKERHOST://${DOCKER_HOST_IP:-127.0.0.1}:29094,LISTENER_EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: BROKER:PLAINTEXT,LOCAL:PLAINTEXT,DOCKERHOST:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: BROKER://kafka-3:19094,LOCAL://kafka-3:39094,DOCKERHOST://kafka-3:29094,EXTERNAL://kafka-3:9094
+      KAFKA_ADVERTISED_LISTENERS: BROKER://kafka-3:19094,LOCAL://localhost:39094,DOCKERHOST://${DOCKER_HOST_IP:-127.0.0.1}:29094,EXTERNAL://${PUBLIC_IP:-127.0.0.1}:9094
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
@@ -414,7 +414,6 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
-      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
       SCHEMA_REGISTRY_GROUP_ID: schema-registry
       SCHEMA_REGISTRY_LEADER_ELIGIBILITY: 'True'
       SCHEMA_REGISTRY_MODE_MUTABILITY: 'True'
@@ -505,10 +504,13 @@ services:
     hostname: akhq
     labels:
       com.platys.name: akhq
-      com.platys.webui.title: Apache Kafka AQ UI
+      com.platys.webui.title: AKHQ UI
       com.platys.webui.url: http://dataplatform:28107
+      com.platys.restapi.title: AKHQ API
+      com.platys.restapi.url: http://dataplatform:28107/api
     ports:
       - 28107:8080
+      - 28320:28081
     environment:
       AKHQ_CONFIGURATION: |
         akhq:
@@ -610,7 +612,7 @@ services:
     restart: unless-stopped
   #  ================================== NiFi ========================================== #
   nifi-1:
-    image: apache/nifi:1.23.0
+    image: apache/nifi:1.23.2
     container_name: nifi-1
     hostname: nifi-1
     labels:
@@ -769,7 +771,7 @@ services:
       MINIO_ROOT_PASSWORD: bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza
       MINIO_REGION_NAME: us-east-1
       MINIO_DOMAIN: minio
-      MINIO_SERVER_URL: http://dataplatform:9000
+      MINIO_SERVER_URL: http://${PUBLIC_IP}:9000
     volumes:
       - ./data-transfer:/data-transfer
     command: server /data --console-address ":9010"
@@ -850,7 +852,7 @@ services:
     restart: unless-stopped
   #  ================================== markdown-viewer ========================================== #
   markdown-viewer:
-    image: trivadis/markdown-web:latest
+    image: dannyben/madness:latest
     container_name: markdown-viewer
     hostname: markdown-viewer
     labels:
@@ -858,10 +860,12 @@ services:
       com.platys.webui.title: Markdown Viewer UI
       com.platys.webui.url: http://dataplatform:80
     ports:
-      - 80:80
+      - 80:3000
     volumes:
-      - ./artefacts:/home/python/markdown
+      - ./artefacts:/docs
+      - ./conf/markdown-viewer/markdown-madness.yml:/docs/.madness.yml
       - ./data-transfer:/data-transfer
+    command: server
     restart: unless-stopped
   markdown-renderer:
     image: trivadis/jinja2-renderer:latest

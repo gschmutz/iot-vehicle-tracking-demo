@@ -3,6 +3,7 @@
 | Service Name | Web UI | Rest API |
 |-------------- |------|------------
 {%- for service in services.items() | sort() %}
+{%- if service[1].init is not defined %}
 | {%- if service[1].labels and service[1].labels['com.platys.name'] is defined -%} [{{ service[0]}}](./documentation/services/{{service[1].labels['com.platys.name'] }} ) {%- else -%} {{ service[0]}} {%- endif -%}  |
   {%- if service[1].labels -%}
   {%- for label,value in service[1].labels.items() -%}
@@ -32,4 +33,7 @@
     {%- endif -%}
   {%- endfor -%}
  {%- endif -%}
-{%- endfor -%}
+{%- endif -%} 
+{%- endfor -%} |
+
+**Note:** init container ("init: true") are not shown
