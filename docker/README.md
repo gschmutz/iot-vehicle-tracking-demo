@@ -8,7 +8,6 @@ It contains the following services:
   * [adminer](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/adminer.md) -  Relational Database Admin UI
   * [akhq](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/akhq.md) -  Kafka GUI
   * [cloudbeaver](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/cloudbeaver.md) -  Cloud Database Manager
-  * [cmak](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/cmak.md) -  Kafka GUI
   * [kafka-1](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/kafka.md) -  Kafka Broker 1
   * [kafka-2](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/kafka.md) -  Kafka Broker 2
   * [kafka-3](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/kafka.md) -  Kafka Broker 3

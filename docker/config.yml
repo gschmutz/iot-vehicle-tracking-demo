@@ -195,7 +195,7 @@
       #
       # ===== Cluster Manager for Apache Kafka ========
       #
-      CMAK_enable: true
+      CMAK_enable: false
       CMAK_auth_enabled: "'false'"
       CMAK_username: admin
       CMAK_password: abc123!

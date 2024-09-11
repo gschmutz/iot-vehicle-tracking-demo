@@ -548,27 +548,6 @@ services:
       - ./data-transfer:/data-transfer
       - ./conf/resolv.conf:/etc/resolv.conf:ro
     restart: unless-stopped
-  #  ================================== Cluster Manager for Apache Kafka (CMAK) ========================================== #
-  cmak:
-    image: trivadis/cmak:latest
-    container_name: cmak
-    hostname: cmak
-    labels:
-      com.platys.name: cmak
-      com.platys.description: Kafka GUI
-      com.platys.webui.title: Cluster Manager for Apache Kafka UI
-      com.platys.webui.url: http://dataplatform:28104
-    ports:
-      - 28104:9000
-    environment:
-      ZK_HOSTS: zookeeper-1:2181
-      APPLICATION_SECRET: abc123!
-      KAFKA_MANAGER_AUTH_ENABLED: 'false'
-      KAFKA_MANAGER_USERNAME: admin
-      KAFKA_MANAGER_PASSWORD: abc123!
-    volumes:
-      - ./data-transfer:/data-transfer
-    restart: unless-stopped
   #  ================================== Apache Kafka HQ (AKHQ) ========================================== #
   akhq:
     image: tchiotludo/akhq:latest

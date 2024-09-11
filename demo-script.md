@@ -8,6 +8,10 @@ export DATAPLATFORM_HOME=/home/docker/iot-vehicle-tracking-demo/docker
 
 ## Demo 0 - Write Vehicle Tracking message directly to Kafka
 
+```bash
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic truck_position --partitions 8 --replication-factor 3
+```
+
 ``` bash
 docker run --network host trivadis/iot-truck-simulator '-s' 'KAFKA' '-h' $DOCKER_HOST_IP '-p' '9092' '-f' 'JSON' '-vf' '1-49'
 ```

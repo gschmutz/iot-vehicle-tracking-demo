@@ -86,6 +86,8 @@ cd /home/${USERNAME}/${GITHUB_PROJECT}/${DATAPLATFORM_HOME}
 sudo echo "export PUBLIC_IP=$PUBLIC_IP" | sudo tee -a /etc/profile.d/platys-platform-env.sh
 sudo echo "export DOCKER_HOST_IP=$DOCKER_HOST_IP" | sudo tee -a /etc/profile.d/platys-platform-env.sh
 sudo echo "export DATAPLATFORM_HOME=$PWD" | sudo tee -a /etc/profile.d/platys-platform-env.sh
+sudo echo "" | sudo tee -a sudo tee -a /etc/profile.d/platys-platform-env.sh
+sudo echo "alias kcat=kafkacat" | sudo tee -a /etc/profile.d/platys-platform-env.sh
 
 # Startup Environment
 docker compose up -d
