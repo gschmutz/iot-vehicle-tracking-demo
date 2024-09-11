@@ -30,7 +30,6 @@ It contains the following services:
   * [redis-1](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/redis.md) -  Key-value store
   * [schema-registry-1](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/schema-registry.md) -  Confluent Schema Registry
   * [schema-registry-ui](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/schema-registry-ui.md) -  Schema Registry UI
-  * [streamsets-1](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/streamsets.md) -  StreamSets Data Integration Engine
   * [wetty](https://github.com/TrivadisPF/platys-modern-data-platform/tree/master/documentation/services/wetty.md) -  A terminal window in Web-Browser
 
 _**Note**: the init container·("init:·true")·are·not·shown_

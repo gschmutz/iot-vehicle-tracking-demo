@@ -351,7 +351,7 @@
       #
       # =====  Streamsets Data Collector ========
       #
-      STREAMSETS_enable: true
+      STREAMSETS_enable: false
       STREAMSETS_volume_map_data: false
       STREAMSETS_volume_map_logs: false
       STREAMSETS_volume_map_security_policy: false

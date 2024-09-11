@@ -626,47 +626,6 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== StreamSets DataCollector ========================================== #
-  streamsets-1:
-    image: streamsets/datacollector:3.22.2
-    container_name: streamsets-1
-    hostname: streamsets-1
-    labels:
-      com.platys.name: streamsets
-      com.platys.description: StreamSets Data Integration Engine
-      com.platys.webui.title: StreamSets Data Collector UI
-      com.platys.webui.url: http://dataplatform:18630
-      com.platys.restapi.title: StreamSets Data Collector REST API
-      com.platys.restapi.url: http://dataplatform:18630/collector/restapi
-    ports:
-      - 18630:18630
-    environment:
-      SDC_OFFSET_DIRECTORY: /data/custom-offset-el
-      SDC_INSTALL_STAGES: streamsets-datacollector-apache-kafka_2_7-lib
-      SDC_INSTALL_ENTERPRISE_STAGES: ''
-      SDC_JAVA_OPTS: -Xmx2g -Xms2g -Dlog4j2.formatMsgNoLookups=true
-      SDC_JAVA8_OPTS: -XX:+UseG1GC
-      SDC_CONF_MONITOR_MEMORY: 'true'
-      SDC_CONF_PIPELINE_MAX_RUNNERS_COUNT: 50
-      SDC_CONF_http_authentication: form
-      SDC_CONF_RUNTIME_CONF_LOCATION: embedded
-    volumes:
-      - ./data-transfer:/data-transfer
-      - ./conf/streamsets/pre-docker-entrypoint.sh:/pre-docker-entrypoint.sh
-      - ./plugins/streamsets/user-libs:/opt/streamsets-datacollector-user-libs:Z
-      - ./plugins/streamsets/libs-extras/streamsets-datacollector-jdbc-lib/:/opt/streamsets-datacollector-3.22.2/streamsets-libs-extras/streamsets-datacollector-jdbc-lib/lib/:Z
-    ulimits:
-      nofile:
-        soft: 32768
-        hard: 32768
-    user: '1000'
-    command:
-      - dc
-      - -exec
-      - -verbose
-    entrypoint:
-      - /pre-docker-entrypoint.sh
-    restart: unless-stopped
   #  ================================== NiFi ========================================== #
   nifi-1:
     image: apache/nifi:1.27.0
