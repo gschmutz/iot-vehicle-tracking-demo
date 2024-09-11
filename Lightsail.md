@@ -11,7 +11,7 @@ Click **Create instance** to navigate to the **Create an instance** dialog.
 ![Alt Image Text](./images/lightsail-create-instance-1.png "Lightsail Homepage")
 
 Optionally change the **Instance Location** to a AWS region of your liking.
-Keep **Linux/Unix** for the **Select a platform** and click on **OS Only** and select **Ubuntu 20.04 LTS** for the **Select a blueprint**. 
+Keep **Linux/Unix** for the **Select a platform** and click on **OS Only** and select **Ubuntu 22.04 LTS** for the **Select a blueprint**.
 
 ![Alt Image Text](./images/lightsail-create-instance-2.png "Lightsail Homepage")
 
@@ -82,7 +82,6 @@ chown -R ${USERNAME}:${USERNAME} ${GITHUB_PROJECT}
 
 cd /home/${USERNAME}/${GITHUB_PROJECT}/${DATAPLATFORM_HOME}
 
-
 # Make Environment Variables persistent
 sudo echo "export PUBLIC_IP=$PUBLIC_IP" | sudo tee -a /etc/profile.d/platys-platform-env.sh
 sudo echo "export DOCKER_HOST_IP=$DOCKER_HOST_IP" | sudo tee -a /etc/profile.d/platys-platform-env.sh
@@ -96,9 +95,9 @@ into the **Launch Script** edit field
  
 ![Alt Image Text](./images/lightsail-create-instance-3.png "Lightsail Homepage")
 
-Under **Choose your instance plan** click on the arrow on the right and select the **16 GB** instance.   
+Under **Choose your instance plan** click on the arrow on the right and select the **16 GB** instance.  
 
-Under **Identify your instance** enter **Ubuntu-Hadoop-1** into the edit field. 
+Under **Identify your instance** enter **IoT-Vehicle-Tracking** into the edit field.
 
 ![Alt Image Text](./images/lightsail-create-instance-4.png "Lightsail Homepage")
 
@@ -122,97 +121,42 @@ The initialisation is finished when you see the `Creating xxxxx .... done` lines
 
 ![Alt Image Text](./images/lightsail-create-instance-log-file.png "Lightsail Homepage")
 
-## Connecting from a Terminal window using SSH
+## View Platform Documentation
 
-Optionally you can also SSH into the Lightsail instance using the **SSH key pair** which you can download from the **Account** menu in the top menu bar. 
+The platform contains some web-based documentation, which can be accessed once the platform is running. In a web browser, navigate to the public IP <http://18.196.124.212> (replace the IP address by your Public IP address) and you should see a page similar to the one shown here
 
-For that open a terminal window (on Mac / Linux) or Putty (on Windows) and connect as ubuntu to the **Public IP** address of the instance.   
+![Alt Image Text](./images/platform-overview.png "Platform Overview")
 
-```
-ssh -i LightsailDefaultKey-eu-central-1.pem ubuntu@18.196.124.212 
-```
+If you click on the "A list of available services is available here" a page with the list of available services and their IP address will appear
 
-## Using a Terminal over Web-Browser
+![Alt Image Text](./images/platform-services.png "Platform Services")
 
-Before you can use this option, you either have to open the ports on the Firewall or create an SSH tunnel, documented under **Enable using the Services from your client**.
+So with all services running, there is one last step to do. We have to configure the Firewall to allow traffic into the Lightsail instance.
 
-After the stack is started, you can use your web browser (best is Chrome) to access the terminal in the ligthsail environment. Navigate to <http://18.196.124.212:3001> (replace the IP address by the IP address your IP address and you should see a back terminal window asking to enter the username to connect:
+## Open Network Firewall
 
-![Alt Image Text](./images/wetty-1.png "Lightsail Homepage")
+For accessing the services running in the cloud from our machine, we have two options:
 
-Enter `ubuntu` for the **username** and enter value you have chosen as your password when creating the lightsail environment (when specifying the **Launch Script**) for the **password** and you should be able to connect. 
+1. Open the ports on the firewall (this is what we do here)
+2. Create an SSH Tunnel
 
-![Alt Image Text](./images/wetty-2.png "Lightsail Homepage")
+Because the Lightsail instance is exposed to the public internet, generally opening the ports is not the best idea. But if you open it to accept only traffic from your own IP address, the risk can be minimised. Using an SSH tunnel is more secure, but also more difficult to setup.
 
-## Enable using the Services from your client
-
-For accessing the services in the cloud, we have to open the ports on the firewall (with the option to only allow a certain client to connect)
-
-Due to the fact, that the lightsail instance is exposed to the public internet, opening the ports is not the best idea. But if you only open it restricted to your IP address the risk can be minimised. 
-
-But of course using an SSH tunnel is more secure, but on the other hand much more difficult to setup.  
-
-### Open Ports on the Firewall
-
-So with all services running, there is one last step to do. We have to configure the Firewall to allow traffic into the Lightsail instance. 
-
-
-Click on the **Networking** tab/link to navigate to the network settings.
+So let see how we can open the ports on the firewall. Click on the **Networking** tab/link to navigate to the network settings.
 
 ![Alt Image Text](./images/lightsail-image-networking.png "Lightsail Homepage")
 
 Click on **Add rule** to add a new Firewall rule.
 
-For simplicity reasons, we allow all TCP traffic by selecting **All TCP** on port range **0 - 65535**. 
+For simplicity reasons, we allow all TCP traffic by selecting **All TCP** on port range **0 - 65535**.
 To increase security, you should restrict incoming traffic to one or more IP addresses by selecting the option **Restrict to IP address** and adding the IP address of your client as the **Source IP address**.
 
 ![Alt Image Text](./images/lightsail-image-networking-add-firewall-rule-1.png "Lightsail Homepage")
 
 To find out your IP address, browse to <https://www.whatismyip.com/> and use the `XXX.XXX.XXX.XXX` value shown right to **My Public IPv4 is:** to replace the `188.60.35.196` value in the image above.
 
-Click on **Create** to save this new Firewall rule and it should be added to the list of rules. 
+Click on **Create** to save this new Firewall rule and it should be added to the list of rules.
 
 ![Alt Image Text](./images/lightsail-image-networking-add-firewall-rule-2.png "Lightsail Homepage")
 
 Your instance is now ready to use. Complete the post installation steps documented the [here](README.md).
-
-## Stop an Instance
-
-To stop the instance, navigate to the instance overview and click on the drop-down menu and select **Stop**. 
-
-![Alt Image Text](./images/lightsail-stop-instance.png "Lightsail Homepage")
-
-Click on **Stop** to confirm stopping the instance. 
-
-![Alt Image Text](./images/lightsail-stop-instance-confirm.png "Lightsail Homepage")
-
-A stopped instance will still incur charges, you have to delete the instance completely to stop charges. 
-
-## Delete an Instance
-
-t.b.d.
-
-## Create a snapshot of an Instance
-
-When an instance is stopped, you can create a snapshot, which you can keep, even if later drop the instance to reduce costs.
-
-![Alt Image Text](./images/lightsail-image-create-snapshot.png "Lightsail Homepage")
-
-You can always recreate an instance based on a snapshot. 
-
-# De-provision the environment
-
-To stop the environment, execute the following command:
-
-```
-docker-compose stop
-```
-
-after that it can be re-started using `docker-compose start`.
-
-To stop and remove all running container, execute the following command:
-
-```
-docker-compose down
-```
-
