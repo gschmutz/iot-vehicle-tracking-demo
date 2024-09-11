@@ -2,9 +2,106 @@
 
 See [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack) for how to upgrade to newer version.
 
+## What's new in 1.18.0
+
+The Modern Data Platform version 1.18.0 contains the following bug fixes and enhancements:
+
+### New Services
+
+ * Langflow 
+ * Langfuse
+ * Kyuubi
+ * NeoDash
+ * Fluent Bit
+ * NATS
+ * MQTTX Web & MQTTX CLI
+ * Web Protégé
+ * Jena-Fuseki
+ * Rancher
+ * NLM Ingestor
+ * Weaviate Verba
+ * Unstructured API
+ * gpt-researcher
+ * Docker Exec Web Console
+ * n8n
+ * Arroyo
+
+### Version upgrades
+
+ * Update `postgresql` to `16` 
+ * Update `mongo` to `7.0` 
+ * Update `solr` to `9.5` 
+ * Update `janusgraph` to `1.0.0-20231010-065545.e3799d4`
+ * Update `neo4j` to `5.19`
+ * Update `memgraph` to `2.16.0`
+ * Update `memgraph-mage` to `1.16-memgraph-2.16-dev`
+ * Update `arcadedb` to `24.2.1`
+ * Update `dgraph` to `v23.1.1`
+ * Update `graphdb` to `10.6.3`
+ * Update `questdb` to `7.4.0`
+ * Update `kudu` to `1.17`
+ * Update `chroma` to `0.4.25.dev139`
+ * Update `qdrant` to `v1.8.4`
+ * Update `weaviate` to `1.24.10`
+ * Update `druid` to `29.0.1`
+ * Update `pinot` to `1.1.0`
+ * Update `prometheus` to `v2.51.2`
+ * Update `prometheus-pushgateway` to `v1.8.0`
+ * Update `prometheus-alertmanager` to `v0.27.0`
+ * Update `tile38` to `1.32.2`
+ * Update `yugabyte` to `2.14.16.0-b17`
+ * Update `single-store` to `0.2.18`
+ * Update `timescaledb` to `2.14.2-pg16`
+ * Update `hazelcast` to `5.4`
+ * Update `trino` to `445`
+ * Update `prestodb` to `0.286`
+ * Update `ahana` to `0.286`
+ * Update `dremio` to `24.2`
+ * Update `hasura` to `v2.38.1-ce`
+ * Update `marquez` and `marquez-web` to `0.46.0`
+ * Update `datastax` to `6.8.44`
+ * Update `elasticsearch` to `7.17.20` and `8.13.0`
+ * Update `kibana` to `7.17.20` and `8.13.0`
+ * Update `memcached` to `1.6.26`
+ * Update `redis-stack` to `7.2.0-v10`
+ * Update `stardog` to `latest`
+ * Update `minio` to `RELEASE.2024-04-06T05-26-02Z`
+ * Update `datahub` to `v0.13.2`
+ * Update `risingwave` to `v1.10.1`
+ * Update `portainer` to `alpine-sts`
+ * Update `flowise` to `2.0.7`
+ * Update `nifi` to `2.0.0-M4`
+ * Update `nifi` to `1.27.0`
+ * Update `flink` to `1.20-scala_2.12-java17`
+ * Update `Confluent Platform` to `7.7.0`
+
+### Enhancements
+
+ * a README.md file is generated which lists all the services contained in the `docker-compose.yml` file
+ * Refactored Spark (Master, Worker, History and Thriftserver) to use the bitnami docker images
+ * Refactored Zeppelin to use the Dockerfile provided by the Apache Zeppelin project
+
+### Breaking Changes
+
+ * Remove `NEO4J_dbms_logs_debug_level` setting from Neo4J
+ * Change to config settings to configure memory in Neo4J: `NEO4J_server_memory_pagecache_size`, `NEO4J_server_memory_heap_initial_size` and `NEO4J_server_memory_heap_max_size`
+ * Lenses no longer uses external port `3030` but `28369`
+ * `wetty` is no longer enabled by default in the initial `config.yml` file
+ * Neo4J config setting `NEO4J_plugins` renamed to `NEO4J_download_plugins` and added `NEO4J_mount_plugins` 
+ * Memgraph no longer uses external port `7690 ` but `7699`
+ 
+## What's new in 1.17.1
+
+The Modern Data Platform version 1.17.1 contains no new services but a few small enhancements:
+
+### Enhancements
+
+ * VectorAdmin uses postgresql default database and enables it automatically
+ * default value for external Ollama endpoint
+
 ## What's new in 1.17.0
 
-The Modern Data Platform version 1.16.0 contains the following bug fixes and enhancements:
+The Modern Data Platform version 1.17.0 contains the following bug fixes and enhancements:
 
 ### New Services
 
@@ -22,8 +119,54 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Kadeck
  * MailDev
  * Mailpit
+ * MailHog
  * Dataverse
  * CKAN
+ * AsyncAPI Studio
+ * Taiga
+ * Taskcafé
+ * Cetusguard
+ * etcd & etcd-browser
+ * Risingwave
+ * MonitoFi
+ * IOEvent Cockpit
+ * Redis (Metrics) Exporter
+ * S3FS
+ * Prometheus Alertmanager
+ * Pact Broker
+ * Cribl Stream
+ * Cribl Edge
+ * Blaze (FHIR Server)
+ * LinuxForHealth (FHIR Server)
+ * HAPI FHIR Server
+ * FileBeat
+ * Open Policy Agent (OPA)
+ * Styra Enterprise OPA
+ * ToolJet
+ * Miracum FHIR Gateway
+ * LiteLLM
+ * MindsDB
+ * Ollama
+ * Ollama WebUI
+ * Alpaca WebUI
+ * Chroma
+ * Milvus & Attu
+ * Flowise
+ * Streamlit Applications
+ * Anything LLM
+ * Vector Admin
+ * SingleStore
+ * Qdrant
+ * Redis Stack
+ * Weaviate
+ * Big-AGI
+ * LocalAI
+ * Solace PubSub+
+ * Solace Kafka Proxy
+ * Softproject X4 Server
+ * MariaDB
+ * Minio KES
+ * AutoGen Studio
 
 ### Removed Services
  
@@ -40,21 +183,41 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
 
  * Update `zeebe` to `8.2.5`
  * Update `druid` to `26.0.0`
- * Update `trino` to `427`
- * Update `starbrustdata` to `426-e`
+ * Update `trino` to `443`
+ * Update `starbrustdata` to `435-e.2`
  * Update `jikkou` to `0.21.0`
- * Update `minio` to `RELEASE.2023-08-16T20-17-30Z`
- * Update `nifi` to `1.23.2`
+ * Update `minio` to `RELEASE.2024-03-21T23-13-43Z`
+ * Update `nifi` to `1.25.0`
  * Update `ksqldb` to `0.29.0`
- * Update `datahub` to `v0.11.0`
- * Update `Confluent Platform` to `7.5.0`
+ * Update `datahub` to `v0.13.0`
+ * Update `Confluent Platform` to `7.6.0`
  * Update `portainer-ce` to `2.18.4-alpine`
  * Update `activemq-classic` to `5.18.2`
  * Update `materialize` to `v0.64.0`
- * Update `grafana` to `10.1.1`
  * Update `jikkou` to `latest`
  * Update `keycloak` to `22.0`
  * Update `marquez` to `0.41.0`
+ * Update `flink` to `1.18-scala_2.12-java17`
+ * Update `airflow` to `2.7.3`
+ * Update `zeebe` to `8.3.1`
+ * Update `grafana` to `10.2.0`
+ * Update `prometheus` to `v2.28.1`
+ * Update `prometheus-pushgateway` to `v1.6.2`
+ * Update `prometheus-nodeexporter` to `v1.7.0`
+ * Update `redis` to `7.2`
+ * Update `vault` to `1.15`
+ * Update `influxdb` to `1.8` (latest OSS version)
+ * Update `kapacitor` to `1.7`
+ * Update `telegraf` to `1.28`
+ * Update `tile38` to `1.32.0`
+ * Update `hasura` to `v2.35.1`
+ * Update `materialize` to `v0.91.0`
+ * Update `cadvisor` to `v0.47.2`
+ * Update `portainer` to `2.19.4-alpine`
+ * Update `elasticsearch` to `8.11.3`
+ * Update `kibana` to `8.11.3`
+ * Update `hasura` to `v2.37.0-ce`
+ * Update `risingwave` to `v1.6.0`
 
 ### Enhancements
 
@@ -68,6 +231,11 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * support for Kafka SASL/SCRAM (256 + 512) authentication for traditional and KRaft setups
  * support for Kafka authorisation for traditional and KRaft setups
  * support for authentication in AKHQ
+ * removed JAR's from the plugin folder to decrease the size of the docker image
+ * added multi-arch docker build to also build the docker image of the generator as an arm64 type
+ * the "preview" version is no longer tagged as `1.nn.nn-preview` but as `develop`, so to get the development version, just use `platys init -n demo-platform --stack trivadis/platys-modern-data-platform --stack-version develop --structure flat`
+ * Add property (`NIFI_major_version`) to chose between NiFi Version 1 and Version 2
+ * Markdown-Viewer service comes with a redesigned service list now also visualising the exposed ports and the description of each service. This is `v2`, you can switch back to `v1` by configuring `MARKDOWN_VIEWER_services_list_version` and set it to `1`.
 
 ### Breaking Changes
 
@@ -76,7 +244,9 @@ The Modern Data Platform version 1.16.0 contains the following bug fixes and enh
  * Keycloak is no longer using the "legacy" version but the new Quarkus-based one 
  * Dataiku now maps to port `28315` and no longer to `28205`
  * Change `KAFKA_KSQLDB_xxxxx` to `KSQLDB_xxxxx`
-
+ * Change `FTP_xxxxx` to `PURE_FTPD_xxxxx` to control the Pure FTPd server
+ * Config `ATLAS_install_hive_hook` has been replaced by `ATLAS_hive_hook_enable` and the JARs for the hook are no longer included and need to be downloaded manually  
+ * Config `KAFKA_jmx_monitoring_prometheus_enable` replaced by global configuration property `jmx_monitoring_with_prometheus_enable` as it doesn't apply to just the Kafka cluster
 
 ## What's new in 1.16.0
 

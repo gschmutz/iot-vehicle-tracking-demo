@@ -4,7 +4,7 @@
       platys:
           platform-name: 'iot-vehicle-tracking-platform'
           platform-stack: 'trivadis/platys-modern-data-platform'
-          platform-stack-version: '1.17.0-preview'
+          platform-stack-version: 'develop'
           structure: 'flat'
       # ========================================================================
       # Global configuration, valid for all or a group of services
@@ -15,20 +15,7 @@
       private_docker_repository_name: 'trivadis'
       # the UID to use when using the "user" property in a service to override the user inside the container
       uid: '1000'
-      # ========================================================================
-      # External Services
-      # ========================================================================
-      external:
-          KAFKA_enable: false
-          KAFKA_bootstrap_servers:
-          KAFKA_username:
-          KAFKA_password:
-          SCHEMA_REGISTRY_enable: false
-          SCHEMA_REGISTRY_url:
-          S3_enable: false
-          S3_endpoint:
-          S3_default_region:
-          S3_path_style_access: false
+
       # ========================================================================
       # Platys Services
       # ========================================================================
@@ -36,7 +23,7 @@
       #
       # ===== Apache Zookeeper ========
       #
-      ZOOKEEPER_enable: true
+      ZOOKEEPER_enable: false
       ZOOKEEPER_volume_map_data: false
       ZOOKEEPER_nodes: 1 # either 1 or 3
       #
@@ -49,10 +36,11 @@
       KAFKA_enable: true
       # one of enterprise, community
       KAFKA_edition: 'community'
+      KAFKA_use_kraft_mode: true
       KAFKA_volume_map_data: false
       KAFKA_datacenters: 1
       KAFKA_broker_nodes: 3
-      KAFKA_use_kraft_mode: false
+      KAFKA_broker_first_port: 9092      
       KAFKA_internal_replication_factor: 3
       KAFKA_delete_topic_enable: true
       KAFKA_auto_create_topics_enable: false
@@ -120,7 +108,7 @@
       #
       KAFKA_CONNECT_enable: true
       KAFKA_CONNECT_nodes: 2
-      KAFKA_CONNECT_connectors: confluentinc/kafka-connect-jdbc:10.6.3,debezium/debezium-connector-postgresql:2.2.1,debezium/debezium-connector-mysql:2.2.1,confluentinc/kafka-connect-s3:10.5.1
+      KAFKA_CONNECT_connectors: confluentinc/kafka-connect-jdbc:10.7.11,debezium/debezium-connector-postgresql:2.5.4,debezium/debezium-connector-mysql:2.4.2,confluentinc/kafka-connect-s3:10.5.15
       KAFKA_CONNECT_config_providers: 'file'
       KAFKA_CONNECT_config_providers_classes: 'org.apache.kafka.common.config.provider.FileConfigProvider'
       KAFKA_CONNECT_map_settings_file: false
@@ -960,3 +948,18 @@
       PYTHON_enable: false
       PYTHON_script_folder: ''
       PYTHON_script: ''
+
+      # ========================================================================
+      # External Services
+      # ========================================================================
+      external:
+          KAFKA_enable: false
+          KAFKA_bootstrap_servers:
+          KAFKA_username:
+          KAFKA_password:
+          SCHEMA_REGISTRY_enable: false
+          SCHEMA_REGISTRY_url:
+          S3_enable: false
+          S3_endpoint:
+          S3_default_region:
+          S3_path_style_access: false

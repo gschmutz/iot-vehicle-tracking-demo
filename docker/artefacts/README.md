@@ -1,15 +1,6 @@
-# Platform Stack: `modern-data-platform` - v1.17.0
+# Platform Stack: `modern-data-platform` - v1.17.1
 
-This Platform Stack defines the set of services for a Modern Data Platform, such as
-
-* Kafka
-* Spark
-* Hadoop Ecosystem
-* StreamSets & NiFi
-* Zeppelin & Jupyter
-* NoSQL
-
-and many others. 
+This Platform Stack defines the set of services for a Modern Data Platform that can be used with the [Platys](http://github.com/trivadispf/platys) platform generator.
 
 ## Which services can I use? 
 
@@ -28,9 +19,10 @@ See [What's new?](./documentation/changes) for a detailed list of changes.
 * [Configuration](./documentation/configuration) - all settings configurable in the `config.yml`
 * [Tutorials](./tutorials/README) - various tutorials detailed instructions on how to work with `platys`
 * [Cookbooks](./cookbooks/README) - various recipes showing how to use specific features of `platys`
-* [Port Mapping](./documentation/port-mapping)
+* [Port Mapping](./documentation/port-mapping) - a list of all the ports which are mapped to the outside for the various supported services
 * [Frequently Asked Questions](./documentation/faq)
 * [Troubleshooting](./documentation/troubleshooting)
 * [Adding additional services not supported by a platform stack](https://github.com/TrivadisPF/platys/blob/master/documentation/docker-compose-override)
+* [Creating a new stack in a scripted way](./documentation/start-stack-scripted-way)
 * [How to use a platys-generated stack without Internet](https://github.com/TrivadisPF/platys/blob/master/documentation/docker-compose-without-internet)
 * [Upgrade to a new platform stack version](https://github.com/TrivadisPF/platys/blob/master/documentation/upgrade-platform-stack)
