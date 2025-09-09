@@ -307,7 +307,7 @@ services:
       test: curl --user connectAdmin:connectAdmin --fail --silent --insecure https://kafka-connect-2:8084/ --output /dev/null || exit 1
   #  ================================== ksqlDB ========================================== #
   ksqldb-server-1:
-    image: confluentinc/ksqldb-server:0.29.0
+    image: confluentinc/cp-ksqldb-server:8.0.0
     hostname: ksqldb-server-1
     container_name: ksqldb-server-1
     labels:
@@ -324,7 +324,8 @@ services:
       - 8088:8088
       - 1095:1095
     environment:
-      KSQL_LOG4J_OPTS: -Dlog4j.configuration=file:/tmp/log4j.properties
+      KSQL_LOG4J_ROOT_LOGLEVEL: INFO
+      KSQL_LOG4J_OPTS: -Dlog4j.configuration=file:/tmp/helper/log4j.properties
       KSQL_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: ksql_processing_log
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092,kafka-2:19093,kafka-3:19094
@@ -361,22 +362,9 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/ksqldb:/etc/ksqldb/ext
-      - ./conf/ksqldb/etc/log4j.properties:/tmp/log4j.properties.templ
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
       - ./plugins/kafka-connect/jars:/etc/kafka-connect/jars
       - ./plugins/opentelemetry/agents:/otel
-    command:
-      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
-      - bash
-      - -c
-      - |
-        python -c 'import os,sys; sys.stdout.write(os.path.expandvars(sys.stdin.read()))' < /tmp/log4j.properties.templ > /tmp/log4j.properties
-        #
-        echo "Launching ksqlDB server"
-        #/etc/confluent/docker/run &
-        /usr/bin/docker/run &
-        #
-        sleep infinity
     restart: unless-stopped
     healthcheck:
       start_period: 10s
@@ -384,7 +372,7 @@ services:
       retries: 25
       test: curl --user ksqlDBUser:ksqlDBUser -fail --silent http://ksqldb-server-1:8088/info | grep RUNNING 1>/dev/null || exit 1
   ksqldb-server-2:
-    image: confluentinc/ksqldb-server:0.29.0
+    image: confluentinc/cp-ksqldb-server:8.0.0
     hostname: ksqldb-server-2
     container_name: ksqldb-server-2
     labels:
@@ -401,7 +389,8 @@ services:
       - 8089:8088
       - 1096:1095
     environment:
-      KSQL_LOG4J_OPTS: -Dlog4j.configuration=file:/tmp/log4j.properties
+      KSQL_LOG4J_ROOT_LOGLEVEL: INFO
+      KSQL_LOG4J_OPTS: -Dlog4j.configuration=file:/tmp/helper/log4j.properties
       KSQL_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
       KSQL_LOG4J_PROCESSING_LOG_TOPIC: ksql_processing_log
       KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka-1:19092,kafka-2:19093,kafka-3:19094
@@ -438,22 +427,9 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
       - ./plugins/ksqldb:/etc/ksqldb/ext
-      - ./conf/ksqldb/etc/log4j.properties:/tmp/log4j.properties.templ
       - ./plugins/kafka-connect/connectors:/etc/kafka-connect/addl-plugins
       - ./plugins/kafka-connect/jars:/etc/kafka-connect/jars
       - ./plugins/opentelemetry/agents:/otel
-    command:
-      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
-      - bash
-      - -c
-      - |
-        python -c 'import os,sys; sys.stdout.write(os.path.expandvars(sys.stdin.read()))' < /tmp/log4j.properties.templ > /tmp/log4j.properties
-        #
-        echo "Launching ksqlDB server"
-        #/etc/confluent/docker/run &
-        /usr/bin/docker/run &
-        #
-        sleep infinity
     restart: unless-stopped
     healthcheck:
       start_period: 10s
@@ -463,7 +439,7 @@ services:
   # Access the cli by running:
   # > docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
   ksqldb-cli:
-    image: confluentinc/ksqldb-cli:0.29.0
+    image: confluentinc/cp-ksqldb-cli:8.0.0
     container_name: ksqldb-cli
     hostname: ksqldb-cli
     labels:

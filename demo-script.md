@@ -47,12 +47,12 @@ cd $DATAPLATFORM_HOME/plugins/kafka-connect/connectors
 ```
 
 ```bash
-sudo wget https://github.com/lensesio/stream-reactor/releases/download/4.2.0/kafka-connect-mqtt-4.2.0.zip
+sudo wget https://github.com/lensesio/stream-reactor/releases/download/10.0.0/kafka-connect-mqtt-10.0.0.zip
 ```
 
 ```bash
-sudo unzip kafka-connect-mqtt-4.2.0.zip
-sudo rm kafka-connect-mqtt-4.2.0.zip
+sudo unzip kafka-connect-mqtt-10.0.0.zip
+sudo rm kafka-connect-mqtt-10.0.0.zip
 ```
 
 ```bash
@@ -90,10 +90,10 @@ curl -X PUT \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json' \
   -d '{
-    "connector.class": "com.datamountaineer.streamreactor.connect.mqtt.source.MqttSourceConnector",
+    "connector.class": "io.lenses.streamreactor.connect.mqtt.source.MqttSourceConnector",
     "connect.mqtt.connection.timeout": "1000",
     "tasks.max": "1",
-    "connect.mqtt.kcql": "INSERT INTO vehicle_tracking_sysA SELECT * FROM truck/+/position WITHCONVERTER=`com.datamountaineer.streamreactor.connect.converters.source.JsonSimpleConverter` WITHKEY(truckId)",
+    "connect.mqtt.kcql": "INSERT INTO vehicle_tracking_sysA SELECT * FROM truck/+/position WITHCONVERTER=`io.lenses.streamreactor.connect.converters.source.JsonSimpleConverter` WITHKEY(truckId)",
     "connect.mqtt.connection.clean": "true",
     "connect.mqtt.service.quality": "0",
     "connect.mqtt.connection.keep.alive": "1000",
@@ -227,7 +227,7 @@ tail -f $DATAPLATFORM_HOME/data-transfer/logs/TruckData.dat
 docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_sysB --partitions 8 --replication-factor 3
 ```
 
-Upload the NiFi Template `nifi/tailfile-to-kafka.xml` into Apache NiFi. 
+Upload the NiFi Template `nifi/File_to_Kafka.json` into Apache NiFi. 
 
 ![](./images/nifi-upload-template.png)
 

@@ -117,7 +117,7 @@
       #
       KSQLDB_enable: true
       # either 'cp' or 'oss'
-      KSQLDB_edition: 'oss'
+      KSQLDB_edition: 'cp'
       KSQLDB_nodes: 2
       KSQLDB_internal_replication_factor: 1
       KSQLDB_suppress_enabled: false

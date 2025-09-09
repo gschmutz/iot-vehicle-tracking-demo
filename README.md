@@ -232,17 +232,17 @@ Navigate into the `plugins/kafka-connect` folder (which is a sub-folder of the `
 cd $DATAPLATFORM_HOME/plugins/kafka-connect/connectors
 ```
 
-and download the `4.2.0/kafka-connect-mqtt-4.2.0.zip` file from the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) project.
+and download the `10.0.0/kafka-connect-mqtt-4.2.0.zip` file from the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) project.
 
 ```
-sudo wget https://github.com/lensesio/stream-reactor/releases/download/4.2.0/kafka-connect-mqtt-4.2.0.zip
+sudo wget https://github.com/lensesio/stream-reactor/releases/download/10.0.0/kafka-connect-mqtt-10.0.0.zip
 ```
 
 Once it is successfully downloaded, uncompress it using this `tar` command and remove the file. 
 
 ```
-sudo unzip kafka-connect-mqtt-4.2.0.zip
-sudo rm kafka-connect-mqtt-4.2.0.zip
+sudo unzip kafka-connect-mqtt-10.0.0.zip
+sudo rm kafka-connect-mqtt-10.0.0.zip
 ```
 
 Now let's restart Kafka connect in order to pick up the new connector (Make sure to navigate back to the docker folder first, either using `cd $DATAPLATFORM_HOME` or `cd ../..`)
@@ -284,26 +284,26 @@ docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_sysA -f "%k - %s\n" -q
 Now let's start the connector:
 
 ```bash
-curl -X "POST" "$DOCKER_HOST_IP:8083/connectors" \
-     -H "Content-Type: application/json" \
-     --data '{
-  "name": "mqtt-vehicle-position-source",
-  "config": {
-    "connector.class": "io.confluent.connect.mqtt.MqttSourceConnector",
+curl -X PUT \
+  http://${DOCKER_HOST_IP}:8083/connectors/mqtt-source/config \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{
+    "connector.class": "io.lenses.streamreactor.connect.mqtt.source.MqttSourceConnector",
+    "connect.mqtt.connection.timeout": "1000",
     "tasks.max": "1",
-    "mqtt.server.uri": "tcp://mosquitto-1:1883",
-    "mqtt.topics": "truck/+/position",
-    "mqtt.clean.session.enabled":"true",
-    "mqtt.connect.timeout.seconds":"30",
-    "mqtt.keepalive.interval.seconds":"60",
-    "mqtt.qos":"0",
-    "kafka.topic":"vehicle_tracking_sysA",
-    "confluent.topic.bootstrap.servers": "kafka-1:19092,kafka-2:19093",
-    "confluent.topic.replication.factor": "3",
-    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-    "value.converter": "org.apache.kafka.connect.converters.ByteArrayConverter"
-    }
-  }'
+    "connect.mqtt.kcql": "INSERT INTO vehicle_tracking_sysA SELECT * FROM truck/+/position WITHCONVERTER=`io.lenses.streamreactor.connect.converters.source.JsonSimpleConverter` WITHKEY(truckId)",
+    "connect.mqtt.connection.clean": "true",
+    "connect.mqtt.service.quality": "0",
+    "connect.mqtt.connection.keep.alive": "1000",
+    "connect.mqtt.client.id": "tm-mqtt-connect-01",
+    "connect.mqtt.converter.throw.on.error": "true",
+    "connect.mqtt.hosts": "tcp://mosquitto-1:1883",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+}'
 ```
 
 The truck position messages are sent to the `vehicle_tracking_sysA` topic and should show up on the kcat consumer immediately. 
