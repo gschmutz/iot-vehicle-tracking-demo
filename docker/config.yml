@@ -539,12 +539,23 @@
       # ===== Redis ========
       #
       REDIS_enable: true
+      # either 'redis' or 'valkey'
+      REDIS_edition: redis
       REDIS_replicasets: 0
-      REDIS_allow_empty_password: yes
-      REDIS_disable_commands:
+      REDIS_volume_map_data: false      
+      REDIS_allow_empty_password: true
       REDIS_password: abc123!
-      REDIS_aof_enabled: no
-      REDIS_volume_map_data: false
+      REDIS_password_file:
+      REDIS_aclfile:
+      REDIS_disable_commands:
+      REDIS_rdb_enabled: true
+      REDIS_rdb_save_policy:
+      REDIS_aof_enabled: false
+      REDIS_io_threads:
+      REDIS_io_threads_do_reads_enabled: false
+      REDIS_overrides_config_file:
+      # one of 'nothing', 'warning', 'notice', 'verbose', 'debug' 
+      REDIS_log_level: 'notice'      
       #
       # ===== Redis Insight ========
       #

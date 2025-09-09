@@ -11,7 +11,7 @@ networks:
 services:
 #  ================================== Kafka ========================================== #
   kafka-1:
-    image: confluentinc/cp-kafka:7.8.0
+    image: confluentinc/cp-kafka:8.0.0
     container_name: kafka-1
     hostname: kafka-1
     labels:
@@ -56,10 +56,10 @@ services:
       test: kafka-topics --bootstrap-server kafka-1:19092 --list
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 25
       start_period: 20s
   kafka-2:
-    image: confluentinc/cp-kafka:7.8.0
+    image: confluentinc/cp-kafka:8.0.0
     container_name: kafka-2
     hostname: kafka-2
     labels:
@@ -104,10 +104,10 @@ services:
       test: kafka-topics --bootstrap-server kafka-1:19092 --list
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 25
       start_period: 20s
   kafka-3:
-    image: confluentinc/cp-kafka:7.8.0
+    image: confluentinc/cp-kafka:8.0.0
     container_name: kafka-3
     hostname: kafka-3
     labels:
@@ -152,11 +152,11 @@ services:
       test: kafka-topics --bootstrap-server kafka-1:19092 --list
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 25
       start_period: 20s
   #  ================================== Kafka Connect ========================================== #
   kafka-connect-1:
-    image: confluentinc/cp-kafka-connect:7.8.0
+    image: confluentinc/cp-kafka-connect:8.0.0
     container_name: kafka-connect-1
     hostname: kafka-connect-1
     labels:
@@ -166,6 +166,9 @@ services:
       com.platys.restapi.url: http://dataplatform:8083
     ports:
       - 8083:8083
+    depends_on:
+      kafka-1:
+        condition: service_healthy
     environment:
       CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
       CONNECT_LISTENERS: http://0.0.0.0:8083
@@ -224,11 +227,11 @@ services:
         sleep infinity
     restart: unless-stopped
     healthcheck:
-      interval: 10s
-      retries: 20
+      interval: 30s
+      retries: 25
       test: curl --user connectAdmin:connectAdmin --fail --silent --insecure https://kafka-connect-1:8083/ --output /dev/null || exit 1
   kafka-connect-2:
-    image: confluentinc/cp-kafka-connect:7.8.0
+    image: confluentinc/cp-kafka-connect:8.0.0
     container_name: kafka-connect-2
     hostname: kafka-connect-2
     labels:
@@ -238,6 +241,9 @@ services:
       com.platys.restapi.url: http://dataplatform:8084
     ports:
       - 8084:8084
+    depends_on:
+      kafka-1:
+        condition: service_healthy
     environment:
       CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
       CONNECT_LISTENERS: http://0.0.0.0:8084
@@ -296,8 +302,8 @@ services:
         sleep infinity
     restart: unless-stopped
     healthcheck:
-      interval: 10s
-      retries: 20
+      interval: 30s
+      retries: 25
       test: curl --user connectAdmin:connectAdmin --fail --silent --insecure https://kafka-connect-2:8084/ --output /dev/null || exit 1
   #  ================================== ksqlDB ========================================== #
   ksqldb-server-1:
@@ -309,6 +315,11 @@ services:
       com.platys.description: ksqlDB Streaming Database - Node 1
       com.platys.restapi.title: ksqlDB Server REST API
       com.platys.restapi.url: http://dataplatform:8088
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+      schema-registry-1:
+        condition: service_healthy
     ports:
       - 8088:8088
       - 1095:1095
@@ -370,7 +381,7 @@ services:
     healthcheck:
       start_period: 10s
       interval: 10s
-      retries: 20
+      retries: 25
       test: curl --user ksqlDBUser:ksqlDBUser -fail --silent http://ksqldb-server-1:8088/info | grep RUNNING 1>/dev/null || exit 1
   ksqldb-server-2:
     image: confluentinc/ksqldb-server:0.29.0
@@ -381,6 +392,11 @@ services:
       com.platys.description: ksqlDB Streaming Database - Node 2
       com.platys.restapi.title: ksqlDB Server REST API
       com.platys.restapi.url: http://dataplatform:8089
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+      schema-registry-1:
+        condition: service_healthy
     ports:
       - 8089:8088
       - 1096:1095
@@ -442,7 +458,7 @@ services:
     healthcheck:
       start_period: 10s
       interval: 10s
-      retries: 20
+      retries: 25
       test: curl --user ksqlDBUser:ksqlDBUser -fail --silent http://ksqldb-server-2:8088/info | grep RUNNING 1>/dev/null || exit 1
   # Access the cli by running:
   # > docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
@@ -462,7 +478,7 @@ services:
     restart: unless-stopped
   #  ================================== Confluent Schema Registry ========================================== #
   schema-registry-1:
-    image: confluentinc/cp-schema-registry:7.8.0
+    image: confluentinc/cp-schema-registry:8.0.0
     hostname: schema-registry-1
     container_name: schema-registry-1
     labels:
@@ -472,6 +488,9 @@ services:
       com.platys.restapi.url: http://dataplatform:8081
     ports:
       - 8081:8081
+    depends_on:
+      kafka-1:
+        condition: service_healthy
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
@@ -492,9 +511,9 @@ services:
     restart: unless-stopped
     healthcheck:
       start_period: 10s
-      interval: 10s
-      retries: 20
-      test: curl --user superUser:superUser --fail --silent --insecure https://schema-registry-1:8081/subjects --output /dev/null || exit 1
+      interval: 15s
+      retries: 25
+      test: curl --fail --silent --insecure http://schema-registry-1:8081/subjects --output /dev/null || exit 1
   #  ================================== Schema Registry UI ========================================== #
   schema-registry-ui:
     image: landoop/schema-registry-ui:latest
@@ -689,8 +708,6 @@ services:
     environment:
       - REDIS_PORT_NUMBER=6379
       - ALLOW_EMPTY_PASSWORD=yes
-      - REDIS_AOF_ENABLED=yes
-      - REDIS_RDB_POLICY_DISABLED=yes
     volumes:
       - ./data-transfer:/data-transfer
     command: /opt/bitnami/scripts/redis/run.sh --loglevel notice
@@ -751,6 +768,10 @@ services:
       - postgres
       - -c
       - wal_level=logical
+      - -c
+      - max_replication_slots=10
+      - -c
+      - max_wal_senders=10
     restart: unless-stopped
     healthcheck:
       test: [CMD-SHELL, pg_isready -U postgres]
@@ -783,15 +804,18 @@ services:
       com.platys.description: Cloud Database Manager
       com.platys.webui.title: Cloudbeaver UI
       com.platys.webui.url: http://dataplatform:8978
+      com.platys.password.envvars: PLATYS_CLOUDBEAVER_ADMIN_PASSWORD
     ports:
       - 8978:8978
+    environment:
+      CB_SERVER_NAME: Cloudbeaver
     volumes:
       - ./data-transfer:/data-transfer
       - ./conf/cloudbeaver/data-sources.json:/opt/cloudbeaver/workspace/GlobalConfiguration/.dbeaver/data-sources.json
     restart: unless-stopped
   #  ================================== Minio ========================================== #
   minio-1:
-    image: minio/minio:RELEASE.2025-02-07T23-21-09Z
+    image: minio/minio:RELEASE.2025-05-24T17-08-30Z
     container_name: minio-1
     hostname: minio-1
     labels:
@@ -935,7 +959,7 @@ services:
       retries: 3
       start_period: 1m
   markdown-renderer:
-    image: trivadis/jinja2-renderer:latest
+    image: trivadis/jinja2-renderer:0.8.1
     container_name: markdown-renderer
     hostname: markdown-renderer
     labels:
@@ -950,6 +974,7 @@ services:
       PLATYS_PLATFORM_STACK: trivadis/platys-modern-data-platform
       PLATYS_PLATFORM_STACK_VERSION: develop
       PLATYS_COPY_COOKBOOK_DATA: 'True'
+      PLATYS_DATACENTER:
       SERVICE_LIST_VERSION: 2
     volumes:
       - ./artefacts/templates:/templates

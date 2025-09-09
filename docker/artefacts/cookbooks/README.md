@@ -1,4 +1,5 @@
-# Modern Data Platform Cookbooks  - v1.17.1
+# Modern Data Platform Cookbooks  - v1.19.0
+
 Inhere we are documenting cookbooks on how to use the platform:
 
  * **Airflow**
@@ -74,6 +75,7 @@ Inhere we are documenting cookbooks on how to use the platform:
    * [SASL/SCRAM Authentication with Zookeeper](./recipes/kafka-sasl-scram-authentication-zk/README) - `1.17.0`
    * [SASL/SCRAM Authentication with KRaft](./recipes/kafka-sasl-scram-authentication-kraft/README) - `1.17.0`
    * [SASL/PLAIN Authentication](./recipes/kafka-sasl-plain-authentication/README) - `1.17.0`
+   * [Working with real and synthetic data streams](./recipes/kafka-working-with-real-and-synthetic-streams/README) - `1.19.0`
 
  * **Confluent Enterprise Platform**
    * [Using Confluent Enterprise Tiered Storage](./recipes/confluent-tiered-storage/README) - `1.13.0`
