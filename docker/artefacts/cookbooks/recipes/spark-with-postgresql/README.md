@@ -84,7 +84,7 @@ FROM '/data-transfer/flight-data/airports.csv' DELIMITER ',' CSV HEADER;
 
 ## Work with data from PostgreSQL
 
-Navigate to Zeppelin <http://dataplatform:28080> and login as user `admin` with password `abc123!`.
+Navigate to Zeppelin <http://192.168.1.112:28080> and login as user `admin` with password `abc123!`.
 
 Create a new notebook and in a cell enter the following Spark code using the Python API. 
 

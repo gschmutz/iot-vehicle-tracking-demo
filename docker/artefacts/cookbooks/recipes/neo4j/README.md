@@ -27,7 +27,7 @@ Connect to the `cypher-shell` in the `neo4j-1` container:
 docker exec -ti neo4j-1 ./bin/cypher-shell -u neo4j -p abc123!
 ```
 
-Alternatively you can also connect through the Neo4J Browser: <http://dataplatform:7474>
+Alternatively you can also connect through the Neo4J Browser: <http://192.168.1.112:7474>
 
 Create a plain node
 

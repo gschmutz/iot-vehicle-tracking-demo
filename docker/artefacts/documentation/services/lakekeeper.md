@@ -2,7 +2,7 @@
 
 Lakekeeper is an Apache-Licensed, secure, fast and easy to use Apache Iceberg REST Catalog written in Rust. 
 
-**[Documentation](https://docs.lakekeeper.io/)** | **[Documentation](https://docs.lakekeeper.io/docs/nightly/concepts/)** | **[GitHub](https://github.com/lakekeeper/lakekeeper)**
+**[Website](https://docs.lakekeeper.io/)** | **[Documentation](https://docs.lakekeeper.io/docs/nightly/concepts/)** | **[GitHub](https://github.com/lakekeeper/lakekeeper)**
 
 ## How to enable?
 
@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28275>.
+Navigate to <http://192.168.1.112:28275>.

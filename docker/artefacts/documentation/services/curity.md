@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <https://dataplatform:6749> and log-in with user `admin` and the password specified in the `config.yml` file (defaults to `abc123!`).
+Navigate to <https://192.168.1.112:6749> and log-in with user `admin` and the password specified in the `config.yml` file (defaults to `abc123!`).

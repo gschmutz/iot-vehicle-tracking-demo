@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28283>.
+Navigate to <http://192.168.1.112:28283>.
 
 You have to get a license from [kpow](https://kpow.io/) here: <https://kpow.io/pricing/>.
 

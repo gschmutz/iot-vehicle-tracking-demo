@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28139>.
+Navigate to <http://192.168.1.112:28139>.
 Login with user `airflow` and password `abc123!`.
 
 Place the dag files into the folder `./scripts/airflow/dags`.

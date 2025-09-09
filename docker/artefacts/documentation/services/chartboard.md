@@ -11,7 +11,7 @@ platys gen
 
 ### Run Sample Dashboard
 
-Navigate to <http://dataplatform:28173> to see the sample dashboard.
+Navigate to <http://192.168.1.112:28173> to see the sample dashboard.
 
 To simulate data, you can run the sensors inside the container
 

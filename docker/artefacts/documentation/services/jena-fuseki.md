@@ -13,6 +13,6 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:3030>.
+Navigate to <http://192.168.1.112:3030>.
 
 Login as user `admin` with password `abc123!`. 

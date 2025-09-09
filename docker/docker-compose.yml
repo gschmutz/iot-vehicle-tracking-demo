@@ -648,7 +648,7 @@ services:
     restart: unless-stopped
   #  ================================== NiFi 2 ========================================== #
   nifi2-1:
-    image: apache/nifi:2.4.0
+    image: apache/nifi:2.5.0
     container_name: nifi2-1
     hostname: nifi2-1
     labels:
@@ -820,7 +820,7 @@ services:
     restart: unless-stopped
   #  ================================== Minio ========================================== #
   minio-1:
-    image: minio/minio:RELEASE.2025-05-24T17-08-30Z
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: minio-1
     hostname: minio-1
     labels:

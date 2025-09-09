@@ -13,5 +13,5 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:8585> and log in with user `openmetadata` and password `abc123!`.
+Navigate to <http://192.168.1.112:8585> and log in with user `openmetadata` and password `abc123!`.
 

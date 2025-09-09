@@ -49,7 +49,7 @@ docker-compose up -d
 The Apicurio Registry is available on port 8081. It offers a confluent-compliant REST interface available under this base URL:
 
 ```bash
-http://dataplatform:8081/apis/ccompat/v6
+http://192.168.1.112:8081/apis/ccompat/v6
 ```
 
 ## Register a schema using Kafka UI

@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28370>.
+Navigate to <http://192.168.1.112:28370>.
 
 To get the initial password, execute the following
 

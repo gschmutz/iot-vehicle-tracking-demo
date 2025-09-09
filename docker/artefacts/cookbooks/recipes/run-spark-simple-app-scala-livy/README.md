@@ -67,7 +67,7 @@ export LIVY_HOST=${PUBLIC_IP}:8998
 curl -v -H 'Content-Type: application/json' -X POST -d '{ "file":"s3a://app-bucket/spark/spark-scala-sample-1.0-SNAPSHOT.jar", "className":"com.trivadis.sample.spark.SimpleApp", "args":[], "conf": {"spark.jars.packages": "", "spark.hadoop.fs.s3a.endpoint": "http://minio:9000", "spark.hadoop.fs.s3a.access.key":"V42FCGRVMK24JJ8DHUYG", "spark.hadoop.fs.s3a.secret.key":"bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza", "spark.hadoop.fs.s3a.path.style.access":"true", "spark.hadoop.fs.s3a.impl":"org.apache.hadoop.fs.s3a.S3AFileSystem" } }' "http://$LIVY_HOST/batches"
 ```
 
-Navigate to the Livy UI on <http://dataplatform:8998/ui#> to view the status of the batch session. 
+Navigate to the Livy UI on <http://192.168.1.112:8998/ui#> to view the status of the batch session. 
 
 ## Monitor the status of the running Spark Application 
 

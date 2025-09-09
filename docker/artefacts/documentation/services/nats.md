@@ -26,4 +26,4 @@ Escape character is '^]'.
 INFO {"server_id":"NDP7NP2P2KADDDUUBUDG6VSSWKCW4IC5BQHAYVMLVAJEGZITE5XP7O5J","version":"2.0.0","proto":1,"go":"go1.11.10","host":"0.0.0.0","port":4222,"max_payload":1048576,"client_id":13249}
 ```
 
-You can also test the monitoring endpoint, viewing <http://dataplatform:8222>.
+You can also test the monitoring endpoint, viewing <http://192.168.1.112:8222>.

@@ -23,7 +23,7 @@ export SCHEMA=$(jq tostring $TOPIC-value.avsc)
 
 echo "{\"schema\":$SCHEMA}"
 
-curl -XPOST -H "Content-Type:application/json" -d"{\"schema\":$SCHEMA}" http://dataplatform:8081/subjects/$TOPIC-value/versions
+curl -XPOST -H "Content-Type:application/json" -d"{\"schema\":$SCHEMA}" http://192.168.1.112:8081/subjects/$TOPIC-value/versions
 ```
 
 using `httpie`
@@ -49,7 +49,7 @@ using `httpie`
 
 ```bash
 export TOPIC=topicName
-http http://dataplatform:8081/subjects/$TOPIC-value/versions/latest \
+http http://192.168.1.112:8081/subjects/$TOPIC-value/versions/latest \
   | jq -r '.schema|fromjson' \
   > $TOPIC-value.avsc
 ```

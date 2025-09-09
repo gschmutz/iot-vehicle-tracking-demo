@@ -404,7 +404,7 @@ and here is the event for the table:
 
 ## Check the entity in Apache Atlas
 
-In a browser, navigate to <http://dataplatform:21000> and search for hive-table
+In a browser, navigate to <http://192.168.1.112:21000> and search for hive-table
 
 ![Hive Table Search](./images/atlas-search-hive-table.png)
 

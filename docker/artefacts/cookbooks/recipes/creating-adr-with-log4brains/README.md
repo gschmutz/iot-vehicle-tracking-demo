@@ -94,7 +94,7 @@ Now with the ADR project being initialised, can restart the `log4brains` contain
 docker restart log4brains
 ```
 
-Now navigate to <http://dataplatform:4004> and you should see two ADRs being rendered as a Web application.
+Now navigate to <http://192.168.1.112:4004> and you should see two ADRs being rendered as a Web application.
 
 ![Alt Image Text](./log4brains-preview.png "Log4brains preview")
 

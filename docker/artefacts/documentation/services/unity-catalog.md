@@ -15,7 +15,7 @@ platys gen
 
 ### Web UI
 
-Navigate to <http://dataplatform:28393>.
+Navigate to <http://192.168.1.112:28393>.
 
 ### Unity Catalog CLI
 

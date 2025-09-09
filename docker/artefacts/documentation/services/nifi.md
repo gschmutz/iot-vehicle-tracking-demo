@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:18080/nifi>
+Navigate to <http://192.168.1.112:18080/nifi>
 
 Login with User `nifi` and password `1234567890ACD`.
 

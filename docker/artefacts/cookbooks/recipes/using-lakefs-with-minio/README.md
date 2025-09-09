@@ -53,7 +53,7 @@ docker exec -ti lakectl lakectl branch list lakefs://flight-bucket
 
 
 
-1. Open lakeFS’s web interface at <http://dataplatform:28220/> and login with username `V42FCGRVMK24JJ8DHUYG` and password `bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza` (if left to defaults). 
+1. Open lakeFS’s web interface at <http://192.168.1.112:28220/> and login with username `V42FCGRVMK24JJ8DHUYG` and password `bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza` (if left to defaults). 
 
 You’ll notice that there aren’t any repositories created yet. Click the Create Sample Repository button.
 

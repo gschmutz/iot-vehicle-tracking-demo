@@ -48,5 +48,5 @@ docker-compose up -d
  
 ## Using JupyterHub
 
-Navigate to JupyterHub on <http://dataplatform:28284>. 
+Navigate to JupyterHub on <http://192.168.1.112:28284>. 
 

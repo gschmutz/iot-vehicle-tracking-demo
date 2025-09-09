@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28889>. The token for the login has either be specified in the `config.yml` (`ANACONDA_JUPYTER_token`) or if not set, the generated token can be retrieved from the log (`docker logs -f anaconda`). 
+Navigate to <http://192.168.1.112:28889>. The token for the login has either be specified in the `config.yml` (`ANACONDA_JUPYTER_token`) or if not set, the generated token can be retrieved from the log (`docker logs -f anaconda`). 
