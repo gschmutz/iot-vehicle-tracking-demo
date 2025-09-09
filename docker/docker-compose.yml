@@ -646,30 +646,30 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== NiFi ========================================== #
-  nifi-1:
-    image: apache/nifi:1.28.1
-    container_name: nifi-1
-    hostname: nifi-1
+  #  ================================== NiFi 2 ========================================== #
+  nifi2-1:
+    image: apache/nifi:2.4.0
+    container_name: nifi2-1
+    hostname: nifi2-1
     labels:
       com.platys.name: nifi
-      com.platys.description: NiFi Data Integration Engine
+      com.platys.description: NiFi Data Integration Engine (V2)
       com.platys.webui.title: Apache NiFi UI
-      com.platys.webui.url: https://dataplatform:18080/nifi
+      com.platys.webui.url: https://dataplatform:18083/nifi
       com.platys.restapi.title: Apche NiFi REST API
-      com.platys.restapi.url: https://dataplatform:18080/nifi-api
-      com.platys.password.envvars: PLATYS_NIFI_PASSWORD
+      com.platys.restapi.url: https://dataplatform:18083/nifi-api
+      com.platys.password.envvars: PLATYS_NIFI2_PASSWORD
     ports:
       # HTTP
-      - 18080:18080
+      - 18083:18083
       # Remote Input Socket
-      - 10005:10005/tcp
+      - 10015:10015/tcp
       # Prometheus Port
-      - 1270:1234
+      - 1273:1234
     environment:
-      NIFI_WEB_HTTPS_PORT: '18080'
+      NIFI_WEB_HTTPS_PORT: '18083'
       NIFI_WEB_HTTPS_HOST: 0.0.0.0
-      NIFI_WEB_PROXY_HOST: ${PUBLIC_IP}:18080,${DOCKER_HOST_IP}:18080
+      NIFI_WEB_PROXY_HOST: ${PUBLIC_IP}:18083,${DOCKER_HOST_IP}:18083
       NIFI_SECURITY_USER_AUTHORIZER: single-user-authorizer
       NIFI_SECURITY_USER_LOGIN_IDENTITY_PROVIDER: single-user-provider
       S3_ENDPOINT: http://minio-1:9000
@@ -678,21 +678,26 @@ services:
       # these two env variables are also needed for the s3-credentials.properties file gen to work! 
       AWS_ACCESS_KEY: ${PLATYS_AWS_ACCESS_KEY:-V42FCGRVMK24JJ8DHUYG}
       AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza}
-      NIFI_REMOTE_INPUT_SOCKET_PORT: '10005'
+      NIFI_REMOTE_INPUT_SOCKET_PORT: '10015'
       NIFI_REMOTE_INPUT_HOST: nifi-1
       NIFI_SENSITIVE_PROPS_KEY: 12345678901234567890A
       SINGLE_USER_CREDENTIALS_USERNAME: nifi
-      SINGLE_USER_CREDENTIALS_PASSWORD: ${PLATYS_NIFI_PASSWORD:-1234567890ACD}
+      SINGLE_USER_CREDENTIALS_PASSWORD: ${PLATYS_NIFI2_PASSWORD:-1234567890ACD}
       INITIAL_ADMIN_IDENTITY: nifi
+      # these config settings are custom ones and treated by the pre-start.sh script before the standard start.sh script of the NiFi docker image
     volumes:
       - ./data-transfer:/data-transfer
-      - ./plugins/nifi/nars/:/opt/nifi/nifi-current/extensions/
+      - ./init/nifi2/pre-start.sh:/tmp/pre-start.sh
+      - ./plugins/nifi2/nar_extensions/:/opt/nifi/nifi-current/nar_extensions/
+      - ./plugins/nifi2/python_extensions/:/opt/nifi/nifi-current/python_extensions/
       - aws-credentials-vol:/opt/nifi/nifi-current/.aws:RO
+      - nifi-config-vol:/opt/nifi/nifi-current/conf
     entrypoint:
       # We override the entrypoint from the docker image and therefore have to run ../scripts/start.sh from the NiFi docker image
       - bash
       - -c
       - |
+        /tmp/pre-start.sh        
         ../scripts/start.sh
     restart: unless-stopped
   #  ================================== Redis ========================================== #
@@ -987,3 +992,4 @@ volumes:
   data-transfer-vol:
     name: data_transfer_vol
   aws-credentials-vol:
+  nifi-config-vol:
