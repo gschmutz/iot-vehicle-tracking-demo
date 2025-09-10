@@ -13,12 +13,12 @@ platys gen
 
 ## How to use it?
 
-REST API documentation available [here](http://192.168.1.112:28257/api/schema/swagger).
+REST API documentation available [here](http://172.20.10.3:28257/api/schema/swagger).
 
 Translate
 
 ```bash
-curl 'http://192.168.1.112:28257/api/v4/translator?text=Hello&source=eng_Latn&target=spa_Latn'
+curl 'http://172.20.10.3:28257/api/v4/translator?text=Hello&source=eng_Latn&target=spa_Latn'
 ```
 
 

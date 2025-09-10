@@ -216,7 +216,7 @@ services:
       - |
         echo "Installing Connectors"
         mkdir -p /etc/kafka-connect/cflthub-plugins
-        for i in $$(echo "confluentinc/kafka-connect-jdbc:10.7.11,debezium/debezium-connector-postgresql:2.5.4,debezium/debezium-connector-mysql:2.4.2,confluentinc/kafka-connect-s3:10.5.15" | sed "s/,/ /g")
+        for i in $$(echo "confluentinc/kafka-connect-jdbc:10.8.4,debezium/debezium-connector-postgresql:3.1.2,debezium/debezium-connector-mysql:3.1.2,confluentinc/kafka-connect-s3:11.0.0" | sed "s/,/ /g")
         do
           confluent-hub install --no-prompt --component-dir /etc/kafka-connect/cflthub-plugins --verbose "$$i"
         done
@@ -291,7 +291,7 @@ services:
       - |
         echo "Installing Connectors"
         mkdir -p /etc/kafka-connect/cflthub-plugins
-        for i in $$(echo "confluentinc/kafka-connect-jdbc:10.7.11,debezium/debezium-connector-postgresql:2.5.4,debezium/debezium-connector-mysql:2.4.2,confluentinc/kafka-connect-s3:10.5.15" | sed "s/,/ /g")
+        for i in $$(echo "confluentinc/kafka-connect-jdbc:10.8.4,debezium/debezium-connector-postgresql:3.1.2,debezium/debezium-connector-mysql:3.1.2,confluentinc/kafka-connect-s3:11.0.0" | sed "s/,/ /g")
         do
           confluent-hub install --no-prompt --component-dir /etc/kafka-connect/cflthub-plugins --verbose "$$i"
         done

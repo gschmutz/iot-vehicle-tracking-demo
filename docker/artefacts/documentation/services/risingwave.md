@@ -24,4 +24,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://192.168.1.112:5691>
+Navigate to <http://172.20.10.3:5691>

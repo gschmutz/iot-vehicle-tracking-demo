@@ -13,6 +13,6 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://192.168.1.112:28137>. 
+Navigate to <http://172.20.10.3:28137>. 
 
 Use `admin` for user and `abc123!abc123!` for the password. 

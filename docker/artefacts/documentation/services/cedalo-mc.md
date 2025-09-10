@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://192.168.1.112:28175> and login as user `cedalo` with password `abc123!`.
+Navigate to <http://172.20.10.3:28175> and login as user `cedalo` with password `abc123!`.

@@ -13,6 +13,6 @@ platys gen
 
 ## How to use it?
 
-In a Web-Browser navigate to <http://192.168.1.112:28310>.
+In a Web-Browser navigate to <http://172.20.10.3:28310>.
 
 

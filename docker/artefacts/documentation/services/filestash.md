@@ -13,8 +13,8 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://192.168.1.112:28192>. 
+Navigate to <http://172.20.10.3:28192>. 
 
 ### Storage Backends
 
-By default `s3`, `local`, `ftp` and `sftp` storage backends are enabled. Navigate to <http://192.168.1.112:28192/admin/backend> to change to the Admin console, where you can enable other storage backends.
+By default `s3`, `local`, `ftp` and `sftp` storage backends are enabled. Navigate to <http://172.20.10.3:28192/admin/backend> to change to the Admin console, where you can enable other storage backends.

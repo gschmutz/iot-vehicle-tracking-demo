@@ -15,7 +15,7 @@ platys gen
 
 ### Web
 
-Navigate to <http://192.168.1.112:28367>.
+Navigate to <http://172.20.10.3:28367>.
 
 ### CLI
 

@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://192.168.1.112:28329> and login as User `admin` with password `admin`. 
+Navigate to <http://172.20.10.3:28329> and login as User `admin` with password `admin`. 
