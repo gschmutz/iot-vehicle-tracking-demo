@@ -1284,7 +1284,7 @@ CREATE SOURCE CONNECTOR jdbc_logistics_sc WITH (
     "connection.url" = 'jdbc:postgresql://postgresql/demodb?user=demo&password=abc123!',
     "mode" = 'timestamp',
     "timestamp.column.name" = 'last_update',
-    "schema.pattern" = 'dispatching',
+    "schema.pattern" = 'logistics_db',
     "table.whitelist" = 'driver',
     "validate.non.null" = 'false',
     "topic.prefix" = 'logisticsdb_',
