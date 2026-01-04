@@ -47,12 +47,12 @@ cd $DATAPLATFORM_HOME/plugins/kafka-connect/connectors
 ```
 
 ```bash
-sudo wget https://github.com/lensesio/stream-reactor/releases/download/10.0.0/kafka-connect-mqtt-10.0.0.zip
+sudo wget https://github.com/lensesio/stream-reactor/releases/download/11.3.0/kafka-connect-mqtt-11.3.0.zip
 ```
 
 ```bash
-sudo unzip kafka-connect-mqtt-10.0.0.zip
-sudo rm kafka-connect-mqtt-10.0.0.zip
+sudo unzip kafka-connect-mqtt-11.3.0.zip
+sudo rm kafka-connect-mqtt-11.3.0.zip
 ```
 
 ```bash
@@ -142,8 +142,7 @@ DROP STREAM IF EXISTS vehicle_tracking_sysA_s;
 
 ``` sql
 CREATE STREAM IF NOT EXISTS vehicle_tracking_sysA_s 
-  (mqttTopic VARCHAR KEY,
-  timestamp VARCHAR, 
+  (key VARCHAR KEY, 
    truckId VARCHAR, 
    driverId BIGINT, 
    routeId BIGINT,

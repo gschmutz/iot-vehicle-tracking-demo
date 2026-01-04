@@ -85,7 +85,7 @@ docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create -
 docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_sysB --partitions 8 --replication-factor 3
 ```
 
-If you don't like to work with the CLI, you can also create the Kafka topics using the graphical user interfaces [Cluster Manager for Kafka (CMAK)](http://dataplatform:28104) or the [Apache Kafka HQ (AKHQ)](http://dataplatform:28107). 
+If you don't like to work with the CLI, you can also create the Kafka topics using the graphical user interface [Apache Kafka HQ (AKHQ)](http://dataplatform:28107). 
 
 ### Check logistics_db Postgresql Database
 
@@ -235,14 +235,14 @@ cd $DATAPLATFORM_HOME/plugins/kafka-connect/connectors
 and download the `10.0.0/kafka-connect-mqtt-4.2.0.zip` file from the [Landoop Stream-Reactor Project](https://github.com/Landoop/stream-reactor/tree/master/kafka-connect-mqtt) project.
 
 ```
-sudo wget https://github.com/lensesio/stream-reactor/releases/download/10.0.0/kafka-connect-mqtt-10.0.0.zip
+sudo wget https://github.com/lensesio/stream-reactor/releases/download/11.3.0/kafka-connect-mqtt-11.3.0.zip
 ```
 
 Once it is successfully downloaded, uncompress it using this `tar` command and remove the file. 
 
 ```
-sudo unzip kafka-connect-mqtt-10.0.0.zip
-sudo rm kafka-connect-mqtt-10.0.0.zip
+sudo unzip kafka-connect-mqtt-11.3.0.zip
+sudo rm kafka-connect-mqtt-11.3.0.zip
 ```
 
 Now let's restart Kafka connect in order to pick up the new connector (Make sure to navigate back to the docker folder first, either using `cd $DATAPLATFORM_HOME` or `cd ../..`)
@@ -318,13 +318,15 @@ curl -X "DELETE" "$DOCKER_HOST_IP:8083/connectors/mqtt-vehicle-position-source"
 
 Navigate to the [Kafka Connect UI](http://dataplatform:28103) to view the connector in a graphical window.
 
-## Step 2 - Using KSQL to Refine the data
+## Step 2 - Refine the data
 
-In this part we will refine the data and place it in a new topic. The idea here is to have one normalised topic in Avro format, where all the tracking data from both system A and B will be placed, so that further processing can take it from there. For the refinement we will be using ksqlDB.
+In this part we will refine the data and place it in a new topic. The idea here is to have one normalised topic in Avro format, where all the tracking data from both system A and B will be placed, so that further processing can take it from there. 
+
+For the refinement you can either use ksqlDB or Apache Flink.
 
 ![Alt Image Text](./images/use-case-step-2.png "Demo 1 - KsqlDB")
 
-### What is ksqlDB? 
+### Using KsqlDB
 
 ksqlDB is an event streaming database purpose-built to help developers create stream processing applications on top of Apache Kafka.
 
@@ -332,7 +334,7 @@ ksqlDB is an event streaming database purpose-built to help developers create st
 
 [_Source: Confluent_](https://docs.ksqldb.io/en/latest/)
 
-### Connect to ksqlDB engine
+#### Connect to ksqlDB engine
 
 Let's connect to the ksqlDB shell
 
@@ -340,7 +342,7 @@ Let's connect to the ksqlDB shell
 docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
 ```
 
-### Use ksqlDB for displaying messages
+#### Use ksqlDB for displaying messages
 
 Show the available Kafka topics
 
@@ -368,7 +370,7 @@ show tables;
 show queries;
 ```
 
-### Create a Stream and SELECT from it
+#### Create a Stream and SELECT from it
 
 First drop the stream if it already exists:
 
@@ -380,8 +382,8 @@ Now let's create the ksqlDB Stream
 
 ``` sql
 CREATE STREAM IF NOT EXISTS vehicle_tracking_sysA_s 
-  (mqttTopic VARCHAR KEY,
-  timestamp VARCHAR, 
+  (key VARCHAR KEY,
+   timestamp VARCHAR, 
    truckId VARCHAR, 
    driverId BIGINT, 
    routeId BIGINT,
@@ -435,7 +437,7 @@ or with the additional `EXTENDED` option
 DESCRIBE EXTENDED vehicle_tracking_sysA_s;
 ```
 
-### Create a new "refined" stream where the data is transformed into Avro
+#### Create a new "refined" stream where the data is transformed into Avro
 
 First drop the stream if it already exists:
 
@@ -496,6 +498,198 @@ docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined -s value=avro -
 ```
 
 You can use the Schema Registry UI on <http://dataplatform:28102> to view the Avro Schema created by ksqlDB.
+
+### Using Apache Flink
+
+Apache Flink is an open-source stream processing framework for real-time analytics on unbounded and bounded data streams, offering low-latency, stateful processing with exactly-once guarantees. It supports multiple APIs—including Java and Python for programmatic stream processing, and Flink SQL for declarative, SQL-based analytics—allowing developers to choose the most suitable abstraction for their use case.
+
+![](./images/flink-apis.png)
+
+In this demo we will mostly be using Flink SQL.
+
+#### Connect to Flink SQL CLI
+
+Let's connect to the Flink SQL CLI
+
+```bash
+docker exec -ti flink-sql-cli ./bin/sql-client.sh
+```
+
+#### Create a Flink SQL Table and SELECT FROM IT
+
+First let's drop the table if it already exits:
+
+```sql
+DROP TABLE IF EXISTS vehicle_tracking_sysA;
+```
+
+Now let's create the table
+
+```sql
+CREATE TABLE vehicle_tracking_sysA (
+  `timestamp` STRING,
+  truckId STRING,
+  driverId BIGINT,
+  routeId BIGINT,
+  eventType STRING,
+  latitude DOUBLE,
+  longitude DOUBLE,
+  correlationId STRING,
+
+  -- event-time attribute derived from the string field
+  event_time AS TO_TIMESTAMP_LTZ(CAST(`timestamp` AS BIGINT), 3),
+
+  -- watermark definition (5 seconds out-of-orderness)
+  WATERMARK FOR event_time AS event_time - INTERVAL '5' SECOND
+) WITH (
+  'connector' = 'kafka',
+  'topic' = 'vehicle_tracking_sysA',
+  'properties.bootstrap.servers' = 'kafka-1:19092',
+  'format' = 'json',
+  'scan.startup.mode' = 'earliest-offset'
+);
+```
+
+We are using the JSON value format, as our stream is a JSON-formatted string.
+
+Let's see the live data by using a SELECT on the Stream:
+
+```sql
+SELECT * FROM vehicle_tracking_sysA;
+```
+
+you should see a continous stream of events as a result of the SELECT statement, similar to the image below:
+
+![](./images/flink-cli-1.png)
+
+You can use the cursor keys to move the result right and left.
+
+Hit Q to quit the statement.
+
+You can get info about the table by using the `DESCRIBE` command:
+
+```sql
+Flink SQL> describe vehicle_tracking_sysA;
++---------------+------------------------+------+-----+------------------------------+------------------------------------+
+|          name |                   type | null | key |                       extras |                          watermark |
++---------------+------------------------+------+-----+------------------------------+------------------------------------+
+|     timestamp |                 STRING | TRUE |     |                              |                                    |
+|       truckId |                 STRING | TRUE |     |                              |                                    |
+|      driverId |                 BIGINT | TRUE |     |                              |                                    |
+|       routeId |                 BIGINT | TRUE |     |                              |                                    |
+|     eventType |                 STRING | TRUE |     |                              |                                    |
+|      latitude |                 DOUBLE | TRUE |     |                              |                                    |
+|     longitude |                 DOUBLE | TRUE |     |                              |                                    |
+| correlationId |                 STRING | TRUE |     |                              |                                    |
+|    event_time | TIMESTAMP(3) *ROWTIME* | TRUE |     | AS TO_TIMESTAMP(`timestamp`) | `event_time` - INTERVAL '5' SECOND |
++---------------+------------------------+------+-----+------------------------------+------------------------------------+
+9 rows in set
+```
+
+#### Create a "refined" stream with the data transformed to Avro
+
+First drop the new table if it already exists:
+
+```sql
+DROP TABLE IF EXISTS vehicle_tracking_refined;
+```
+
+Now let's create a new table we will be using as the Sink. In the `WITH` clause we specify the target Kafka topic as well as to use Avro for the format of the Kafka value. 
+
+```sql
+CREATE TABLE vehicle_tracking_refined (
+  truckId STRING,
+  source STRING,
+  event_time TIMESTAMP(3),
+  vehicleId STRING,
+  driverId BIGINT,
+  routeId BIGINT,
+  eventType STRING,
+  latitude DOUBLE,
+  longitude DOUBLE,
+  correlationId STRING
+) WITH (
+  'connector' = 'kafka',
+  'topic' = 'vehicle_tracking_refined',
+  'properties.bootstrap.servers' = 'kafka-1:19092',
+
+  -- Avro + Schema Registry
+  'value.format' = 'avro-confluent',
+  'value.avro-confluent.url' = 'http://schema-registry-1:8081'  
+);
+```
+
+As the Kafka cluster is configured to not auto-create the topics, we have to manually create the Kafka topic before using the table
+
+```bash
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic vehicle_tracking_refined --partitions 8 --replication-factor 3
+```
+
+Now let's extecute the `INSERT INTO ...` statement, which reads from the first, source table and writes to the new sink table. In the column list we can transform values, in this case all we do is adding an additional source column:
+
+```
+INSERT INTO vehicle_tracking_refined
+SELECT
+  truckId,
+  'Tracking_SysA' AS source,
+  event_time,
+  truckId AS vehicleId,
+  driverId,
+  routeId,
+  eventType,
+  latitude,
+  longitude,
+  correlationId
+FROM vehicle_tracking_sysA;
+```
+
+To check that the refined topic does in fact hold Avro formatted data, let's just do a normal kcat on the truck_position_refined topic
+
+```bash
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined
+```
+
+we can see that it is serialised as Avro
+
+```bash
+                         Normal���(\OC@������V�(-2969744079642392386
+% Reached end of topic vehicle_tracking_refined [5] at offset 2905
+% Reached end of topic vehicle_tracking_refined [2] at offset 3438
+% Reached end of topic vehicle_tracking_refined [4] at offset 3923
+13Tracking_SysA���f13 ���
+                         Normal=
+ףpE@R����V�(-2969744079642392386
+% Reached end of topic vehicle_tracking_refined [3] at offset 3422
+% Reached end of topic vehicle_tracking_refined [6] at offset 4084
+34Tracking_SysA���f34ܯ��
+
+                        Normal�G�z�D@{�G�V�(-2969744079642392386
+% Reached end of topic vehicle_tracking_refined [7] at offset 3450
+```
+
+we can use the `-s` and `-r` option to specify the Avro Serde and the URL of the schema registry
+
+```bash
+docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined -s value=avro -r http://schema-registry-1:8081
+```
+
+and the output will be rendered using JSON:
+
+```bash
+{"truckId": {"string": "28"}, "source": {"string": "Tracking_SysA"}, "event_time": {"long": 1767539281133}, "vehicleId": {"string": "28"}, "driverId": {"long": 22}, "routeId": {"long": 1594289134}, "eventType": {"string": "Normal"}, "latitude": {"double": 34.890000000000001}, "longitude": {"double": -91.739999999999995}, "correlationId": {"string": "-2969744079642392386"}}
+{"truckId": {"string": "37"}, "source": {"string": "Tracking_SysA"}, "event_time": {"long": 1767539281424}, "vehicleId": {"string": "37"}, "driverId": {"long": 25}, "routeId": {"long": 1567254452}, "eventType": {"string": "Normal"}, "latitude": {"double": 36.840000000000003}, "longitude": {"double": -89.540000000000006}, "correlationId": {"string": "-2969744079642392386"}}
+{"truckId": {"string": "13"}, "source": {"string": "Tracking_SysA"}, "event_time": {"long": 1767539281674}, "vehicleId": {"string": "13"}, "driverId": {"long": 16}, "routeId": {"long": 137128276}, "eventType": {"string": "Normal"}, "latitude": {"double": 41.710000000000001}, "longitude": {"double": -91.319999999999993}, "correlationId": {"string": "-2969744079642392386"}}
+{"truckId": {"string": "34"}, "source": {"string": "Tracking_SysA"}, "event_time": {"long": 1767539282043}, "vehicleId": {"string": "34"}, "driverId": {"long": 11}, "routeId": {"long": 1594289134}, "eventType": {"string": "Normal"}, "latitude": {"double": 41.479999999999997}, "longitude": {"double": -88.069999999999993}, "correlationId": {"string": "-2969744079642392386"}}
+% Reached end of topic vehicle_tracking_refined [5] at offset 2878
+```
+
+You can use the Schema Registry UI on <http://dataplatform:28102> to view the Avro Schema created by Flink SQL.
+
+![](./images/schema-registry-ui.png)
+
+The flink Job being submitted and running for the `INSERT INTO .. SELECT ...` can be viewed on the Flink Dashboard by navigating to <http://dataplatform:28237>. In the menu to the left, click on Runing Jobs and you should see your job running:
+
+![Alt Image Text](./images/flink-dashboard-1.png )
 
 ## Step 3 - Integrate System B
 
