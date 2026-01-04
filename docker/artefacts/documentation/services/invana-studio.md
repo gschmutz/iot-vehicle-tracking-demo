@@ -11,4 +11,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://172.20.10.3:28292> and enter `http://172.20.10.3:28291/graphql` into the connection string to connect to the Invana GraphQL Engine. 
+Navigate to <http://dataplatform:28292> and enter `http://dataplatform:28291/graphql` into the connection string to connect to the Invana GraphQL Engine. 

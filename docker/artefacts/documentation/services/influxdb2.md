@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://172.20.10.3:19999> and login with user `influx` and password `abc123abc123!`. 
+Navigate to <http://dataplatform:19999> and login with user `influx` and password `abc123abc123!`. 
 
 ### InfluxDB CLI
 

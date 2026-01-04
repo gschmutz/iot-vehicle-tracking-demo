@@ -21,12 +21,29 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Lakekeeper
  * MCP Inspector
  * Allure Report
+ * Nimtable
+ * EHRBase
+ * OpenEHR Tool
+ * Polaris
+ * RisingWave Console
+ * Gravitino
+ * Gravitino Iceberg Rest Server
+ * Puppy Graph
+ * Azurite
+ * Cruise Control
+ * Confluent Control Center Next Generation
+ * XTDB
+ * Shadow Traffic
+ * PyIceberg
+ * Apache Fluss
+ * Data Contract Editor
+ * Data Contract CLI API
  
 ### Version upgrades
 
  * Update `milvus` to `v2.5.12` 
  * Update `langflow` to `1.5.0`
- * Update `n8n` to `1.108.1`
+ * Update `n8n` to `2.0.2`
  * Update `minio` to `RELEASE.2025-09-07T16-13-09Z`
  * Update `dgraph` to `v24.1.3`
  * Update `memgraph` to `3.2.1`
@@ -40,9 +57,10 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `grafana` to `12.0.1`
  * Update `memcached` to `1.6`
  * Update `flowise` to `3.0.1`
- * Update `trino` to `476`
- * Update `risingwave` to `v2.5.1`
- * Update `confluent-platform` to `8.0.0`
+ * Update `trino` to `479`
+ * Update `starburstdata` to `477-e.2`
+ * Update `risingwave` to `v2.6.1`
+ * Update `confluent-platform` to `8.1.0`
  * Update `apicurio-registry` to `2.6.11.Final`
  * Update `materialize` to `v0.146.1`
  * Update `arroyo` to `0.14.0`
@@ -74,6 +92,21 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `spring-boot-admin` to `3.4.1`
  * Update `sqlserver` to `2022-latest`
  * Update `dremio` to `26.0`
+ * Update `presto` to `0.294`
+ * Update `streampipes` to `0.98.0-SNAPSHOT`
+ * Update `nessie` to `0.105.7`
+ * Update `unity-catalog` to `v0.3.0`
+ * Update `unity-catalog-main` to `main`
+ * Update `flink` to `2.1.0-scala_2.12-java17`
+ * Update `postgresql` to `18` 
+ * Update `oracle-free` to `23.26.0.0`
+ * Update `oracle-adb` to `25.7.5.2-23ai`
+ * Update `kafka` to `4.1.0`
+ * Update `duckdb` to `v1.4.3`
+
+### New/Updated Cookbook Recipes
+
+ * [Using DuckDB](../cookbooks/recipes/using-duckdb/README)
  
 ### Enhancements
 
@@ -94,6 +127,12 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * `MINIO_browser_enable` renamed to `MINIO_browser_enabled` to be conforment with naming convention
  * Change internal port of `docker-registry` from `5000` to `5020`
  * Any config setting which does not enable a service renamed from `XXXX_ddd_enable` to `XXXX_ddd_enabled`
+ * Change all bitnami images to the `bitnamilegacy` docker repository, due to all the bitnami images no longer be available for free
+ * Change default values of `MINIO_access_key` and `MINIO_secret_key` to a more memorable value
+ * Default value for `LAKEFS_use_as_drop_in_replacement_for_s3` changed to `false`
+ * Change Oracle REST Data Service (ORDS) to use the official oracle docker image
+ * `KAFKA_CCC_enable` renamed to `CONFLUENT_CCC_enable`
+ * VectorChord replaces pgvecto.rs 
 
 ## What's new in 1.18.1
 
@@ -183,7 +222,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `mongo` to `8.0` 
  * Update `solr` to `9.5` 
  * Update `janusgraph` to `1.0.0-20231010-065545.e3799d4`
- * Update `neo4j` to `5.26`
+ * Update `neo4j` to `5.26` and `2025`
  * Update `memgraph` to `2.16.0`
  * Update `memgraph-mage` to `1.16-memgraph-2.16-dev`
  * Update `arcadedb` to `24.2.1`

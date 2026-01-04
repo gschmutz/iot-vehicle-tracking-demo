@@ -112,10 +112,12 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 4052 | 4052 | zeppelin (spark ui) |
 4053 | 4053 | zeppelin (spark ui) |
 4054 | 4054 | zeppelin (spark ui) |
+4173 | 4173 | data-contract-editor |
 4195 | 4195 | benthos-1 |
 4196 | 4196 | benthos-server |
 4200 | 4200 | cribl-master |
 4222 | 4222 | nats-1 |
+4242 | 4242 | data-contract-api |
 4317 | 4317 | otel-collector |
 4318 | 4318 | otel-collector |
 4319 | 4317 | jaeger |
@@ -145,6 +147,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 5440 | 5432 | proton-server (postgres batch) |
 5441 | 5432 | supabase-db |
 5442 | 5432 | hive-metastore-db |
+5443 | 5432 | ehrbase-db |
+5444 | 5432 | xtdb |
 5500 | 5500 | oracledb-ee-1 |
 5501 | 5500 | oracledb-ee-1 |
 5502 | 5500 | oracledb-ee-1 |
@@ -226,6 +230,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8008 | 80 | markdown-viewer, markdown-viewer-dc1 |
 8009 | 80 | markdown-viewer-dc2 |
 8010 | 80 | markdown-viewer-dc3 |
+8020 | 8020 | risingwave-console |
 8024 | 8024 | axon-server |
 8047 | 8047 | drill |
 8048 | 8048 | kafka-eagle |
@@ -240,6 +245,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 8084 | 8084 | connect-2 |
 8085 | 8085 | connect-3 |
 8086 | 8086 | influxdb |
+8087 | 8086 | streampipes-influxdb |
 8088 | 8088 | ksqldb-server-1 |
 8089 | 8088 | ksqldb-server-2 |
 8090 | 8088 | ksqldb-server-3 |
@@ -286,7 +292,12 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9101 | 9001 | mosquitto-1 |
 9102 | 9002 | mosquitto-2 |
 9103 | 9003 | mosquitto-3 |
+9114 | 9114 | elasticsearch-exporter |
 9121 | 9121 | redis-exporter |
+9123 | 9123 | fluss-coordinator-service |
+9124 | 9123 | fluss-tablet-server-1 |
+9125 | 9123 | fluss-tablet-server-2 |
+9126 | 9123 | fluss-tablet-server-3 |
 9200 | 9200 | elasticsearch-1 |
 9201 | 9200 | langwatch-opensearch |
 9300 | 9300 | elasticsearch-1 |
@@ -298,6 +309,8 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9083 | 9083 | hive-metastore |
 9021 | 9021 | control-center (dc1) |
 9022 | 9021 | control-center (dc2) |
+9025 | 9021 | control-center-ng (dc1) |
+9026 | 9021 | control-center-ng (dc2) |
 9090 | 9090 | prometheus-1 |
 9091 | 9091 | prometheus-pushgateway |
 9092 | 9092 | kafka-1     |
@@ -320,6 +333,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 9600 | 9600 | zeebe-1 |
 9601 | 9600 | langwatch-opensearch  |
 9851 | 9851 | tile38 |
+9832 | 9832 | xtdb |
 9870 | 9870 | namenode |
 9864 | 9864 | datanode-1 |
 9865 | 9864 | datanode-2 |
@@ -346,6 +360,9 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 10017 | 10000 | nifi2-3 |
 10009 | 10009 | kyuubi |
 10099 | 10099 | kyuubi |
+10020 | 10000 | azurite (blob service) |
+10021 | 10001 | azurite (queue service) |
+10022 | 10002 | azurite (table service) |
 11211 | 11211 | memcached |
 11212 | 11211 | ignite-1 |
 11235 | 11235 | crawl4ai |
@@ -424,6 +441,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 27019 | 27017 | mongodb-3 |
 27020 | 27017 | mongodb-3 |
 27022 | 27017 | oracle-adb |
+27023 | 27017 | oracle-rest-1 |
 28080 | 8080 | zeppelin |
 28081 | 8080 | presto-1 |
 28082 | 8080 | trino-1 |
@@ -597,7 +615,7 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28250 | 80 | gitweb |
 28251 | 8888 | oracle-xe |
 28252 | 8888 | oracle-rest-1 |
-28253 | 8888 | kouncil |
+28253 | 8443 | oracle-rest-1 |
 28254 | 80 | kafka-magic |
 28255 | 80 | streampipes-ui |
 28256 | 80 | remora |
@@ -802,7 +820,23 @@ Container Port(s) | Internal Port(s)           | Service (alternatives) |
 28277 | 8081 | mcp-inspector |
 28278 | 5050 | allure |
 28279 | 5252 | allure-ui |
-
+28280 | 3000 | nimtable-web |
+28281 | 8182 | nimtable |
+28282 | 8080 | ehrbase |
+28283 | 9000 | openehr-tool |
+28284 | 8081 | polaris |
+28285 | 8082 | polaris |
+28286 | 8090 | gravitino |
+28287 | 9001 | gravitino-iceberg-rest |
+28288 | 8000 | gravitino-mcp-server |
+28289 | 8081 | puppygraph |
+28290 | 8182 | puppygraph |
+28291 | 7687 | puppygraph |
+28292 | 8888 | kouncil |
+28293 | 9090 | cruise-control |
+28394 | 9090 | ccc-prometheus |
+28395 | 9093 | ccc-prometheus-alertmanager |
+28396 | 8080 | xtdb |
 ## Ports > 28500
 
 Container Port(s) | Internal Port(s)           | Service (alternatives) |

@@ -45,6 +45,7 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Iceberg Table Format**
    * [Spark with Iceberg](./recipes/iceberg-with-spark/README) - `1.16.0`
+   * [Spark with Iceberg and Polaris](./recipes/spark-iceberg-polaris/README) - `1.19.0`
 
  * **Hadoop HDFS**
    * [Querying HDFS data using Presto](./recipes/querying-hdfs-with-presto/README)
@@ -91,6 +92,9 @@ Inhere we are documenting cookbooks on how to use the platform:
 
  * **Apicurio Registry**
    * [Apicurio Registry with SQL Storage (PostgreSQL)](./recipes/apicurio-with-database-storage/README) - `1.14.0`
+
+ * **DuckDB**
+ 	* [Using DuckDB](./recipes/using-duckdb/README) - `1.19.0` 
 
  * **Oracle RDBMS**
    * [Using private (Trivadis) Oracle EE image](./recipes/using-private-oracle-ee-image/README) - `1.13.0`    

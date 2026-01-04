@@ -11,7 +11,7 @@ networks:
 services:
 #  ================================== Kafka ========================================== #
   kafka-1:
-    image: confluentinc/cp-kafka:8.0.0
+    image: confluentinc/cp-kafka:8.1.0
     container_name: kafka-1
     hostname: kafka-1
     labels:
@@ -59,7 +59,7 @@ services:
       retries: 25
       start_period: 20s
   kafka-2:
-    image: confluentinc/cp-kafka:8.0.0
+    image: confluentinc/cp-kafka:8.1.0
     container_name: kafka-2
     hostname: kafka-2
     labels:
@@ -107,7 +107,7 @@ services:
       retries: 25
       start_period: 20s
   kafka-3:
-    image: confluentinc/cp-kafka:8.0.0
+    image: confluentinc/cp-kafka:8.1.0
     container_name: kafka-3
     hostname: kafka-3
     labels:
@@ -156,7 +156,7 @@ services:
       start_period: 20s
   #  ================================== Kafka Connect ========================================== #
   kafka-connect-1:
-    image: confluentinc/cp-kafka-connect:8.0.0
+    image: confluentinc/cp-kafka-connect:8.1.0
     container_name: kafka-connect-1
     hostname: kafka-connect-1
     labels:
@@ -231,7 +231,7 @@ services:
       retries: 25
       test: curl --user connectAdmin:connectAdmin --fail --silent --insecure https://kafka-connect-1:8083/ --output /dev/null || exit 1
   kafka-connect-2:
-    image: confluentinc/cp-kafka-connect:8.0.0
+    image: confluentinc/cp-kafka-connect:8.1.0
     container_name: kafka-connect-2
     hostname: kafka-connect-2
     labels:
@@ -307,7 +307,7 @@ services:
       test: curl --user connectAdmin:connectAdmin --fail --silent --insecure https://kafka-connect-2:8084/ --output /dev/null || exit 1
   #  ================================== ksqlDB ========================================== #
   ksqldb-server-1:
-    image: confluentinc/cp-ksqldb-server:8.0.0
+    image: confluentinc/cp-ksqldb-server:8.1.0
     hostname: ksqldb-server-1
     container_name: ksqldb-server-1
     labels:
@@ -372,7 +372,7 @@ services:
       retries: 25
       test: curl --user ksqlDBUser:ksqlDBUser -fail --silent http://ksqldb-server-1:8088/info | grep RUNNING 1>/dev/null || exit 1
   ksqldb-server-2:
-    image: confluentinc/cp-ksqldb-server:8.0.0
+    image: confluentinc/cp-ksqldb-server:8.1.0
     hostname: ksqldb-server-2
     container_name: ksqldb-server-2
     labels:
@@ -439,7 +439,7 @@ services:
   # Access the cli by running:
   # > docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
   ksqldb-cli:
-    image: confluentinc/cp-ksqldb-cli:8.0.0
+    image: confluentinc/cp-ksqldb-cli:8.1.0
     container_name: ksqldb-cli
     hostname: ksqldb-cli
     labels:
@@ -454,7 +454,7 @@ services:
     restart: unless-stopped
   #  ================================== Confluent Schema Registry ========================================== #
   schema-registry-1:
-    image: confluentinc/cp-schema-registry:8.0.0
+    image: confluentinc/cp-schema-registry:8.1.0
     hostname: schema-registry-1
     container_name: schema-registry-1
     labels:
@@ -522,6 +522,7 @@ services:
       - /bin/sh
       - -c
       - |
+        apk add jq;
         while [ 1 -eq 1 ];do sleep 60;done
     restart: unless-stopped
   #  ================================== Kafka Connect UI ========================================== #
@@ -678,7 +679,7 @@ services:
     restart: unless-stopped
   #  ================================== Redis ========================================== #
   redis-1:
-    image: bitnami/redis:7.4
+    image: bitnamilegacy/redis:7.4
     hostname: redis-1
     container_name: redis-1
     labels:
@@ -723,7 +724,7 @@ services:
       retries: 3
   #  ================================== PostgreSQL ========================================== #
   postgresql:
-    image: postgres:17
+    image: postgres:18
     container_name: postgresql
     hostname: postgresql
     labels:
@@ -736,6 +737,7 @@ services:
       - POSTGRES_PASSWORD=${PLATYS_POSTGRESQL_PASSWORD:-abc123!}
       - POSTGRES_USER=postgres
       - POSTGRES_DB=postgres
+#      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --data-checksums      
       - POSTGRES_MULTIPLE_DATABASES=demodb
       - POSTGRES_MULTIPLE_USERS=demo
       - POSTGRES_MULTIPLE_PASSWORDS=${PLATYS_POSTGRESQL_MULTIPLE_PASSWORD:-abc123!}

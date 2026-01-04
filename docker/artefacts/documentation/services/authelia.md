@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://172.20.10.3:28399> for the Authelia dashboard.
+Navigate to <http://dataplatform:28399> for the Authelia dashboard.
