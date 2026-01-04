@@ -11,6 +11,6 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28284>. 
+Navigate to <http://192.168.1.112:28284>. 
 
 By default the user `jupyterhub` with password `abc123!` (if not changed in `JUPYTERHUB_global_password`) can be used to log into JupyterHub.

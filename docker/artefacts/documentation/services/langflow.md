@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:7860>.
+Navigate to <http://192.168.1.112:7860>.
 
 ### Load flows on startup
 

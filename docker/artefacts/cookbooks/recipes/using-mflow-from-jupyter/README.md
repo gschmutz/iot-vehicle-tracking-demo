@@ -34,7 +34,7 @@ docker-compose up -d
 
 ## Working with MLflow
 
-Navigate to Jupyter on <http://dataplatform:28888>. 
+Navigate to Jupyter on <http://192.168.1.112:28888>. 
 
 Create a new notebook and add the following cell
 
@@ -142,6 +142,6 @@ train(0.1, 0.1)
 
 ## Check it in MLFlow dashboard
 
-Navigate to <http://dataplatform:28229> to check the results.
+Navigate to <http://192.168.1.112:28229> to check the results.
 
 ![](./images/mlflow-dashboard.png)

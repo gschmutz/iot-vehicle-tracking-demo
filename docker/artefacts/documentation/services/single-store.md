@@ -15,4 +15,4 @@ Add the Free License to `SINGLE_STORE_LICENSE`. You can [sign up](https://www.si
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28351> to run the SingleStore UI. Login with password `abc123!`.
+Navigate to <http://192.168.1.112:28351> to run the SingleStore UI. Login with password `abc123!`.

@@ -6,7 +6,7 @@ Here you can find the [REST API documentation of Livy](https://livy.incubator.ap
 
 ## Prerequistes
 ```
-export LIVY_HOST=dataplatform:8998
+export LIVY_HOST=192.168.1.112:8998
 ```
 
 ```
@@ -31,7 +31,7 @@ Note: Unnecessary use of -X or --request, POST is already inferred.
 * TCP_NODELAY set
 * Connected to dataplatform (172.16.252.11) port 8998 (#0)
 > POST /batches HTTP/1.1
-> Host: dataplatform:8998
+> Host: 192.168.1.112:8998
 > User-Agent: curl/7.58.0
 > Accept: */*
 > Content-Type: application/json
@@ -84,7 +84,7 @@ Note: Unnecessary use of -X or --request, GET is already inferred.
 * TCP_NODELAY set
 * Connected to dataplatform (172.16.252.11) port 8998 (#0)
 > GET /batches/8 HTTP/1.1
-> Host: dataplatform:8998
+> Host: 192.168.1.112:8998
 > User-Agent: curl/7.58.0
 > Accept: */*
 > Content-Type: application/json

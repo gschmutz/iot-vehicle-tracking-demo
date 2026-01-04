@@ -44,7 +44,7 @@ FROM '/data-transfer/samples/flight-data/airports.csv' DELIMITER ',' CSV HEADER;
 
 ## Query Table from Drill
 
-Next let's query the data from Drill. Connect to the Drill UI using a browser: <http://dataplatform:8047>
+Next let's query the data from Drill. Connect to the Drill UI using a browser: <http://192.168.1.112:8047>
 
 Create a new Storage Plugin, name it `postgresql` and this configuration
 

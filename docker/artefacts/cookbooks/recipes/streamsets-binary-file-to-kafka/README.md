@@ -29,7 +29,7 @@ docker exec -ti kafka-1 kafka-topics --create --zookeeper zookeeper-1:2181 --top
 
 ## Create the 1st StreamSets pipeline
 
-In a browser, navigate to the StreamSets application on <http://dataplatform:18630> and login as user `admin` with password `admin`. 
+In a browser, navigate to the StreamSets application on <http://192.168.1.112:18630> and login as user `admin` with password `admin`. 
 
 Create a new pipeline and name it `BinaryFile-to-Kafka`. 
 

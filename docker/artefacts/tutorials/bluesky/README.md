@@ -38,25 +38,25 @@ docker exec -ti kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create -
 Run the bluesky retriever
 
 ```bash
-docker run --name bluesky-retriever --rm -d -e DESTINATION=kafka -e KAFKA_BROKERS=dataplatform:9092 -e KAFKA_TOPIC=bluesky.raw ghcr.io/gschmutz/bluebird:latest
+docker run --name bluesky-retriever --rm -d -e DESTINATION=kafka -e KAFKA_BROKERS=192.168.1.112:9092 -e KAFKA_TOPIC=bluesky.raw ghcr.io/gschmutz/bluebird:latest
 ```
 
 Let's see the messages comming in with `kcat` 
 
 ```bash
-kca	t -q -b dataplatform:9092 -t bluesky.raw
+kca	t -q -b 192.168.1.112:9092 -t bluesky.raw
 ```
 
 What are the different message types?
 
 ```bash
-kcat -q -b dataplatform:9092 -t bluesky.raw | jq .record.commit.collection
+kcat -q -b 192.168.1.112:9092 -t bluesky.raw | jq .record.commit.collection
 ```
 
 Let's view only the `text` of an `app.bsky.feed.post` message
 
 ```bash
-kcat -q -b dataplatform:9092 -t bluesky.raw | jq 'select(.record.commit.collection == "app.bsky.feed.post") | .record.commit.record.text'
+kcat -q -b 192.168.1.112:9092 -t bluesky.raw | jq 'select(.record.commit.collection == "app.bsky.feed.post") | .record.commit.record.text'
 ```
 
 ## Kafka Connect - Elasticsearch Sink Connector
@@ -65,7 +65,7 @@ Add the Elasticsearch connector
 
 ```bash
 curl -X PUT \
-  http://dataplatform:8083/connectors/elasticsearch-bluesky-sink/config \
+  http://192.168.1.112:8083/connectors/elasticsearch-bluesky-sink/config \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json' \
   -d '{
@@ -95,9 +95,9 @@ curl -X PUT \
 }'
 ```
 
-Visulalize the connector in the [Kafka Connect UI](http://dataplatform:28103/).
+Visulalize the connector in the [Kafka Connect UI](http://192.168.1.112:28103/).
 
 
 ## Kibana - Visualize the Posts
 
-Navigate to <http://dataplatform:5601>
+Navigate to <http://192.168.1.112:5601>

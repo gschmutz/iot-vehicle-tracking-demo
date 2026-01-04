@@ -48,9 +48,9 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `dgraph` to `v24.1.3`
  * Update `memgraph` to `3.2.1`
  * Update `airflow` to `2.11.0` and `3.0.1`
- * Update `nifi` to `2.5.0`
- * Update `nifi-registry` to `2.5.0`
- * Update `nifi-toolkit` to `2.5.0`
+ * Update `nifi` to `2.7.2`
+ * Update `nifi-registry` to `2.7.2`
+ * Update `nifi-toolkit` to `2.7.2`
  * Update `ollama` to `0.9.0`
  * Update `local-ai` to `v2.29.0`
  * Update `anaconda` to `2024.10-1`
@@ -60,7 +60,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `trino` to `479`
  * Update `starburstdata` to `477-e.2`
  * Update `risingwave` to `v2.6.1`
- * Update `confluent-platform` to `8.1.0`
+ * Update `confluent-platform` to `8.1.1`
  * Update `apicurio-registry` to `2.6.11.Final`
  * Update `materialize` to `v0.146.1`
  * Update `arroyo` to `0.14.0`

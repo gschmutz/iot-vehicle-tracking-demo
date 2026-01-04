@@ -79,7 +79,7 @@ minio-1/webapp-bucket/
 
 ## Test the Application
 
-Now test the application by navigating to <http://dataplatform:28306> and you should get the following result
+Now test the application by navigating to <http://192.168.1.112:28306> and you should get the following result
 
 ![](./images/my-web-app.png)
 
@@ -105,6 +105,6 @@ platys gen
 docker compose up -d minio-web
 ```
 
-Test the application again by navigating to <http://dataplatform:28306> and you should see your own favourite icon:
+Test the application again by navigating to <http://192.168.1.112:28306> and you should see your own favourite icon:
 
 ![](./images/my-web-app2.png)

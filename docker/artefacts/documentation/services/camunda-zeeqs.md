@@ -13,5 +13,5 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28208/graphiql>.
+Navigate to <http://192.168.1.112:28208/graphiql>.
 

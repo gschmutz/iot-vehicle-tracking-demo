@@ -11,6 +11,6 @@ platys gen
 
 ### Run Sample Dashboard
 
-Navigate to <http://dataplatform:28171> to see the sample dashboard.
+Navigate to <http://192.168.1.112:28171> to see the sample dashboard.
 
 ### Run Your Own Dashboard

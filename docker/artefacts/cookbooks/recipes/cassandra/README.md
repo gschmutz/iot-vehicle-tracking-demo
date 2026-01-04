@@ -32,7 +32,7 @@ You can find the `cqlsh` command line utility inside the Cassandra docker contai
 docker exec -ti cassandra-1 cqlsh
 ```
 
-Alternatively you can also use the Cassandra Web UI on <http://dataplatform:28120/>.
+Alternatively you can also use the Cassandra Web UI on <http://192.168.1.112:28120/>.
 
 Create a keyspace for the IoT data:
 

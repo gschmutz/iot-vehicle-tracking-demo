@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28406> for the Perplixica UI.
+Navigate to <http://192.168.1.112:28406> for the Perplixica UI.

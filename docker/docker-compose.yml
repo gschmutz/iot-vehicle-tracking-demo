@@ -11,7 +11,7 @@ networks:
 services:
 #  ================================== Kafka ========================================== #
   kafka-1:
-    image: confluentinc/cp-kafka:8.1.0
+    image: confluentinc/cp-kafka:8.1.1
     container_name: kafka-1
     hostname: kafka-1
     labels:
@@ -59,7 +59,7 @@ services:
       retries: 25
       start_period: 20s
   kafka-2:
-    image: confluentinc/cp-kafka:8.1.0
+    image: confluentinc/cp-kafka:8.1.1
     container_name: kafka-2
     hostname: kafka-2
     labels:
@@ -107,7 +107,7 @@ services:
       retries: 25
       start_period: 20s
   kafka-3:
-    image: confluentinc/cp-kafka:8.1.0
+    image: confluentinc/cp-kafka:8.1.1
     container_name: kafka-3
     hostname: kafka-3
     labels:
@@ -156,7 +156,7 @@ services:
       start_period: 20s
   #  ================================== Kafka Connect ========================================== #
   kafka-connect-1:
-    image: confluentinc/cp-kafka-connect:8.1.0
+    image: confluentinc/cp-kafka-connect:8.1.1
     container_name: kafka-connect-1
     hostname: kafka-connect-1
     labels:
@@ -231,7 +231,7 @@ services:
       retries: 25
       test: curl --user connectAdmin:connectAdmin --fail --silent --insecure https://kafka-connect-1:8083/ --output /dev/null || exit 1
   kafka-connect-2:
-    image: confluentinc/cp-kafka-connect:8.1.0
+    image: confluentinc/cp-kafka-connect:8.1.1
     container_name: kafka-connect-2
     hostname: kafka-connect-2
     labels:
@@ -307,7 +307,7 @@ services:
       test: curl --user connectAdmin:connectAdmin --fail --silent --insecure https://kafka-connect-2:8084/ --output /dev/null || exit 1
   #  ================================== ksqlDB ========================================== #
   ksqldb-server-1:
-    image: confluentinc/cp-ksqldb-server:8.1.0
+    image: confluentinc/cp-ksqldb-server:8.1.1
     hostname: ksqldb-server-1
     container_name: ksqldb-server-1
     labels:
@@ -324,6 +324,7 @@ services:
       - 8088:8088
       - 1095:1095
     environment:
+      UB_CLASSPATH: /usr/share/java/confluent-security/ksql/*:/usr/share/java/ksqldb-server/*:/usr/share/java/cp-base-new/*
       KSQL_LOG4J_ROOT_LOGLEVEL: INFO
       KSQL_LOG4J_OPTS: -Dlog4j.configuration=file:/tmp/helper/log4j.properties
       KSQL_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
@@ -372,7 +373,7 @@ services:
       retries: 25
       test: curl --user ksqlDBUser:ksqlDBUser -fail --silent http://ksqldb-server-1:8088/info | grep RUNNING 1>/dev/null || exit 1
   ksqldb-server-2:
-    image: confluentinc/cp-ksqldb-server:8.1.0
+    image: confluentinc/cp-ksqldb-server:8.1.1
     hostname: ksqldb-server-2
     container_name: ksqldb-server-2
     labels:
@@ -389,6 +390,7 @@ services:
       - 8089:8088
       - 1096:1095
     environment:
+      UB_CLASSPATH: /usr/share/java/confluent-security/ksql/*:/usr/share/java/ksqldb-server/*:/usr/share/java/cp-base-new/*
       KSQL_LOG4J_ROOT_LOGLEVEL: INFO
       KSQL_LOG4J_OPTS: -Dlog4j.configuration=file:/tmp/helper/log4j.properties
       KSQL_LOG4J_LOGGERS: org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR
@@ -439,7 +441,7 @@ services:
   # Access the cli by running:
   # > docker exec -it ksqldb-cli ksql http://ksqldb-server-1:8088
   ksqldb-cli:
-    image: confluentinc/cp-ksqldb-cli:8.1.0
+    image: confluentinc/cp-ksqldb-server:8.1.1
     container_name: ksqldb-cli
     hostname: ksqldb-cli
     labels:
@@ -454,7 +456,7 @@ services:
     restart: unless-stopped
   #  ================================== Confluent Schema Registry ========================================== #
   schema-registry-1:
-    image: confluentinc/cp-schema-registry:8.1.0
+    image: confluentinc/cp-schema-registry:8.1.1
     hostname: schema-registry-1
     container_name: schema-registry-1
     labels:
@@ -737,7 +739,7 @@ services:
     command: sleep infinity
   #  ================================== NiFi 2 ========================================== #
   nifi2-1:
-    image: apache/nifi:2.5.0
+    image: apache/nifi:2.7.2
     container_name: nifi2-1
     hostname: nifi2-1
     labels:

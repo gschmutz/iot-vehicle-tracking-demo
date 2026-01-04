@@ -52,7 +52,7 @@ docker exec -ti awscli s3cmd put /data-transfer/flight-data/airports.csv s3://fl
 
 ## Working with Iceberg from Zeppelin
 
-Navigate to Zeppelin <http://dataplatform:28080> and login as user `admin` with password `abc123!`.
+Navigate to Zeppelin <http://192.168.1.112:28080> and login as user `admin` with password `abc123!`.
 
 Create a new notebook and add and execute the following commands:
 

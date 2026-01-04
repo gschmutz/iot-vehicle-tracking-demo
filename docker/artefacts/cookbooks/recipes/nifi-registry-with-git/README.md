@@ -58,11 +58,11 @@ docker-compose up -d
 
 Now let's use NiFi together with the Registry. Here we will only show the most important steps, you can find a more tutorial like documentation [here](https://nifi.apache.org/docs/nifi-registry-docs/index.html). 
 
-Navigate to the NiFi Registry: <http://dataplatform:19090/nifi-registry> and create a new bucket and name it `my-bucket`.
+Navigate to the NiFi Registry: <http://192.168.1.112:19090/nifi-registry> and create a new bucket and name it `my-bucket`.
 
 ![](./images/create-bucket.png)
 
-Navigate to NiFi <https://dataplatform:18080> and login as user `nifi` with password `1234567890ACD`.
+Navigate to NiFi <https://192.168.1.112:18080> and login as user `nifi` with password `1234567890ACD`.
 
 Click on the Sandwich menu in the top right and open **Controller Settings**. Navigate to the **Registry Clients** tab and add a new Registry Client. 
 

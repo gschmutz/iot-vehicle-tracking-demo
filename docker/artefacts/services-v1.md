@@ -5,6 +5,9 @@
 |[adminer](./documentation/services/adminer )|<http://192.168.1.112:28131>|
 |[akhq](./documentation/services/akhq )|<http://192.168.1.112:28107>|<http://192.168.1.112:28107/api>
 |[cloudbeaver](./documentation/services/cloudbeaver )|<http://192.168.1.112:8978>|
+|[flink-jobmanager](./documentation/services/flink )|<http://192.168.1.112:28237/>|
+|[flink-sql-cli](./documentation/services/flink )||
+|[flink-taskmanager-1](./documentation/services/flink )||
 |[kafka-1](./documentation/services/kafka )||
 |[kafka-2](./documentation/services/kafka )||
 |[kafka-3](./documentation/services/kafka )||

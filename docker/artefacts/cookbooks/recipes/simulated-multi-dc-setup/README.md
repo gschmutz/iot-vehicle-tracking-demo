@@ -134,11 +134,11 @@ We have now 2 different stacks running, each one representing one data center.
 Both stack have their own home page generated. You can find them on port `80` and `81`:
  
  * **DC1** 
-   * Homepage: <http://dataplatform:80>
-   * Service List: <http://dataplatform:80/services>
+   * Homepage: <http://192.168.1.112:80>
+   * Service List: <http://192.168.1.112:80/services>
  * **DC2**
-   * Homepage: <http://dataplatform:81>
-   * Service List: <http://dataplatform:81/services>
+   * Homepage: <http://192.168.1.112:81>
+   * Service List: <http://192.168.1.112:81/services>
 
 
 ### Restrictions
