@@ -526,7 +526,7 @@ DROP TABLE IF EXISTS vehicle_tracking_sysA;
 Now let's create the table
 
 ```sql
-CREATE TABLE vehicle_tracking_sysA (
+CREATE TABLE IF NOT EXISTS vehicle_tracking_sysA (
   `timestamp` STRING,
   truckId STRING,
   driverId BIGINT,
@@ -597,7 +597,7 @@ DROP TABLE IF EXISTS vehicle_tracking_refined;
 Now let's create a new table we will be using as the Sink. In the `WITH` clause we specify the target Kafka topic as well as to use Avro for the format of the Kafka value. 
 
 ```sql
-CREATE TABLE vehicle_tracking_refined (
+CREATE TABLE IF NOT EXISTS vehicle_tracking_refined (
   truckId STRING,
   source STRING,
   event_time TIMESTAMP(3),
@@ -612,10 +612,16 @@ CREATE TABLE vehicle_tracking_refined (
   'connector' = 'kafka',
   'topic' = 'vehicle_tracking_refined',
   'properties.bootstrap.servers' = 'kafka-1:19092',
+  
+  -- REQUIRED: Kafka consumer group
+  --'properties.group.id' = 'vehicle_tracking_refined_group',  
 
   -- Avro + Schema Registry
   'value.format' = 'avro-confluent',
-  'value.avro-confluent.url' = 'http://schema-registry-1:8081'  
+  'value.avro-confluent.url' = 'http://schema-registry-1:8081',
+  
+  -- explicit offsets startup mode
+  'scan.startup.mode' = 'earliest-offset'    
 );
 ```
 
@@ -627,7 +633,7 @@ docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create -
 
 Now let's extecute the `INSERT INTO ...` statement, which reads from the first, source table and writes to the new sink table. In the column list we can transform values, in this case all we do is adding an additional source column:
 
-```
+```sql
 INSERT INTO vehicle_tracking_refined
 SELECT
   truckId,
@@ -693,21 +699,28 @@ The flink Job being submitted and running for the `INSERT INTO .. SELECT ...` ca
 
 ## Step 3 - Integrate System B
 
-In this part we will show how we can integrate the data from the 2nd vehicle tracking system (System B), where the only integration point available is a set of log files. We can tail these log files and by that get the information as soon as it arrives. We convert the file source into a streaming data source by that. We will be using [StreamSets Data Collector](https://streamsets.com/products/dataops-platform/data-collector/) for the tail operation, as in real life this data collector would have to run on the Vehicle Tracking System itself or at least on a machine next to it. At the end it needs to be able to access the actual, active file while it is being written to by the application. StreamSets even has an Edge option which is a down-sized version of the full version and is capable of running on a Rasperry Pi.
+In this section, we demonstrate how to integrate data from the second vehicle tracking system (System B), for which the only available integration point is a set of log files. By continuously tailing these log files, we can capture new information as soon as it is generated, effectively converting the file source into a streaming data source. For this purpose, we will use Apache NiFi to perform the tail operation. In a real-world scenario, this data collector would need to run directly on the Vehicle Tracking System itself—or at least on a machine in close proximity—to access the active log file while it is being written by the application.
 
-![Alt Image Text](./images/use-case-step-3.png "Demo 1 - KsqlDB")
+![Alt Image Text](./images/use-case-step-3.png)
 
 Let's again start a simulator, but this time simulating the file where the tracking data is appended to:
 
 ```bash
+cd $DATAPLATFORM_HOME
 docker run -v "${PWD}/data-transfer/logs:/out" --rm trivadis/iot-truck-simulator "-s" "FILE" "-f" "CSV" "-d" "1000" "-vf" "50-100" "-es" "2"
 ```
 
-Create a StreamSets data flow to tail File into Kafka topic `vehicle_tracking_sysB`. 
+check that the file is created using the tail command
 
-![Alt Image Text](./images/streamsets.png "Streamsets Data Flow")
+```bash
+tail -f data-transfer/logs/TruckData.dat
+```
 
-You can import that data flow from `./streamsets/File_to_Kafka.json` if you don't want to create it from scratch. 
+Now let's create an Apache NiFi data flow which tails the File and publishes the single readings into the Kafka topic `vehicle_tracking_sysB`. 
+
+![Alt Image Text](./images/nifi-flow.png "Nifi Data Flow")
+
+You can import that data flow from `./nifi/File_to_Kafka.json` if you don't want to create it from scratch. 
 
 Now let's listen on the new topic
 
@@ -718,9 +731,15 @@ docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_sysB -f "%k - %s\n" -q
 and then start the flow in StreamSets. You should see the data from the file arriving as a stream of vehicle tracking data. 
 
 ```
-Field[STRING:97] - {"text":"SystemB,1599556302227,97,21,1325712174,Normal,37.7:-92.61,4331001611104251967"}
-Field[STRING:97] - {"text":"SystemB,1599556302994,97,21,1325712174,Normal,37.6:-92.74,4331001611104251967"}
-Field[STRING:97] - {"text":"SystemB,1599556303791,97,21,1325712174,Normal,37.51:-92.89,4331001611104251967"}
+68 - SystemB,1767541144665,68,17,1198242881,Normal,34.83:-91.38,-641992314407248157
+
+89 - SystemB,1767541144915,89,23,1962261785,Normal,40.7:-89.52,-641992314407248157
+
+93 - SystemB,1767541145217,93,26,1961634315,Normal,37.31:-94.31,-641992314407248157
+
+69 - SystemB,1767541145355,69,19,1390372503,Normal,36.18:-95.76,-641992314407248157
+
+68 - SystemB,1767541145645,68,17,1198242881,Normal,34.89:-91.74,-641992314407248157
 ```
 
 The first part (before the dash) shows the content of the Kafka key, generated in the `Expression Evaluator` component in StreamSets. The second part represents the Kafka value. Compared to the data from System A, this system delivers its data in CSV format. Additionally the system name is produced and there is only one value for latitude/longitude, it is sent as string and the two values are delimited by a colon character (`:`).
@@ -730,6 +749,8 @@ The first part (before the dash) shows the content of the Kafka key, generated i
 In this part we will do the refinement on the raw data from System B and place it into the same topic `vehicle_tracking_refined` as used in step 2.
 
 ![Alt Image Text](./images/use-case-step-4.png "Demo 1 - KsqlDB")
+
+### Using KsqlDB
 
 Firs lets create the Stream on the raw data topic:
 
@@ -775,6 +796,82 @@ SELECT ROWKEY
 	, correlationId
 FROM vehicle_tracking_sysB_s
 EMIT CHANGES;
+```
+
+### Using Apache Flink
+
+Firs lets create a Flink SQL table on the raw data topic:
+
+```sql
+DROP TABLE IF EXISTS vehicle_tracking_sysB;
+```
+
+```sql
+CREATE TABLE vehicle_tracking_sysB (
+  system_name STRING,
+  `timestamp` STRING,
+  vehicleId STRING,
+  driverId BIGINT,
+  routeId BIGINT,
+  eventType STRING,
+  latLong STRING,
+  correlationId STRING,
+  -- event-time attribute derived from the string field
+  event_time AS TO_TIMESTAMP_LTZ(CAST(`timestamp` AS BIGINT), 3),
+
+  -- watermark definition (5 seconds out-of-orderness)
+  WATERMARK FOR event_time AS event_time - INTERVAL '5' SECOND  
+) WITH (
+  'connector' = 'kafka',
+  'topic' = 'vehicle_tracking_sysB',
+  'properties.bootstrap.servers' = 'kafka-1:19092',
+  
+  -- Delimited (CSV) format
+  'format' = 'csv',
+   
+  'scan.startup.mode' = 'earliest-offset'
+);
+```
+
+```sql
+SELECT * FROM vehicle_tracking_sysB;
+```
+
+System B delivers the latitude and longitude in one field as a string, with the two values delimited by a colon character.
+
+```sql
+Flink SQL> describe vehicle_tracking_sysB;
++---------------+----------------------------+------+-----+-----------------------------------------------------+------------------------------------+
+|          name |                       type | null | key |                                              extras |                          watermark |
++---------------+----------------------------+------+-----+-----------------------------------------------------+------------------------------------+
+|   system_name |                     STRING | TRUE |     |                                                     |                                    |
+|     timestamp |                     STRING | TRUE |     |                                                     |                                    |
+|     vehicleId |                     STRING | TRUE |     |                                                     |                                    |
+|      driverId |                     BIGINT | TRUE |     |                                                     |                                    |
+|       routeId |                     BIGINT | TRUE |     |                                                     |                                    |
+|     eventType |                     STRING | TRUE |     |                                                     |                                    |
+|       latLong |                     STRING | TRUE |     |                                                     |                                    |
+| correlationId |                     STRING | TRUE |     |                                                     |                                    |
+|    event_time | TIMESTAMP_LTZ(3) *ROWTIME* | TRUE |     | AS TO_TIMESTAMP_LTZ(CAST(`timestamp` AS BIGINT), 3) | `event_time` - INTERVAL '5' SECOND |
++---------------+----------------------------+------+-----+-----------------------------------------------------+------------------------------------+
+9 rows in set
+```
+
+Now we can use an `INSERT INTO ...` statement to write the data into the exiting target `vehicle_tracking_refined` table we have created in step 2. We have to make sure that the structure matches (the refinement we perform), which in this case is providing the right value for the soruce column as well as splitting the latLong value into a latitude and longitude value:
+
+```
+INSERT INTO vehicle_tracking_refined 
+SELECT vehicleId as truckId
+    , 'Tracking_SysB' AS source
+	, event_time
+	, vehicleId
+	, driverId
+	, routeId
+	, eventType
+	, CAST(split(latLong,':')[1] as DOUBLE) as latitude
+	, CAST(split(latLong,':')[2] AS DOUBLE) as longitude
+	, correlationId
+FROM vehicle_tracking_sysB;
 ```
 
 ## Demo 5 - Pull Query on Vehicle Tracking Info ("Device Shadow")

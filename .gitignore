@@ -4,3 +4,4 @@ java/kafka-streams-truck/kafka-streams-truck.iml
 java/kafka-streams-truck/target/**
 .DS_Store
 /docker/plugins/kafka-connect/connectors
+docker/data-transfer/logs/TruckData.dat
