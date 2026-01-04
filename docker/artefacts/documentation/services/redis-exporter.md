@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Configure  to <http://172.20.10.3:28327>.
+Configure  to <http://dataplatform:28327>.

@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://172.20.10.3:28308> to use the Splunk UI.
+Navigate to <http://dataplatform:28308> to use the Splunk UI.

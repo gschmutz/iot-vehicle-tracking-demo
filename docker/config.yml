@@ -289,10 +289,33 @@
       #
       # ===== Apache Flink ========
       #
-      FLINK_enable: false
+      FLINK_enable: true
+      # either 1.20 or 2.1
+      FLINK_base_version: '1.20'
+      # deployment mode, either 'session' or 'application'
+      FLINK_deployment_mode: 'session'
       FLINK_taskmanagers: 1
-      FLINK_SQL_CLI_enable: false
-      FLINK_NUSSKNACKER_enable: false
+      # either 'hashmap' or 'rocksdb'
+      FLINK_state_backend: hashmap      
+      FLINK_catalog_store_kind: 'file'
+      FLINK_enable_build_in_plugins: ''
+      FLINK_install_maven_dep: 'org.apache.flink:flink-sql-connector-kafka:3.4.0-1.20,org.apache.flink:flink-sql-avro-confluent-registry:1.20.3,org.apache.kafka:kafka-clients:3.4.0'
+      FLINK_install_file_dep: ''
+      FLINK_additional_plugins: ''
+      FLINK_python_enabled: false§
+      FLINK_python_provide_requirements_file: false
+      FLINK_python_version: '3.10'
+      FLINK_volume_map_flink_distro: false      
+      
+      FLINK_SQL_CLI_enable: true
+      FLINK_SQL_GATEWAY_enable: false
+      #
+      # ===== Nussknacker ========
+      #      
+      NUSSKNACKER_enable: false
+      # one of 'streaming', 'streaming-lite-embedded', 'request-response-embedded'
+      NUSSKNACKER_scenario_type: 'streaming'
+
       #
       # ===== Apache Tika ========
       #
