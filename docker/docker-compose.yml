@@ -645,6 +645,9 @@ services:
         rest.bind-port: 8081
         execution.checkpointing.interval: 5000
         execution.checkpointing.mode: EXACTLY_ONCE
+        execution.restart-strategy: fixed-delay
+        execution.restart-strategy.fixed-delay.attempts: 3
+        execution.restart-strategy.fixed-delay.delay: 10 s        
         table.catalog-store.kind: file
         table.catalog-store.file.path: ./conf/catalogs
         state.backend.type: hashmap
@@ -652,7 +655,7 @@ services:
         state.checkpoints.dir: file:///tmp/flink-checkpoints
         state.savepoints.dir: file:///tmp/flink-savepoints
         heartbeat.interval: 1000
-        heartbeat.timeout: 5000        
+        heartbeat.timeout:  50 s      
         rest.flamegraph.enabled: true
         web.backpressure.refresh-interval: 10000
         s3.access.key: ${PLATYS_AWS_ACCESS_KEY:-V42FCGRVMK24JJ8DHUYG}
@@ -684,11 +687,16 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager        
-        taskmanager.numberOfTaskSlots: 10
-        taskmanager.memory.process.size: 1728m
+        taskmanager.numberOfTaskSlots: 4
+        taskmanager.memory.process.size: 2g
+        taskmanager.network.memory.min: 64mb
+        taskmanager.network.memory.max: 256mb        
         parallelism.default: 2
         execution.checkpointing.interval: 5000
         execution.checkpointing.mode: EXACTLY_ONCE
+        execution.restart-strategy: fixed-delay
+        execution.restart-strategy.fixed-delay.attempts: 3
+        execution.restart-strategy.fixed-delay.delay: 10 s
         table.catalog-store.kind: file
         table.catalog-store.file.path: ./conf/catalogs
         state.backend.type: hashmap
@@ -696,7 +704,54 @@ services:
         state.checkpoints.dir: file:///tmp/flink-checkpoints
         state.savepoints.dir: file:///tmp/flink-savepoints
         heartbeat.interval: 1000
-        heartbeat.timeout: 5000        
+        heartbeat.timeout: 50 s        
+        s3.access.key: ${PLATYS_AWS_ACCESS_KEY:-V42FCGRVMK24JJ8DHUYG}
+        s3.secret.key: ${PLATYS_AWS_SECRET_ACCESS_KEY:-bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza}
+        s3.fs.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+        s3.endpoint: http://minio-1:9000
+        s3.path.style.access: true
+      - s3.access.key=${PLATYS_AWS_ACCESS_KEY:-V42FCGRVMK24JJ8DHUYG}
+      - s3.secret.key=${PLATYS_AWS_SECRET_ACCESS_KEY:-bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza}
+      - s3.fs.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
+      - s3.endpoint=http://minio-1:9000'
+      - s3.path.style.access='true'
+      - FLINK_INSTALL_MAVEN_DEP=org.apache.flink:flink-sql-connector-kafka:3.4.0-1.20,org.apache.flink:flink-sql-avro-confluent-registry:1.20.3,org.apache.kafka:kafka-clients:3.4.0,org.apache.iceberg:iceberg-flink-runtime-1.20:1.10.1
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/docker/:/platys-scripts/
+      - ./init/flink/docker-entrypoint-override.sh:/docker-entrypoint-override.sh
+    entrypoint: /docker-entrypoint-override.sh
+    command: taskmanager
+    restart: unless-stopped
+  flink-taskmanager-2:
+    image: trivadis/apache-flink:1.20.3-java17-python3.10
+    container_name: flink-taskmanager-2
+    hostname: flink-taskmanager-2
+    labels:
+      com.platys.name: flink
+      com.platys.description: Flink Task Manager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager        
+        taskmanager.numberOfTaskSlots: 4
+        taskmanager.memory.process.size: 2g
+        taskmanager.network.memory.min: 64mb
+        taskmanager.network.memory.max: 256mb        
+        parallelism.default: 2
+        execution.checkpointing.interval: 5000
+        execution.checkpointing.mode: EXACTLY_ONCE
+        execution.restart-strategy: fixed-delay
+        execution.restart-strategy.fixed-delay.attempts: 3
+        execution.restart-strategy.fixed-delay.delay: 10 s
+        table.catalog-store.kind: file
+        table.catalog-store.file.path: ./conf/catalogs
+        state.backend.type: hashmap
+        state.backend.incremental: true
+        state.checkpoints.dir: file:///tmp/flink-checkpoints
+        state.savepoints.dir: file:///tmp/flink-savepoints
+        heartbeat.interval: 1000
+        heartbeat.timeout: 50 s        
         s3.access.key: ${PLATYS_AWS_ACCESS_KEY:-V42FCGRVMK24JJ8DHUYG}
         s3.secret.key: ${PLATYS_AWS_SECRET_ACCESS_KEY:-bKhWxVF3kQoLY9kFmt91l+tDrEoZjqnWXzY9Eza}
         s3.fs.impl: org.apache.hadoop.fs.s3a.S3AFileSystem

@@ -8,6 +8,7 @@
 |[flink-jobmanager](./documentation/services/flink )|[Web UI](http://192.168.1.112:28237/)|28237<br>|8081<br>|Flink Job Manager
 |[flink-sql-cli](./documentation/services/flink )||||Flink SQL CLI
 |[flink-taskmanager-1](./documentation/services/flink )||||Flink Task Manager
+|[flink-taskmanager-2](./documentation/services/flink )||||Flink Task Manager
 |[kafka-1](./documentation/services/kafka )||9092<br>19092<br>29092<br>39092<br>9992<br>1234<br>|9092<br>19092<br>29092<br>39092<br>9992<br>1234<br>|Kafka Broker 1
 |[kafka-2](./documentation/services/kafka )||9093<br>19093<br>29093<br>39093<br>9993<br>1235<br>|9093<br>19093<br>29093<br>39093<br>9993<br>1234<br>|Kafka Broker 2
 |[kafka-3](./documentation/services/kafka )||9094<br>19094<br>29094<br>39094<br>9994<br>1236<br>|9094<br>19094<br>29094<br>39094<br>9994<br>1234<br>|Kafka Broker 3

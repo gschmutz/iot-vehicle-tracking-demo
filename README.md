@@ -525,7 +525,7 @@ DROP TABLE IF EXISTS vehicle_tracking_sysA;
 
 Now let's create the table
 
-```sql
+```sql flink
 CREATE TABLE IF NOT EXISTS vehicle_tracking_sysA (
   `timestamp` STRING,
   truckId STRING,
@@ -555,7 +555,7 @@ We are using the JSON value format, as our stream is a JSON-formatted string.
 Let's see the live data by using a SELECT on the Stream:
 
 ```sql
-SELECT * FROM vehicle_tracking_sysA;
+SELECT * FROM vehicle_tracking_sysA LIMIT 100;
 ```
 
 you should see a continous stream of events as a result of the SELECT statement, similar to the image below:
@@ -633,7 +633,7 @@ docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create -
 
 Now let's extecute the `INSERT INTO ...` statement, which reads from the first, source table and writes to the new sink table. In the column list we can transform values, in this case all we do is adding an additional source column:
 
-```sql
+```sql flink
 INSERT INTO vehicle_tracking_refined
 SELECT
   truckId,
@@ -834,7 +834,7 @@ CREATE TABLE vehicle_tracking_sysB (
 ```
 
 ```sql
-SELECT * FROM vehicle_tracking_sysB;
+SELECT * FROM vehicle_tracking_sysB LIMIT 100;
 ```
 
 System B delivers the latitude and longitude in one field as a string, with the two values delimited by a colon character.
@@ -859,7 +859,7 @@ Flink SQL> describe vehicle_tracking_sysB;
 
 Now we can use an `INSERT INTO ...` statement to write the data into the exiting target `vehicle_tracking_refined` table we have created in step 2. We have to make sure that the structure matches (the refinement we perform), which in this case is providing the right value for the soruce column as well as splitting the latLong value into a latitude and longitude value:
 
-```
+```sql flink
 INSERT INTO vehicle_tracking_refined 
 SELECT vehicleId as truckId
     , 'Tracking_SysB' AS source
@@ -879,6 +879,8 @@ FROM vehicle_tracking_sysB;
 So with the vehicle position data from both source systems normalized into the `vehicle_tracking_refined` topic and available in ksqlDB throught the `vehicle_tracking_refined_s` stream object, is it possible to query for the latest position for a given vehicle. 
 
 ![Alt Image Text](./images/use-case-step-5.png "Demo 1 - KsqlDB")
+
+### Using KsqlDB
 
 In ksqlDB suche queries are called *pull queries*, in contrast to the streaming queries we have seen so far, known as *push queries* (using the `EMIT CHANGES` clause). A pull query is a form of query issued by a client that retrieves a result as of "now", like a query against a traditional RDBS. 
 
@@ -1288,11 +1290,13 @@ Normal33333SC@����̌V�&6906439778495426077Tracking_SysA���bP*�
 
 ## Step 7 - Investigate Driving behaviour
 
-In this part we will be using ksqlDB and as an alternative solution Kafka Streams or Faust to analyse the data in the refined topic `vehicle_tracking_refined`.
+In this part we will be using ksqlDB, Flink SQL and as an alternative solution Kafka Streams and Faust to analyse the data in the refined topic `vehicle_tracking_refined`.
 
 ![Alt Image Text](./images/use-case-step-7.png "Demo 1 - KsqlDB")
 
 Now with the data from both system integrated, let's work with it!
+
+### Using ksqlDB
 
 In this new stream we are only interested in the messages where the `eventType` is not normal. First let's create a SELECT statement which performs the right result, using the ksqlDB CLI:
 
@@ -1330,7 +1334,54 @@ We can also see the same information by directly getting the data from the under
 docker exec -ti kcat kcat -b kafka-1 -t problematic_driving -s value=avro -r http://schema-registry-1:8081
 ```
 
-### Alternative using Kafka Streams
+### Using Apache Flink
+
+```sql flink
+SELECT * FROM vehicle_tracking_refined 
+WHERE eventType <> 'Normal'
+LIMIT 10;
+```
+
+```sql flink
+DROP TABLE problematic_driving;
+```
+
+```sql flink
+CREATE TABLE problematic_driving (
+  truckId STRING,
+  source STRING,
+  event_time TIMESTAMP(3),
+  vehicleId STRING,
+  driverId BIGINT,
+  routeId BIGINT,
+  eventType STRING,
+  latitude DOUBLE,
+  longitude DOUBLE,
+  correlationId STRING
+) WITH (
+  'connector' = 'kafka',
+  'topic' = 'problematic_driving',
+  'properties.bootstrap.servers' = 'kafka-1:19092',
+  'properties.group.id' = 'problematic_driving_group',
+
+  -- Avro + Schema Registry
+  'value.format' = 'avro-confluent',
+  'value.avro-confluent.url' = 'http://schema-registry-1:8081'
+);
+```
+
+```bash
+docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create --topic problematic_driving --partitions 8 --replication-factor 3
+```
+
+```sql
+INSERT INTO problematic_driving
+SELECT *
+FROM vehicle_tracking_refined
+WHERE eventType <> 'Normal';
+```
+
+### Using Kafka Streams
 
 The same logic can also be implemented using Kafka Streams. In the folder `java` you will find the Kafka Streams project `kafka-streams-vehicle-tracking` with the implementation. The value we consume from the `vehicle_tracking_refined` topic is serialized as Avro. Therefore we configure Kafka Streams to use the `SpecificAvroSerde`.
 
@@ -1451,7 +1502,7 @@ Now you can run the Kafka Streams application and you should see the problematic
 docker exec -ti kcat kcat -b kafka-1 -t problematic_driving-kstreams -s value=avro -r http://schema-registry-1:8081 -o end -q
 ```
 
-### Alternative using Faust
+### Using Faust
 
 The same logic can also be implemented using Faust. In the folder `python` you will find the Faust project `faust-vehicle-tracking` with the implementation. The value we have availabke from the `vehicle_tracking_refined` topic is serialized as Avro. Avro is supported by Faut, but the current implementation works on Json. Therefore we first convert the Avro messges into Json using ksqlDB.
 
@@ -1552,6 +1603,8 @@ In this part of the workshop, we are integrating the `driver` information from t
 
 ![Alt Image Text](./images/use-case-step-8.png "Demo 1 - KsqlDB")
 
+### Using ksqlDB
+
 We will use the Kafka Connect [JDBC Source Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc) for periodically retrieving the data from the database table and publish it to the Kafka topic `logisticsdb_driver`. The connector is pre-installed as part of the dataplatform.
 
 Instead of configuring the connector through the REST API, as we have seen before with the MQTT connector, we will use the ksqlDB integration with the [CREATE CONNECTOR](https://docs.ksqldb.io/en/latest/developer-guide/ksqldb-reference/create-connector/) command.
@@ -1628,11 +1681,91 @@ Now perform an update on one of the drivers in the PostgreSQL database (original
 docker exec -ti postgresql psql -d demodb -U demo -c "UPDATE logistics_db.driver SET available = 'N', last_update = CURRENT_TIMESTAMP  WHERE id = 11"
 ```
 
+### Flink SQL with Kafka Connect
+
+```bash
+curl -X PUT \
+  http://${DOCKER_HOST_IP}:8083/connectors/jdbc-source/config \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{
+    "connector.class":"io.confluent.connect.jdbc.JdbcSourceConnector",
+    "tasks.max" : "1",
+    "connection.url" : "jdbc:postgresql://postgresql/demodb?user=demo&password=abc123!",
+    "mode" : "timestamp",
+    "timestamp.column.name" : "last_update",
+    "schema.pattern" : "logistics_db",
+    "table.whitelist" : "driver",
+    "validate.non.null" : "false",
+    "topic.prefix" : "logisticsdb_",
+    "poll.interval.ms" : "10000",
+    "key.converter" : "org.apache.kafka.connect.converters.LongConverter",
+    "key.converter.schemas.enable" : "false",
+    "value.converter" : "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable" : "false",
+    "transforms" : "createKey,extractInt",
+    "transforms.createKey.type" : "org.apache.kafka.connect.transforms.ValueToKey",
+    "transforms.createKey.fields" : "id",
+    "transforms.extractInt.type" : "org.apache.kafka.connect.transforms.ExtractField$Key",
+    "transforms.extractInt.field" : "id"
+}'
+
+curl -X PUT \
+  http://${DOCKER_HOST_IP}:8083/connectors/jdbc-source1/config \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{
+    "connector.class":"io.confluent.connect.jdbc.JdbcSourceConnector",
+    "tasks.max" : "1",
+    "connection.url" : "jdbc:postgresql://postgresql/demodb?user=demo&password=abc123!",
+    "mode" : "timestamp",
+    "timestamp.column.name" : "last_update",
+    "schema.pattern" : "logistics_db",
+    "table.whitelist" : "driver",
+    "validate.non.null" : "false",
+    "topic.prefix" : "logisticsdb_",
+    "poll.interval.ms" : "10000",
+    "key.converter" : "org.apache.kafka.connect.storage.StringConverter",
+    "key.converter.schemas.enable" : "false",
+    "value.converter" : "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable" : "false",
+    "transforms" : "createKey,extractKey,castKey",
+    "transforms.createKey.type" : "org.apache.kafka.connect.transforms.ValueToKey",
+    "transforms.createKey.fields" : "id",
+    "transforms.extractKey.type" : "org.apache.kafka.connect.transforms.ExtractField$Key",
+    "transforms.extractKey.field" : "id",
+    "transforms.castKey.type": "org.apache.kafka.connect.transforms.Cast$Key",
+    "transforms.castKey.spec": "string"
+}'
+```
+
+```sql
+CREATE TABLE driver (
+  id BIGINT,
+  first_name STRING,
+  last_name STRING,
+  available STRING,
+  birthdate STRING,
+  ts BIGINT,
+  PRIMARY KEY (id) NOT ENFORCED,
+  event_time TIMESTAMP_LTZ(3) METADATA FROM 'timestamp',
+  WATERMARK FOR event_time AS event_time - INTERVAL '5' SECOND
+) WITH (
+  'connector' = 'upsert-kafka',
+  'topic' = 'logisticsdb_driver',
+  'properties.bootstrap.servers' = 'kafka-1:19092',
+  'value.format' = 'json',
+  'key.format' = 'raw'
+);
+``
+
 ## Demo 9 - Join with Driver ("static information")
 
 In this part of the workshop, we are joining the `driver` ksqlDB table with the `problematic_driving_s` ksqlDB stream to enrich it with valuable information.
 
 ![Alt Image Text](./images/use-case-step-9.png "Demo 1 - KsqlDB")
+
+### Using ksqlDB
 
 Now with the ksqlDB table in place, let's join it with the `problematic_driving_s` ksqlDB stream to enrich it with driver information available in the `driver_t` table (first_name, last_name and availability):
 
@@ -1669,6 +1802,22 @@ we can use `kcat` to show the data stream in the newly created Kafka topic `prob
 
 ``` bash
 docker exec -ti kcat kcat -b kafka-1 -t problematic_driving_and_driver -s value=avro -r http://schema-registry-1:8081
+```
+
+### Using Apache Flink
+
+```sql flink
+SELECT
+  pd.driverId,
+  d.first_name,
+  d.last_name,
+  d.available,
+  pd.vehicleId,
+  pd.routeId,
+  pd.eventType
+FROM problematic_driving AS pd
+LEFT JOIN driver FOR SYSTEM_TIME AS OF pd.event_time AS d
+ON pd.driverId = d.id;
 ```
 
 ## Demo 10 - Aggregate Driving Behaviour

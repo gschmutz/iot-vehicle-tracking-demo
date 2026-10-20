@@ -8,6 +8,7 @@
 |[flink-jobmanager](./documentation/services/flink )|<http://192.168.1.112:28237/>|
 |[flink-sql-cli](./documentation/services/flink )||
 |[flink-taskmanager-1](./documentation/services/flink )||
+|[flink-taskmanager-2](./documentation/services/flink )||
 |[kafka-1](./documentation/services/kafka )||
 |[kafka-2](./documentation/services/kafka )||
 |[kafka-3](./documentation/services/kafka )||

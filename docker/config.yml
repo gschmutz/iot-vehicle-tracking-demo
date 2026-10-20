@@ -294,7 +294,7 @@
       FLINK_base_version: '1.20'
       # deployment mode, either 'session' or 'application'
       FLINK_deployment_mode: 'session'
-      FLINK_taskmanagers: 1
+      FLINK_taskmanagers: 2
       # either 'hashmap' or 'rocksdb'
       FLINK_state_backend: hashmap      
       FLINK_catalog_store_kind: 'file'
